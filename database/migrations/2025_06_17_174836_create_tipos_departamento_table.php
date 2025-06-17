@@ -12,15 +12,14 @@ return new class extends Migration
      * @return void
      */
     public function up()
-{
-    Schema::create('departamentos', function (Blueprint $table) {
-        $table->id();
-        $table->string('nombre');
-        $table->boolean('estado')->default(true); // true = activo, false = inactivo
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('tipos_departamento', function (Blueprint $table) {
+                $table->id();
+                $table->string('nombre', 100)->unique();
+                $table->text('descripcion')->nullable();
+        });
 
+    }
 
     /**
      * Reverse the migrations.
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('departamentos');
+        Schema::dropIfExists('tipos_departamento');
     }
 };
