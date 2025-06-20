@@ -18,6 +18,7 @@ use Filament\Notifications\Notification;
 class EmpresaResource extends Resource
 {
     protected static ?string $model = Empresa::class;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationIcon = 'heroicon-o-office-building';
     

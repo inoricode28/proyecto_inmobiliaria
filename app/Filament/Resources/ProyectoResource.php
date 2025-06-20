@@ -23,6 +23,7 @@ use Filament\Notifications\Notification;
 class ProyectoResource extends Resource
 {
     protected static ?string $model = Proyecto::class;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $navigationIcon = 'heroicon-o-folder';
     

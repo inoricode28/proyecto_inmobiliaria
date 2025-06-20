@@ -17,7 +17,13 @@ class Edificio extends Model
         'fecha_inicio',
         'fecha_entrega',
     ];
-
+    public function getPisosGridAttribute()
+        {
+            return $this->departamentos()
+                ->with('estado')
+                ->get()
+                ->groupBy('piso');
+        }
     public $timestamps = true;
 
     public function proyecto()

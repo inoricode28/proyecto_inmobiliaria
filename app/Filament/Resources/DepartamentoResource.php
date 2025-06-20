@@ -26,7 +26,8 @@ class DepartamentoResource extends Resource
     protected static ?string $model = Departamento::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-home';
-    
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $modelLabel = 'Departamento';
     
     protected static ?string $pluralModelLabel = 'Departamentos';

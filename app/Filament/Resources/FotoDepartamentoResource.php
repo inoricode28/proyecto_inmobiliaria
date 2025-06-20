@@ -29,12 +29,13 @@ class FotoDepartamentoResource extends Resource
     protected static ?string $model = FotoDepartamento::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-camera';
+    protected static ?int $navigationSort = 2;
     
     protected static ?string $modelLabel = 'Foto de Departamento';
     
     protected static ?string $pluralModelLabel = 'Fotos de Departamentos';
     
-    protected static ?string $navigationGroup = 'Gestión';
+    protected static ?string $navigationGroup = 'Gestión Comercial';
 
     public static function form(Form $form): Form
     {

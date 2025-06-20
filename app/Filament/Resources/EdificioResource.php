@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Builder;
 class EdificioResource extends Resource
 {
     protected static ?string $model = Edificio::class;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationIcon = 'heroicon-o-office-building';
 
