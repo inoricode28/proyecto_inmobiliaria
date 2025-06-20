@@ -8,4 +8,5 @@ buildDocker.sh
 docker-compose.yml
 readme-logo.png
 README.md
+public/storage
 

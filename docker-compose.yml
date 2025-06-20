@@ -1,4 +1,4 @@
-version: "3.3"
+# sin version: innecesario desde Compose v2
 
 volumes:
   mysql_data:

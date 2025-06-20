@@ -27,7 +27,7 @@ class EstadoProyectoResource extends Resource
 
      protected static function getNavigationGroup(): ?string
     {
-        return __('Management');
+        return __('Settings');
     }
     
 

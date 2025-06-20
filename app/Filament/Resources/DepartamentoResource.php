@@ -127,11 +127,12 @@ class DepartamentoResource extends Resource
                     ->searchable()
                     ->label('Estado'),
                     
-                TextColumn::make('precio')
-                    ->money('USD')
-                    ->sortable()
-                    ->label('Precio'),
-                    
+               TextColumn::make('precio')
+                ->formatStateUsing(function ($state) {
+                    return '$' . number_format($state, 2, '.', ',');
+                })
+                ->sortable()
+                ->label('Precio'),
                
                     
                 TextColumn::make('area_total')

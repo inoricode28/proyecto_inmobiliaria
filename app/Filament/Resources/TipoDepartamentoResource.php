@@ -26,7 +26,7 @@ class TipoDepartamentoResource extends Resource
     
  protected static function getNavigationGroup(): ?string
     {
-        return __('Management');
+        return __('Settings');
     }
     public static function form(Form $form): Form
     {
