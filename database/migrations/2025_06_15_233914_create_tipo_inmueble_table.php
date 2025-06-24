@@ -12,14 +12,12 @@ return new class extends Migration
      * @return void
      */
     public function up()
-    {
-        Schema::create('estados_departamento', function (Blueprint $table) {
-                $table->id();
-                $table->string('nombre', 100)->unique();
-                $table->text('descripcion')->nullable();
-        });
-
-    }
+{
+    Schema::create('tipo_inmueble', function (Blueprint $table) {
+        $table->id();
+        $table->string('nombre');
+    });
+}
 
     /**
      * Reverse the migrations.
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('estados_departamento');
+        Schema::dropIfExists('tipo_inmueble');
     }
 };

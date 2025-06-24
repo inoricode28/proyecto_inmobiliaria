@@ -26,18 +26,17 @@ class EstadosInmuebleWidget extends BaseWidget
         $cards = [];
 
         foreach ($estados as $estado) {
-            $count = Departamento::whereHas('estado', fn($q) =>
-                $q->where('nombre', $estado['nombre'])
-            )->count();
+            $count = Departamento::whereHas('estadoDepartamento', function ($q) use ($estado) {
+                $q->where('nombre', $estado['nombre']);
+            })->count();
 
             $cards[] = Card::make($estado['nombre'], $count)
                 ->description($estado['descripcion'])
-                ->color($this->getColorForEstado($estado['nombre'])) // Este mantiene el color de acento
+                ->color($this->getColorForEstado($estado['nombre']))
                 ->extraAttributes([
-    'class' => $this->getCardColorClass($estado['nombre']) .
-               ' text-white shadow-md text-center font-semibold px-4 py-3',
-])
-
+                    'class' => $this->getCardColorClass($estado['nombre']) .
+                               ' text-white shadow-md text-center font-semibold px-4 py-3',
+                ])
                 ->url(ConsultaStockResource::getUrl('index', [
                     'tableFilters' => [
                         'estado' => [

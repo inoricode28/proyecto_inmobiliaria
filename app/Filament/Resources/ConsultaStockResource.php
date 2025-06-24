@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ConsultaStockResource\Pages;
-use App\Filament\Resources\ConsultaStockResource\Widgets;
 use App\Models\Departamento;
 use App\Models\EstadoDepartamento;
 use Filament\Resources\Resource;
@@ -20,25 +19,28 @@ class ConsultaStockResource extends Resource
     protected static ?string $navigationLabel = 'Stock por Piso';
     protected static ?string $modelLabel = 'Stock por Piso';
     protected static ?string $slug = 'stock-por-piso';
+    protected static ?string $navigationGroup = 'Gestión Comercial';
+    protected static ?int $navigationSort = 2;
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('edificio.nombre')
+                // Asegurémonos de acceder correctamente a las relaciones
+                TextColumn::make('edificio.nombre')  // Relación de edificio
                     ->label('Edificio')
                     ->sortable()
                     ->searchable(),
-                
-                TextColumn::make('piso')
+
+                TextColumn::make('num_piso')  // Columna para Piso
                     ->label('Piso')
                     ->sortable(),
-                    
-                TextColumn::make('numero')
+
+                TextColumn::make('num_departamento')  // Columna para Departamento
                     ->label('Departamento')
                     ->sortable(),
-                    
-                BadgeColumn::make('estado.nombre')
+
+                BadgeColumn::make('estadoDepartamento.nombre')  // Relación con estado
                     ->label('Estado')
                     ->colors([
                         'Disponible' => 'success',
@@ -50,16 +52,16 @@ class ConsultaStockResource extends Resource
                     ]),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('edificio')
+                // Filtros para la tabla
+                Tables\Filters\SelectFilter::make('edificio_id')
                     ->relationship('edificio', 'nombre'),
-                    
-                Tables\Filters\SelectFilter::make('estado')
-                    ->relationship('estado', 'nombre')
+
+                Tables\Filters\SelectFilter::make('estado_departamento_id')
+                    ->relationship('estadoDepartamento', 'nombre')
                     ->options(function () {
                         return EstadoDepartamento::all()->pluck('nombre', 'nombre');
                     }),
             ])
-            
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
@@ -68,22 +70,15 @@ class ConsultaStockResource extends Resource
             ]);
     }
 
+    // Método para aplicar el filtro por estado
     protected function applyEstadoFilter(Builder $query, string $estado): Builder
     {
-        return $query->whereHas('estado', fn($q) => $q->where('nombre', $estado));
+        return $query->whereHas('estadoDepartamento', fn($q) => $q->where('nombre', $estado));
     }
 
     public static function getRelations(): array
     {
         return [];
-    }
-    
-    public static function getWidgets(): array
-    {
-        return [
-            ConsultaStockResource\Widgets\EstadosDepartamentoWidget::class,
-            ConsultaStockResource\Widgets\EstadosInmuebleWidget::class,
-        ];
     }
 
     public static function getPages(): array

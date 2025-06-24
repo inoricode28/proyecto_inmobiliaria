@@ -2,24 +2,31 @@
 
 namespace App\Filament\Resources;
 
+use Closure;
 use App\Filament\Resources\DepartamentoResource\Pages;
-use App\Filament\Resources\DepartamentoResource\RelationManagers;
 use App\Models\Departamento;
 use App\Models\Edificio;
 use App\Models\TipoDepartamento;
+use App\Models\TipoInmueble;
+use App\Models\Estado;
 use App\Models\EstadoDepartamento;
+use App\Models\Proyecto;
+use App\Models\Vista;
+use App\Models\Moneda;
 use Filament\Forms;
+use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\Card;
 
 class DepartamentoResource extends Resource
 {
@@ -27,137 +34,341 @@ class DepartamentoResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-home';
     protected static ?int $navigationSort = 4;
-
     protected static ?string $modelLabel = 'Departamento';
-    
-    protected static ?string $pluralModelLabel = 'Departamentos';
-    
- protected static function getNavigationGroup(): ?string
+    protected static ?string $pluralModelLabel = 'Inmueble';
+
+    protected static function getNavigationGroup(): ?string
     {
         return __('Management');
     }
+
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Card::make()->schema([
-                    Select::make('edificio_id')
-                        ->label('Edificio')
-                        ->options(Edificio::all()->pluck('nombre', 'id'))
-                        ->required()
-                        ->searchable(),
-                        
-                    TextInput::make('numero')
-                        ->required()
-                        ->maxLength(20)
-                        ->label('Número de departamento'),
-                        
-                    TextInput::make('piso')
-                        ->required()
-                        ->numeric()
-                        ->label('Piso'),
-                        
-                    TextInput::make('area_total')
-                        ->required()
-                        ->numeric()
-                        ->label('Área total (m²)'),
-                        
-                    TextInput::make('area_construida')
-                        ->required()
-                        ->numeric()
-                        ->label('Área construida (m²)'),
-                        
-                    TextInput::make('numero_habitaciones')
-                        ->required()
-                        ->numeric()
-                        ->label('Número de habitaciones'),
-                        
-                    TextInput::make('numero_banos')
-                        ->required()
-                        ->numeric()
-                        ->label('Número de baños'),
-                        
-                    Toggle::make('tiene_balcon')
-                        ->label('¿Tiene balcón?')
-                        ->required(),
-                        
-                    Select::make('tipo_departamento_id')
-                        ->label('Tipo de departamento')
-                        ->options(TipoDepartamento::all()->pluck('nombre', 'id'))
-                        ->required()
-                        ->searchable(),
-                        
-                    Select::make('estado_departamento_id')
-                        ->label('Estado del departamento')
-                        ->options(EstadoDepartamento::all()->pluck('nombre', 'id'))
-                        ->required()
-                        ->searchable(),
-                        
-                    TextInput::make('precio')
-                        ->required()
-                        ->numeric()
-                        ->prefix('$')
-                        ->label('Precio'),
-                ])->columns(2)
-            ]);
+        return $form->schema([
+            Card::make()->schema([
+                // Sección de relaciones
+                Select::make('proyecto_id')
+                    ->label('Proyecto')
+                    ->options(Proyecto::all()->pluck('nombre', 'id'))
+                    ->searchable()
+                    ->columnSpan(1),
+                    
+                Select::make('edificio_id')
+                    ->label('Edificio')
+                    ->required()
+                    ->options(Edificio::all()->pluck('nombre', 'id'))
+                    ->searchable()
+                    ->columnSpan(1),
+
+                Select::make('tipo_inmueble_id')
+                    ->label('Tipo de Inmueble')
+                    ->options(TipoInmueble::all()->pluck('nombre', 'id'))
+                    ->searchable()
+                    ->columnSpan(1),
+
+                Select::make('tipo_departamento_id')
+                    ->label('Tipo de Departamento')
+                    ->options(TipoDepartamento::all()->pluck('nombre', 'id'))
+                    ->searchable()
+                    ->required()
+                    ->columnSpan(1),
+
+                Select::make('estado_departamento_id')
+                    ->label('Estado del Departamento')
+                    ->options(EstadoDepartamento::all()->pluck('nombre', 'id'))
+                    ->searchable()
+                    ->required()
+                    ->columnSpan(1),
+
+                // Sección de numeración e identificación
+                TextInput::make('numero_inicial')
+                    ->label('Número Inicial')
+                    ->required()
+                    ->maxLength(20)
+                    ->regex('/^[A-Za-z0-9\-]+$/')
+                    ->columnSpan(1),
+
+                TextInput::make('numero_final')
+                    ->label('Número Final')
+                    ->maxLength(20)
+                    ->regex('/^[A-Za-z0-9\-]+$/')
+                    ->columnSpan(1),
+
+                TextInput::make('ficha_indep')
+                    ->label('Ficha Independiente')
+                    ->maxLength(50)
+                    ->regex('/^[A-Za-z0-9\-]+$/')
+                    ->columnSpan(1),
+
+                TextInput::make('num_departamento')
+                    ->label('Número de Departamento')
+                    ->maxLength(255)
+                    ->columnSpan(1),
+
+                // Sección de características físicas
+                TextInput::make('num_piso')
+                    ->label('Número de Piso')
+                    ->required()
+                    ->numeric()
+                    ->columnSpan(1),
+
+                TextInput::make('num_dormitorios')
+                    ->label('Dormitorios')
+                    ->required()
+                    ->numeric()
+                    ->columnSpan(1),
+
+                TextInput::make('num_bano')
+                    ->label('Baños')
+                    ->required()
+                    ->numeric()
+                    ->columnSpan(1),
+
+                // Sección de certificaciones y códigos
+                TextInput::make('num_certificado')
+                    ->label('Número de Certificado')
+                    ->maxLength(50)
+                    ->regex('/^[A-Za-z0-9\-]+$/')
+                    ->columnSpan(1),
+
+                TextInput::make('codigo_bancario')
+                    ->label('Código Bancario')
+                    ->maxLength(50)
+                    ->regex('/^[A-Za-z0-9\-]+$/')
+                    ->columnSpan(1),
+
+                TextInput::make('codigo_catastral')
+                    ->label('Código Catastral')
+                    ->maxLength(50)
+                    ->regex('/^[A-Za-z0-9\-]+$/')
+                    ->columnSpan(1),
+
+                // Sección de bonos
+                Toggle::make('bono_techo_propio')
+                    ->label('Bono Techo Propio')
+                    ->inline(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('num_bono_tp')
+                    ->label('Número Bono TP')
+                    ->maxLength(50)
+                    ->regex('/^[A-Za-z0-9\-]+$/')
+                    ->columnSpan(1)
+                    ->visible(fn (Closure $get) => $get('bono_techo_propio')),
+
+                // Sección de precios y moneda
+                Select::make('moneda_id')
+                    ->label('Moneda')
+                    ->options(Moneda::all()->pluck('nombre', 'id'))
+                    ->searchable()
+                    ->required()
+                    ->columnSpan(1),
+
+                TextInput::make('precio')
+                    ->label('Precio')
+                    ->required()
+                    ->numeric()
+                    ->columnSpan(1),
+
+                TextInput::make('Precio_lista')
+                    ->label('Precio de Lista')
+                    ->numeric()
+                    ->columnSpan(1),
+
+                TextInput::make('Precio_venta')
+                    ->label('Precio de Venta')
+                    ->numeric()
+                    ->columnSpan(1),
+
+                TextInput::make('descuento')
+                    ->label('Descuento (%)')
+                    ->numeric()
+                    ->suffix('%')
+                    ->columnSpan(1),
+
+                // Sección de medidas
+                TextInput::make('predio_m2')
+                    ->label('Área Predio (m²)')
+                    ->numeric()
+                    ->suffix('m²')
+                    ->columnSpan(1),
+
+                TextInput::make('terreno')
+                    ->label('Terreno (m²)')
+                    ->numeric()
+                    ->suffix('m²')
+                    ->columnSpan(1),
+
+                TextInput::make('techada')
+                    ->label('Techada (m²)')
+                    ->numeric()
+                    ->suffix('m²')
+                    ->columnSpan(1),
+
+                TextInput::make('construida')
+                    ->label('Construida (m²)')
+                    ->numeric()
+                    ->suffix('m²')
+                    ->columnSpan(1),
+
+                TextInput::make('terraza')
+                    ->label('Terraza (m²)')
+                    ->numeric()
+                    ->suffix('m²')
+                    ->columnSpan(1),
+
+                TextInput::make('jardin')
+                    ->label('Jardín (m²)')
+                    ->numeric()
+                    ->suffix('m²')
+                    ->columnSpan(1),
+
+                // Sección de vistas y orden
+                Select::make('vista_id')
+                    ->label('Vista')
+                    ->options(Vista::all()->pluck('nombre', 'id'))
+                    ->searchable()
+                    ->columnSpan(1),
+
+                TextInput::make('orden')
+                    ->label('Orden')
+                    ->numeric()
+                    ->columnSpan(1),
+
+                // Sección de ubicación
+                Textarea::make('direccion')
+                    ->label('Dirección')
+                    ->required()
+                    ->maxLength(500)
+                    ->columnSpan(2),
+
+                TextInput::make('frente')
+                    ->label('Frente (m)')
+                    ->numeric()
+                    ->suffix('m')
+                    ->columnSpan(1),
+
+                TextInput::make('derecha')
+                    ->label('Derecha (m)')
+                    ->numeric()
+                    ->suffix('m')
+                    ->columnSpan(1),
+
+                TextInput::make('izquierda')
+                    ->label('Izquierda (m)')
+                    ->numeric()
+                    ->suffix('m')
+                    ->columnSpan(1),
+
+                TextInput::make('fondo')
+                    ->label('Fondo (m)')
+                    ->numeric()
+                    ->suffix('m')
+                    ->columnSpan(1),
+
+                // Sección de observaciones y estado
+                Textarea::make('observaciones')
+                    ->label('Observaciones')
+                    ->maxLength(1000)
+                    ->columnSpan(2),
+
+                Select::make('estado_id')
+                    ->label('Estado')
+                    ->options([
+                        1 => 'Activo',
+                        2 => 'Inactivo',
+                    ])
+                    ->required()
+                    ->default(1)
+                    ->columnSpan(1),
+            ])->columns(2)
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('numero')
-                    ->searchable()
+                TextColumn::make('numero_inicial')
+                    ->label('Número')
                     ->sortable()
-                    ->label('Número'),
-                    
+                    ->searchable(),
+
+                TextColumn::make('num_departamento')
+                    ->label('Núm. Departamento')
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('edificio.nombre')
-                    ->searchable()
+                    ->label('Edificio')
                     ->sortable()
-                    ->label('Edificio'),
-                    
-                TextColumn::make('piso')
+                    ->searchable(),
+
+                TextColumn::make('num_piso')
+                    ->label('Piso')
+                    ->sortable(),
+
+                TextColumn::make('tipoDepartamento.nombre')
+                    ->label('Tipo')
+                    ->sortable(),
+
+                TextColumn::make('estadoDepartamento.nombre')
+                    ->label('Estado Dep.')
+                    ->sortable(),
+
+                TextColumn::make('moneda.nombre')
+                    ->label('Moneda')
+                    ->sortable(),
+
+                TextColumn::make('precio')
+                    ->formatStateUsing(function ($state) {
+                        return '$' . number_format($state, 2, '.', ',');
+                    })
                     ->sortable()
-                    ->label('Piso'),
-                    
-                TextColumn::make('tipo.nombre')
-                    ->searchable()
-                    ->label('Tipo'),
-                    
-                TextColumn::make('estado.nombre')
-                    ->searchable()
-                    ->label('Estado'),
-                    
-               TextColumn::make('precio')
-                ->formatStateUsing(function ($state) {
-                    return '$' . number_format($state, 2, '.', ',');
-                })
-                ->sortable()
-                ->label('Precio'),
-               
-                    
-                TextColumn::make('area_total')
+                    ->label('Precio'),
+
+                TextColumn::make('predio_m2')
                     ->suffix(' m²')
-                    ->sortable()
-                    ->label('Área total'),
+                    ->label('Área Predio')
+                    ->sortable(),
+
+                BooleanColumn::make('bono_techo_propio')
+                    ->label('Bono TP')
+                    ->sortable(),
+
+                BooleanColumn::make('estado_id')
+                    ->label('Estado')
+                    ->getStateUsing(fn ($record): bool => $record->estado_id === 1) // 1 = Activo, 2 = Inactivo
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('edificio_id')
                     ->label('Edificio')
                     ->options(Edificio::all()->pluck('nombre', 'id')),
-                    
+
                 SelectFilter::make('tipo_departamento_id')
                     ->label('Tipo')
                     ->options(TipoDepartamento::all()->pluck('nombre', 'id')),
-                    
+
                 SelectFilter::make('estado_departamento_id')
-                    ->label('Estado')
+                    ->label('Estado Dep.')
                     ->options(EstadoDepartamento::all()->pluck('nombre', 'id')),
+
+                SelectFilter::make('estado_id')
+                    ->label('Activo/Inactivo')
+                    ->options([
+                        1 => 'Activo',
+                        0 => 'Inactivo',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil'),
-                    
                 Tables\Actions\DeleteAction::make()
                     ->icon('heroicon-o-trash'),
             ])
@@ -172,7 +383,7 @@ class DepartamentoResource extends Resource
             // Puedes agregar RelationManagers aquí si es necesario
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -181,9 +392,9 @@ class DepartamentoResource extends Resource
             'edit' => Pages\EditDepartamento::route('/{record}/edit'),
         ];
     }
-    
+
     public static function getGloballySearchableAttributes(): array
     {
-        return ['numero', 'edificio.nombre'];
+        return ['numero_inicial', 'num_departamento', 'edificio.nombre', 'codigo_bancario'];
     }
 }

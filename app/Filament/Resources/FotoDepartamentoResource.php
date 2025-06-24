@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FotoDepartamentoResource\Pages;
-use App\Filament\Resources\FotoDepartamentoResource\RelationManagers;
 use App\Models\FotoDepartamento;
 use App\Models\Proyecto;
 use App\Models\Edificio;
@@ -21,20 +20,15 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Card;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage; // <-- Esta es la importación que falta
-
+use Illuminate\Support\Facades\Storage;
 
 class FotoDepartamentoResource extends Resource
 {
     protected static ?string $model = FotoDepartamento::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-camera';
-    protected static ?int $navigationSort = 2;
-    
+    protected static ?int $navigationSort = 1;
     protected static ?string $modelLabel = 'Foto de Departamento';
-    
     protected static ?string $pluralModelLabel = 'Fotos de Departamentos';
-    
     protected static ?string $navigationGroup = 'Gestión Comercial';
 
     public static function form(Form $form): Form
@@ -52,7 +46,7 @@ class FotoDepartamentoResource extends Resource
                             $set('departamento_id', null);
                         })
                         ->searchable(),
-                        
+
                     Select::make('edificio_id')
                         ->label('Edificio')
                         ->options(function (callable $get) {
@@ -65,7 +59,7 @@ class FotoDepartamentoResource extends Resource
                             $set('departamento_id', null);
                         })
                         ->searchable(),
-                        
+
                     Select::make('departamento_id')
                         ->label('Departamento')
                         ->options(function (callable $get) {
@@ -73,17 +67,17 @@ class FotoDepartamentoResource extends Resource
                             if (!$edificioId) {
                                 return [];
                             }
-                            
+
                             return Departamento::where('edificio_id', $edificioId)
                                 ->get()
                                 ->mapWithKeys(function ($item) {
-                                    return [$item->id => "Piso {$item->piso} - Depto. {$item->numero}"];
+                                    return [$item->id => "Piso {$item->num_piso} - Depto. {$item->num_departamento}"];
                                 })
                                 ->toArray();
                         })
                         ->required()
                         ->searchable(),
-                        
+
                     FileUpload::make('imagen')
                         ->label('Imagen del Departamento')
                         ->directory('departamentos')
@@ -106,26 +100,26 @@ class FotoDepartamentoResource extends Resource
                     ->label('Foto')
                     ->size(80)
                     ->square(),
-                    
+
                 TextColumn::make('proyecto.nombre')
                     ->searchable()
                     ->sortable()
                     ->label('Proyecto'),
-                    
+
                 TextColumn::make('edificio.nombre')
                     ->searchable()
                     ->sortable()
                     ->label('Edificio'),
-                    
-                TextColumn::make('departamento.numero')
+
+                TextColumn::make('departamento.num_departamento') // Mostrar número del departamento
                     ->searchable()
                     ->sortable()
                     ->label('Departamento N°'),
-                    
-                TextColumn::make('departamento.piso')
+
+                TextColumn::make('departamento.num_piso') // Mostrar número de piso
                     ->sortable()
                     ->label('Piso'),
-                    
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -136,18 +130,18 @@ class FotoDepartamentoResource extends Resource
                     ->label('Proyecto')
                     ->options(Proyecto::all()->pluck('nombre', 'id'))
                     ->searchable(),
-                    
+
                 SelectFilter::make('edificio_id')
                     ->label('Edificio')
                     ->options(Edificio::all()->pluck('nombre', 'id'))
                     ->searchable(),
-                    
+
                 SelectFilter::make('departamento_id')
                     ->label('Departamento')
                     ->options(function () {
                         return Departamento::all()
                             ->mapWithKeys(function ($item) {
-                                return [$item->id => "Piso {$item->piso} - Depto. {$item->numero}"];
+                                return [$item->id => "Piso {$item->num_piso} - Depto. {$item->num_departamento}"];
                             })
                             ->toArray();
                     })
@@ -156,10 +150,10 @@ class FotoDepartamentoResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye'),
-                    
+
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil'),
-                    
+
                 Tables\Actions\DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->before(function ($record) {
@@ -183,7 +177,7 @@ class FotoDepartamentoResource extends Resource
             // RelationManagers pueden agregarse aquí
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -193,12 +187,12 @@ class FotoDepartamentoResource extends Resource
             'edit' => Pages\EditFotoDepartamento::route('/{record}/edit'),
         ];
     }
-    
+
     public static function getGloballySearchableAttributes(): array
     {
-        return ['proyecto.nombre', 'edificio.nombre', 'departamento.numero'];
+        return ['proyecto.nombre', 'edificio.nombre', 'departamento.num_departamento'];
     }
-    
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 class EstadoDepartamentoController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Muestra una lista de los estados de departamento.
      */
     public function index()
     {
@@ -19,9 +17,7 @@ class EstadoDepartamentoController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Muestra el formulario para crear un nuevo estado.
      */
     public function create()
     {
@@ -29,16 +25,13 @@ class EstadoDepartamentoController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Almacena un nuevo estado en la base de datos.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:50|unique:estados_departamento,nombre',
-            'descripcion' => 'nullable|string|max:255'
+            'nombre' => 'required|string|max:100|unique:estados_departamento,nombre',
+            'descripcion' => 'nullable|string|max:255',
         ]);
 
         EstadoDepartamento::create($validated);
@@ -48,10 +41,7 @@ class EstadoDepartamentoController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Muestra un estado de departamento específico.
      */
     public function show($id)
     {
@@ -60,10 +50,7 @@ class EstadoDepartamentoController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Muestra el formulario para editar un estado existente.
      */
     public function edit($id)
     {
@@ -72,19 +59,15 @@ class EstadoDepartamentoController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Actualiza un estado de departamento en la base de datos.
      */
     public function update(Request $request, $id)
     {
         $estado = EstadoDepartamento::findOrFail($id);
 
         $validated = $request->validate([
-            'nombre' => 'required|string|max:50|unique:estados_departamento,nombre,'.$estado->id,
-            'descripcion' => 'nullable|string|max:255'
+            'nombre' => 'required|string|max:100|unique:estados_departamento,nombre,' . $estado->id,
+            'descripcion' => 'nullable|string|max:255',
         ]);
 
         $estado->update($validated);
@@ -94,21 +77,17 @@ class EstadoDepartamentoController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Elimina un estado de departamento si no tiene departamentos relacionados.
      */
     public function destroy($id)
     {
         $estado = EstadoDepartamento::findOrFail($id);
-        
-        // Verificar si tiene departamentos asociados
-        if($estado->departamentos()->count() > 0) {
+
+        if ($estado->departamentos()->exists()) {
             return redirect()->route('estados-departamento.index')
                              ->with('error', 'No se puede eliminar este estado porque tiene departamentos asociados.');
         }
-        
+
         $estado->delete();
 
         return redirect()->route('estados-departamento.index')

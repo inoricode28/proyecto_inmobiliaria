@@ -21,7 +21,14 @@ class DatabaseSeeder extends Seeder
         $this->call(TicketStatusSeeder::class);
         $this->call(ActivitySeeder::class);
         $this->call(Estados_DepartamentoSeeder::class);
-
+        $this->call(VistaSeeder::class);
+        $this->call(TipoInmuebleSeeder::class);
+        $this->call(MonedaSeeder::class);
+        $this->call(TiposDepartamentoSeeder::class);
+        $this->call(EstadosProyectoSeeder::class);
+        $this->call(EstadoSeeder::class);
+        
+              
         
         
     }

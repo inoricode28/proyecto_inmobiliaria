@@ -15,7 +15,7 @@ class ListDepartamentos extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('Nuevo Departamento'),
+                ->label('Nuevo Inmueble'),
         ];
     }
 
@@ -23,7 +23,7 @@ class ListDepartamentos extends ListRecords
     {
         return [
             CreateAction::make() 
-                ->label('Crear Departamento')
+                ->label('Crear Inmueble')
                 ->url(route('filament.resources.departamentos.create'))
                 ->icon('heroicon-o-plus')
                 ->button(),
@@ -32,7 +32,7 @@ class ListDepartamentos extends ListRecords
 
     protected function getTableEmptyStateHeading(): ?string
     {
-        return 'No hay departamentos registrados';
+        return 'No hay Inmueble registrados';
     }
 
     protected function getTableEmptyStateDescription(): ?string

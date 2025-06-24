@@ -21,7 +21,7 @@ class ListConsultaStocks extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            //ConsultaStockResource\Widgets\EstadosDepartamentoWidget::class,
+            #ConsultaStockResource\Widgets\EstadosDepartamentoWidget::class,
             ConsultaStockResource\Widgets\EstadosInmuebleWidget::class,
         ];
     }

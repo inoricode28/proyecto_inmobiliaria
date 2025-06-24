@@ -19,9 +19,4 @@ class EstadoDepartamento extends Model
     {
         return $this->hasMany(Departamento::class, 'estado_departamento_id');
     }
-
-    public function estado()
-{
-    return $this->belongsTo(EstadoDepartamento::class);
-}
 }
