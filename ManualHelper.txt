@@ -1,0 +1,161 @@
+                                                          Manual Del Proyecto
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 1<---------------------------------------------------------------------------------
+Lo primero que debemos hacer es clonar el proyecto usando el comando git:
+
+--> git clone https://github.com/devaslanphp/project-management.git
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 2<---------------------------------------------------------------------------------
+Ejecute el siguiente comando para instalar las dependencias del composer:
+
+--> composer install
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 3<---------------------------------------------------------------------------------
+Ejecute el siguiente comando para instalar las dependencias del proyecto :
+
+--> npm install
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 4<---------------------------------------------------------------------------------
+El último paso en la configuración de la plataforma, es la generación de la clave de la aplicación , para ello por favor ejecute el siguiente comando en
+el nivel raíz de la carpeta helper/:
+
+--> php artisan key:generate
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 5<---------------------------------------------------------------------------------
+La plataforma utiliza un sistema de cola para enviar notificaciones y correos electrónicos, por lo que debe ejecutar este comando desde la raíz de
+helper/la carpeta:
+
+-->php artisan queue:work
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 6<---------------------------------------------------------------------------------
+- Cree una base de datos en el mismo servidor que configuró en las variables de entorno.
+- Ejecute migraciones de bases de datos ejecutando el comando
+
+-->php artisan migrate
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 7<---------------------------------------------------------------------------------
+Ejecutar el sembrador de base de datos, para insertar el usuario predeterminado , los referenciales y los permisos utilizados por la plataforma:
+
+--> php artisan db:seed
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 8<---------------------------------------------------------------------------------
+Las credenciales del usuario predeterminado creado al importar el script SQL en el tercer paso son:
+
+--> Dirección de correo electrónico : john.doe@helper.app
+--> Contraseña : Passw@rd
+
+Este usuario tiene todos los permisos vinculados a su cuenta.
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 9<---------------------------------------------------------------------------------
+
+Por último, antes de poder servir el proyecto, debes utilizar el siguiente comando para generar activos vite:
+
+--> Generar activos para la producción:npm run build
+--> Generar activos para el desarrollo: npm run dev o vite
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 10<--------------------------------------------------------------------------------
+Creacion de las Tablas
+
+php artisan make:migration create_estados_proyecto_table
+php artisan make:migration create_empresas_table
+php artisan make:migration create_proyectos_table
+php artisan make:migration create_edificios_table
+php artisan make:migration create_tipos_departamento_table
+php artisan make:migration create_estados_departamento_table
+php artisan make:migration create_departamentos_table
+php artisan make:migration create_foto_departamentos_table
+
+
+
+php artisan make:migration create_tipo_inmueble_table
+php artisan make:migration create_vistas_table
+php artisan make:migration create_moneda_table
+php artisan make:migration create_estado_table
+
+--> php artisan migrate
+
+Nota: Las tablas se ejecutan de uno en uno y tiene su propia logica cada uno de ellas
+Nota: php artisan migrate <-> con este comando puede migrar todas las tablas siempre y cuando estan todo creadas y con su logica interna.
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 11<--------------------------------------------------------------------------------
+Creacion del sembrado(Datos) de las tablas
+
+--> php artisan make:seeder Estados_DepartamentoSeeder
+--> php artisan make:seeder VistaSeeder
+--> php artisan make:seeder TipoInmuebleSeeder
+--> php artisan make:seeder MonedaSeeder
+--> php artisan make:seeder EstadoSeeder
+--> php artisan make:seeder TiposDepartamentoSeeder
+
+Nota: El comando permite crear un archivo para ingresarle la logica de los datos que tendra esta tabla equievalente al Insert Into
+
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 12<--------------------------------------------------------------------------------
+Crear los Modelos
+
+--> php artisan make:model EstadoProyecto
+--> php artisan make:model Empresa
+--> php artisan make:model Proyecto
+--> php artisan make:model Edificio
+--> php artisan make:model TipoDepartamento
+--> php artisan make:model EstadoDepartamento
+--> php artisan make:model Departamento
+--> php artisan make:model FotoDepartamento
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 13<--------------------------------------------------------------------------------
+Crear los controladores
+
+--> php artisan make:controller EstadoProyectoController --resource
+--> php artisan make:controller EmpresaController --resource
+--> php artisan make:controller EdificioController --resource
+--> php artisan make:controller DepartamentoController --resource
+--> php artisan make:controller TipoDepartamentoController --resource
+--> php artisan make:controller EstadoDepartamentoController --resource
+--> php artisan make:controller ProyectoController --resource
+--> php artisan make:controller FotoDepartamentoController --resource
+
+========================================================================================================================================================
+--------------------------------------------------------------->PASO 14<--------------------------------------------------------------------------------
+
+Vistas Web Del Proyecto
+
+--> php artisan make:filament-resource Empresa
+--> php artisan make:filament-resource EstadoProyecto
+--> php artisan make:filament-resource Proyecto
+--> php artisan make:filament-resource Edificio
+--> php artisan make:filament-resource TipoDepartamento
+--> php artisan make:filament-resource EstadoDepartamento
+--> php artisan make:filament-resource Departamento
+--> php artisan make:filament-resource FotoDepartamento
+
+Nota: este comando crea Vistas con crud predeterminados osea un archivo principal y y una carpeta con el mismo nombre donde se encuentra tres archivos mas
+			que son las vistas crud, cada una de ellas debe tener su logica para su funcionamiento.
+
+
+Eliminar
+Windows
+del app\Filament\Resources\DepartamentoResource.php
+rmdir /S /Q app\Filament\Resources\DepartamentoResource
+
+Linux
+del app\Filament\Resources\DepartamentoResource.php
+rmdir /S /Q app\Filament\Resources\DepartamentoResource
+
+
+
+ESTE DE ACA Se ejecuta para dará acceso a las capetas 
+
+php artisan storage:link

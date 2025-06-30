@@ -28,6 +28,6 @@ class ListConsultaStocks extends ListRecords
 
     protected function getTitle(): string
     {
-        return 'Listado de Departamentos por Estado';
+        return 'Listado de Departamentos por stock';
     }
 }
