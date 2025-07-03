@@ -2,74 +2,38 @@
 
 namespace App\Filament\Resources\ConsultaStockResource\Widgets;
 
-use App\Filament\Resources\ConsultaStockResource;
 use App\Models\Departamento;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
+use Filament\Widgets\Widget;
 
-class EstadosInmuebleWidget extends BaseWidget
+class EstadosInmuebleWidget extends Widget
 {
-    protected function getCards(): array
+    protected static string $view = 'filament.resources.consulta-stock-resource.estados-immueble-widget';
+    
+    protected int|string|array $columnSpan = 'full';
+
+    public function getEstadosData(): array
     {
         $estados = [
-            ['nombre' => 'Bloqueado', 'descripcion' => 'Departamento bloqueado temporalmente'],
-            ['nombre' => 'Disponible', 'descripcion' => 'Departamento disponible para venta'],
-            ['nombre' => 'Separacion Temporal', 'descripcion' => 'Separado temporalmente por cliente'],
-            ['nombre' => 'Separacion', 'descripcion' => 'Separado definitivamente por cliente'],
-            ['nombre' => 'Pagado sin minuta', 'descripcion' => 'Pagado sin minuta firmada'],
-            ['nombre' => 'Minuta', 'descripcion' => 'Minuta firmada'],
-            ['nombre' => 'Cancelado', 'descripcion' => 'Venta cancelada'],
-            ['nombre' => 'Listo Entrega', 'descripcion' => 'Listo para entrega al cliente'],
-            ['nombre' => 'Entregado', 'descripcion' => 'Entregado al cliente'],
+            'Bloquedo' => ['color' => 'bg-red-500', 'desc' => ''],
+            'Disponible' => ['color' => 'bg-green-500', 'desc' => ''],            
+            'Separacion Temporal' => ['color' => 'bg-blue-500', 'desc' => ''],
+            'Separacion' => ['color' => 'bg-yellow-500', 'desc' => ''],
+            'Pagado sin minuta' => ['color' => 'bg-indigo-500', 'desc' => ''],
+            'Minuta' => ['color' => 'bg-gray-500', 'desc' => ''],
+            'Cancelado' => ['color' => 'bg-green-500', 'desc' => ''],
+            'Listo Entrega' => ['color' => 'bg-green-500', 'desc' => ''],
+            'Entregado' => ['color' => 'bg-green-500', 'desc' => ''],
         ];
 
-        $cards = [];
-
-        foreach ($estados as $estado) {
-            $count = Departamento::whereHas('estadoDepartamento', function ($q) use ($estado) {
-                $q->where('nombre', $estado['nombre']);
-            })->count();
-
-            $cards[] = Card::make($estado['nombre'], $count)
-                ->description($estado['descripcion'])
-                ->color($this->getColorForEstado($estado['nombre']))
-                ->extraAttributes([
-                    'class' => $this->getCardColorClass($estado['nombre']) .
-                               ' text-white shadow-md text-center font-semibold px-4 py-3',
-                ])
-                ->url(ConsultaStockResource::getUrl('index', [
-                    'tableFilters' => [
-                        'estado' => [
-                            'value' => $estado['nombre'],
-                        ]
-                    ]
-                ]));
-        }
-
-        return $cards;
-    }
-
-    protected function getColorForEstado(string $estado): string
-    {
-        return match ($estado) {
-            'Disponible' => 'success',
-            'Separacion Temporal', 'Separacion' => 'warning',
-            'Pagado sin minuta', 'Minuta' => 'info',
-            'Bloqueado', 'Cancelado' => 'danger',
-            'Listo Entrega', 'Entregado' => 'primary',
-            default => 'gray',
-        };
-    }
-
-    protected function getCardColorClass(string $estado): string
-    {
-        return match ($estado) {
-            'Disponible' => 'bg-green-500',
-            'Separacion Temporal', 'Separacion' => 'bg-yellow-500',
-            'Pagado sin minuta', 'Minuta' => 'bg-blue-500',
-            'Bloqueado', 'Cancelado' => 'bg-red-500',
-            'Listo Entrega', 'Entregado' => 'bg-indigo-600',
-            default => 'bg-gray-400',
-        };
+        return collect($estados)->map(function ($data, $nombre) {
+            return [
+                'nombre' => $nombre,
+                'count' => Departamento::whereHas('estadoDepartamento', 
+                    fn($q) => $q->where('nombre', $nombre)
+                )->count(),
+                'color' => $data['color'],
+                'descripcion' => $data['desc']
+            ];
+        })->values()->all();
     }
 }

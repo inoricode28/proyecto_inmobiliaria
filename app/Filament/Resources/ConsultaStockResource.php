@@ -87,4 +87,6 @@ class ConsultaStockResource extends Resource
             'index' => Pages\ListConsultaStocks::route('/'),
         ];
     }
+
+    
 }
