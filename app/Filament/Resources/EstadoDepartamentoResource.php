@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Notifications\Notification;
 
 class EstadoDepartamentoResource extends Resource
@@ -19,12 +20,12 @@ class EstadoDepartamentoResource extends Resource
     protected static ?string $model = EstadoDepartamento::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
-    
+
     protected static ?string $modelLabel = 'Estado de Departamento';
-    
+
     protected static ?string $pluralModelLabel = 'Estados de Departamento';
-    
-     protected static function getNavigationGroup(): ?string
+
+    protected static function getNavigationGroup(): ?string
     {
         return __('Settings');
     }
@@ -33,18 +34,33 @@ class EstadoDepartamentoResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('nombre')
-                    ->required()
-                    ->maxLength(50)
-                    ->unique(ignoreRecord: true)
-                    ->label('Nombre del Estado')
-                    ->placeholder('Ej: Disponible, Ocupado, Mantenimiento'),
-                    
-                Textarea::make('descripcion')
-                    ->maxLength(255)
-                    ->label('Descripción')
-                    ->columnSpanFull()
-                    ->placeholder('Breve descripción del estado'),
+                Forms\Components\Card::make()
+                    ->schema([
+                        Forms\Components\Grid::make()
+                            ->schema([
+                                TextInput::make('nombre')
+                                    ->required()
+                                    ->maxLength(50)
+                                    ->unique(ignoreRecord: true)
+                                    ->label('Nombre del Estado')
+                                    ->placeholder('Ej: Disponible, Ocupado, Mantenimiento'),
+
+                                Forms\Components\ColorPicker::make('color')
+                                    ->label('Color del Estado')
+                                    ->required()
+                                    ->default('#6b7280'), // Color gris por defecto
+
+                                Forms\Components\Checkbox::make('is_default')
+                                    ->label('Estado por defecto')
+                                    ->helperText('Si está marcado, será el estado asignado por defecto a nuevos departamentos'),
+                            ]),
+
+                        Textarea::make('descripcion')
+                            ->maxLength(255)
+                            ->label('Descripción')
+                            ->columnSpanFull()
+                            ->placeholder('Breve descripción del estado'),
+                    ])
             ]);
     }
 
@@ -52,28 +68,34 @@ class EstadoDepartamentoResource extends Resource
     {
         return $table
             ->columns([
+                ColorColumn::make('color')
+                    ->label('Color')
+                    ->sortable(),
+
                 TextColumn::make('nombre')
                     ->searchable()
                     ->sortable()
                     ->label('Nombre'),
-                    
+
                 TextColumn::make('descripcion')
                     ->limit(50)
                     ->searchable()
                     ->label('Descripción'),
-                    
+
+                Tables\Columns\IconColumn::make('is_default')
+                    ->label('Por defecto')
+                    ->boolean()
+                    ->sortable(),
+
                 TextColumn::make('departamentos_count')
                     ->counts('departamentos')
                     ->label('Departamentos')
                     ->sortable(),
             ])
-            ->filters([
-                // No hay filtros de eliminación ya que no usamos SoftDeletes
-            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil'),
-                    
+
                 Tables\Actions\DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->before(function (EstadoDepartamento $record, Tables\Actions\DeleteAction $action) {
@@ -111,7 +133,7 @@ class EstadoDepartamentoResource extends Resource
     {
         return [];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -120,7 +142,7 @@ class EstadoDepartamentoResource extends Resource
             'edit' => Pages\EditEstadoDepartamento::route('/{record}/edit'),
         ];
     }
-    
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['nombre', 'descripcion'];

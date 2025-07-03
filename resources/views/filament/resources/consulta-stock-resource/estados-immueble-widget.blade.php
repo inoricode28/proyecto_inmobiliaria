@@ -1,26 +1,33 @@
-<div class="flex items-center bg-white rounded-lg shadow px-4 py-2 border">
-    <span class="font-bold text-gray-700 mr-4 whitespace-nowrap text-sm">
-        Estados 
-    </span>
-    
-    <div class="flex gap-2 overflow-x-auto  py-1  w-full">
-        @foreach($this->getEstadosData() as $data)
-            <button 
-                type="button"
-                wire:click="$dispatch('setEstadoFilter', { estado: '{{ $data['nombre'] }}' })"
-                class="flex flex-col min-w-[150px] group transition-all hover:scale-80"
-                title="{{ $data['descripcion'] }}"
-            >
-                <div class="h-2 w-full {{ $data['color'] }} rounded-t"></div>
-                <div class="bg-gray-50 px-1 py-1 rounded-b text-center border border-gray-100">
-                    <div class="text-xs font-medium text-gray-700 truncate">
-                        {{ Str::limit($data['nombre'], 50) }}
-                    </div>
-                    <div class="text-sm font-bold text-gray-900">
-                        {{ $data['count'] }}
-                    </div>
+<div class="bg-white rounded-lg shadow border w-full">
+    <div class="flex items-center w-full px-2 py-2">
+        <span class="font-bold text-gray-700 mr-3 whitespace-nowrap text-sm w-[70px] flex-shrink-0">
+            Estados
+        </span>
+
+        <div class="grid grid-cols-9 gap-1 flex-1 min-w-0">
+            @foreach($this->getEstadosData() as $data)
+                <div class="min-w-0">
+                    <button
+                        type="button"
+                        wire:click="$dispatch('setEstadoFilter', { estado: '{{ $data['nombre'] }}' })"
+                        class="flex flex-col w-full h-full"
+                        title="{{ $data['descripcion'] }}"
+                    >
+                        <!-- Barra de color superior -->
+                        <div class="h-1.5 w-full" style="background-color: {{ $data['color'] }}"></div>
+
+                        <!-- Contenido del botón -->
+                        <div class="bg-gray-50 p-1 border border-gray-200 flex flex-col items-center min-w-0">
+                            <div class="text-[10px] font-medium text-gray-700 text-center break-all leading-tight">
+                                {{ $data['nombre'] }}
+                            </div>
+                            <div class="text-xs font-bold text-gray-900 mt-0.5">
+                                {{ $data['count'] }}
+                            </div>
+                        </div>
+                    </button>
                 </div>
-            </button>
-        @endforeach
+            @endforeach
+        </div>
     </div>
 </div>

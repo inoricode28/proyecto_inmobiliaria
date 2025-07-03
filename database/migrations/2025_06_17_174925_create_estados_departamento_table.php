@@ -6,28 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
-        Schema::create('estados_departamento', function (Blueprint $table) {
-                $table->id();
-                $table->string('nombre', 100)->unique();
-                $table->text('descripcion')->nullable();
+        Schema::table('estados_departamento', function (Blueprint $table) {
+            $table->string('color')->default('#6b7280')->after('descripcion');
+            $table->boolean('is_default')->default(false)->after('color');
         });
-
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        Schema::dropIfExists('estados_departamento');
+        Schema::table('estados_departamento', function (Blueprint $table) {
+            $table->dropColumn(['color', 'is_default']);
+        });
     }
 };
