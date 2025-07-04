@@ -97,6 +97,9 @@ Creacion del sembrado(Datos) de las tablas
 --> php artisan make:seeder MonedaSeeder
 --> php artisan make:seeder EstadoSeeder
 --> php artisan make:seeder TiposDepartamentoSeeder
+--> php artisan make:seeder TiposFinanciamientoSeeder
+
+
 
 Nota: El comando permite crear un archivo para ingresarle la logica de los datos que tendra esta tabla equievalente al Insert Into
 
@@ -159,3 +162,5 @@ rmdir /S /Q app\Filament\Resources\DepartamentoResource
 ESTE DE ACA Se ejecuta para dará acceso a las capetas 
 
 php artisan storage:link
+
+php artisan migrate:fresh --seed
