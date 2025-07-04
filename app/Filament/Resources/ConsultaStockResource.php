@@ -24,79 +24,19 @@ class ConsultaStockResource extends Resource
     protected static ?int $navigationSort = 2;
 
 
-    public static function getEloquentQuery(): Builder
+     public static function table(Table $table): Table
 {
-    $query = Departamento::query()
-        ->selectRaw('MIN(id) as id, tipo_inmueble_id')
-        ->groupBy('tipo_inmueble_id');
-
-    if ($edificioId = request()->get('tableFilters')['edificio_id']['value'] ?? null) {
-        $query->where('edificio_id', $edificioId);
-    }
-
-    return $query;
+    return $table
+        ->columns([
+            // tus columnas aquí...
+        ])
+        ->filters([
+            // tus filtros aquí...
+        ])
+        ->actions([])
+        ->bulkActions([])
+        ->defaultSort('tipo_inmueble_id');
 }
-
-
-    public static function table(Table $table): Table
-    {
-        $estados = EstadoDepartamento::orderBy('nombre')->get();
-
-        // Filtrado por edificio
-        $filtroEdificioId = request()->get('tableFilters')['edificio_id']['value'] ?? null;
-
-        // Preconteo: tipo_inmueble_id x estado_departamento_id
-        $agrupados = Departamento::query()
-            ->when($filtroEdificioId, fn ($q) => $q->where('edificio_id', $filtroEdificioId))
-            ->selectRaw('tipo_inmueble_id, estado_departamento_id, COUNT(*) as count')
-            ->groupBy('tipo_inmueble_id', 'estado_departamento_id')
-            ->get()
-            ->groupBy('tipo_inmueble_id');
-
-        // Columnas de estado dinámicas
-        $estadoColumns = [];
-        foreach ($estados as $estado) {
-            $estadoColumns[] = TextColumn::make('estado_' . $estado->id)
-                ->label($estado->nombre)
-                ->getStateUsing(function ($record) use ($agrupados, $estado) {
-                    return $agrupados[$record->tipo_inmueble_id]?->where('estado_departamento_id', $estado->id)->first()?->count ?? '0';
-                })
-                ->alignCenter();
-        }
-
-        return $table
-            ->columns([
-                TextColumn::make('tipo_inmueble')
-                    ->label('Tipo de Inmueble')
-                    ->getStateUsing(fn ($record) => TipoInmueble::find($record->tipo_inmueble_id)?->nombre ?? 'Sin tipo')
-                    ->alignLeft()
-                    ->weight('bold'),
-
-                ...$estadoColumns,
-
-                TextColumn::make('total')
-                    ->label('Total')
-                    ->getStateUsing(function ($record) use ($agrupados) {
-                        return $agrupados[$record->tipo_inmueble_id]?->sum('count') ?? '0';
-                    })
-                    ->alignCenter()
-                    ->weight('bold'),
-            ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('edificio_id')
-                    ->relationship('edificio', 'nombre')
-                    ->label('Torre')
-                    ->default(Edificio::first()?->id),
-            ])
-            ->actions([])
-            ->bulkActions([])
-            ->defaultSort('tipo_inmueble_id');
-    }
-
-    public static function getRelations(): array
-    {
-        return [];
-    }
 
     public static function getPages(): array
     {
@@ -104,4 +44,6 @@ class ConsultaStockResource extends Resource
             'index' => Pages\ListConsultaStocks::route('/'),
         ];
     }
+
+
 }
