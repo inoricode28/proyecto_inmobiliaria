@@ -19,7 +19,7 @@ class Departamento extends Model
         'numero_final',
         'ficha_indep',
         'num_departamento',
-        'num_piso',         
+        'num_piso',
         'num_dormitorios',
         'num_bano',
         'num_certificado',
@@ -50,8 +50,8 @@ class Departamento extends Model
         'direccion',
         'observaciones',
         'estado_id',
-        'tipoFinanciamiento_id',
-        
+        'tipos_financiamiento_id',
+
     ];
 
     public $timestamps = true;
@@ -99,6 +99,13 @@ class Departamento extends Model
     #Aqui se relaciona el modelo de partamento con el con la tabla de tipo de financiamientro
     public function tipoFinanciamiento()
     {
-        return $this->belongsTo(TipoFinanciamiento::class, 'tipoFinanciamiento_id');
+        return $this->belongsTo(tipoFinanciamiento::class, 'tipos_financiamiento_id');
     }
+
+
+    public function fotoDepartamentos()
+    {
+        return $this->hasMany(FotoDepartamento::class, 'departamento_id');
+    }
+
 }

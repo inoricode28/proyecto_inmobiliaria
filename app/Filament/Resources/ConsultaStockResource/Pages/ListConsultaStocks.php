@@ -21,8 +21,9 @@ class ListConsultaStocks extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-             ConsultaStockResource\Widgets\PisosInmuebleWidget::class,
+           //  ConsultaStockResource\Widgets\PisosInmuebleWidget::class,
              ConsultaStockResource\Widgets\EstadosInmuebleWidget::class,
+            //ConsultaStockResource\Widgets\FiltroTipoInmuebleWidget::class,
         ];
     }
 

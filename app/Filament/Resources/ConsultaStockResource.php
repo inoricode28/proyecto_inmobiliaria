@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
 
 class ConsultaStockResource extends Resource
@@ -25,79 +24,73 @@ class ConsultaStockResource extends Resource
     protected static ?int $navigationSort = 2;
 
 
-public static function table(Table $table): Table
+    public static function getEloquentQuery(): Builder
 {
-    $estados = EstadoDepartamento::orderBy('nombre')->get();
-    $tiposInmueble = TipoInmueble::orderBy('nombre')->get();
+    $query = Departamento::query()
+        ->selectRaw('MIN(id) as id, tipo_inmueble_id')
+        ->groupBy('tipo_inmueble_id');
 
-    // Precargar datos para optimización
-    $departamentosPorEdificio = Departamento::with(['edificio', 'tipoInmueble', 'estadoDepartamento'])
-        ->selectRaw('edificio_id, tipo_inmueble_id, estado_departamento_id, COUNT(*) as count')
-        ->groupBy('edificio_id', 'tipo_inmueble_id', 'estado_departamento_id')
-        ->get()
-        ->groupBy(['edificio_id', 'tipo_inmueble_id']);
-
-    // Columnas dinámicas para cada estado
-    $estadoColumns = [];
-    foreach ($estados as $estado) {
-        $estadoColumns[] = TextColumn::make($estado->nombre)
-            ->label($estado->nombre)
-            ->getStateUsing(function ($record) use ($departamentosPorEdificio, $estado) {
-                $count = $departamentosPorEdificio
-                    ->get($record->edificio_id, collect())
-                    ->get($record->tipo_inmueble_id, collect())
-                    ->where('estado_departamento_id', $estado->id)
-                    ->first()->count ?? 0;
-                return $count == 0 ? '0' : (string)$count;
-            })
-            ->alignCenter();
+    if ($edificioId = request()->get('tableFilters')['edificio_id']['value'] ?? null) {
+        $query->where('edificio_id', $edificioId);
     }
 
-    return $table
-        ->columns([
-            TextColumn::make('tipoInmueble.nombre')
-                ->label('Tipo de Inmueble')
-                ->alignLeft()
-                ->weight('bold'),
-
-            ...$estadoColumns,
-
-            TextColumn::make('total')
-                ->label('Total')
-                ->getStateUsing(function ($record) use ($departamentosPorEdificio) {
-                    $total = $departamentosPorEdificio
-                        ->get($record->edificio_id, collect())
-                        ->get($record->tipo_inmueble_id, collect())
-                        ->sum('count');
-                    return $total == 0 ? '0' : (string)$total;
-                })
-                ->alignCenter()
-                ->weight('bold'),
-        ])
-        ->filters([
-            Tables\Filters\SelectFilter::make('edificio_id')
-                ->relationship('edificio', 'nombre')
-                ->default(request()->get('edificio_id') ?: Edificio::first()?->id)
-                ->label('Torre'),
-        ])
-        ->actions([])
-        ->bulkActions([])
-        ->defaultSort('tipo_inmueble_id');
-}
-
-// Agrega este método para incluir los totales por columna
-protected function getTableContent(): View
-{
-    return view('filament.resources.consulta-stock-resource.pages.custom-table', [
-        'records' => $this->getTableRecords(),
-    ]);
+    return $query;
 }
 
 
-    // Método para aplicar el filtro por estado
-    protected function applyEstadoFilter(Builder $query, string $estado): Builder
+    public static function table(Table $table): Table
     {
-        return $query->whereHas('estadoDepartamento', fn($q) => $q->where('nombre', $estado));
+        $estados = EstadoDepartamento::orderBy('nombre')->get();
+
+        // Filtrado por edificio
+        $filtroEdificioId = request()->get('tableFilters')['edificio_id']['value'] ?? null;
+
+        // Preconteo: tipo_inmueble_id x estado_departamento_id
+        $agrupados = Departamento::query()
+            ->when($filtroEdificioId, fn ($q) => $q->where('edificio_id', $filtroEdificioId))
+            ->selectRaw('tipo_inmueble_id, estado_departamento_id, COUNT(*) as count')
+            ->groupBy('tipo_inmueble_id', 'estado_departamento_id')
+            ->get()
+            ->groupBy('tipo_inmueble_id');
+
+        // Columnas de estado dinámicas
+        $estadoColumns = [];
+        foreach ($estados as $estado) {
+            $estadoColumns[] = TextColumn::make('estado_' . $estado->id)
+                ->label($estado->nombre)
+                ->getStateUsing(function ($record) use ($agrupados, $estado) {
+                    return $agrupados[$record->tipo_inmueble_id]?->where('estado_departamento_id', $estado->id)->first()?->count ?? '0';
+                })
+                ->alignCenter();
+        }
+
+        return $table
+            ->columns([
+                TextColumn::make('tipo_inmueble')
+                    ->label('Tipo de Inmueble')
+                    ->getStateUsing(fn ($record) => TipoInmueble::find($record->tipo_inmueble_id)?->nombre ?? 'Sin tipo')
+                    ->alignLeft()
+                    ->weight('bold'),
+
+                ...$estadoColumns,
+
+                TextColumn::make('total')
+                    ->label('Total')
+                    ->getStateUsing(function ($record) use ($agrupados) {
+                        return $agrupados[$record->tipo_inmueble_id]?->sum('count') ?? '0';
+                    })
+                    ->alignCenter()
+                    ->weight('bold'),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('edificio_id')
+                    ->relationship('edificio', 'nombre')
+                    ->label('Torre')
+                    ->default(Edificio::first()?->id),
+            ])
+            ->actions([])
+            ->bulkActions([])
+            ->defaultSort('tipo_inmueble_id');
     }
 
     public static function getRelations(): array
@@ -111,6 +104,4 @@ protected function getTableContent(): View
             'index' => Pages\ListConsultaStocks::route('/'),
         ];
     }
-
-
 }

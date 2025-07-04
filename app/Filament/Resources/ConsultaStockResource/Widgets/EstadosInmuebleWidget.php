@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\ConsultaStockResource\Widgets;
 
-use App\Models\Departamento;
 use App\Models\EstadoDepartamento;
+use App\Models\TipoFinanciamiento;
+use App\Models\Departamento;
+use App\Models\Edificio;
 use Filament\Widgets\Widget;
 
 class EstadosInmuebleWidget extends Widget
@@ -22,5 +24,29 @@ class EstadosInmuebleWidget extends Widget
                 'descripcion' => $estado->descripcion ?? ''
             ];
         })->values()->all();
+    }
+
+    public function getFinanciamientosData(): array
+    {
+        return TipoFinanciamiento::all()->map(function ($tipo) {
+            return [
+                'nombre' => $tipo->nombre,
+                'count' => 0,
+                'color' => $tipo->color,
+                'descripcion' => $tipo->descripcion ?? '',
+            ];
+        })->values()->all();
+    }
+
+    public function getPisosData()
+    {
+        $edificioId = request()->get('edificio_id') ?: Edificio::first()?->id;
+
+        return Departamento::with(['estadoDepartamento', 'fotoDepartamentos'])
+            ->where('edificio_id', $edificioId)
+            ->orderBy('num_piso', 'desc')
+            ->orderBy('num_departamento')
+            ->get()
+            ->groupBy('num_piso');
     }
 }

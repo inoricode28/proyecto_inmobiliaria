@@ -11,15 +11,13 @@ use App\Models\EstadoDepartamento;
 use App\Models\Proyecto;
 use App\Models\Vista;
 use App\Models\Moneda;
+use App\Models\TipoFinanciamiento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DepartamentoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         try {
@@ -33,7 +31,6 @@ class DepartamentoController extends Controller
                 'moneda',
                 'estado'
             ])
-            ->activos()
             ->orderBy('edificio_id')
             ->orderBy('num_piso')
             ->orderBy('numero_inicial')
@@ -46,9 +43,6 @@ class DepartamentoController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         try {
@@ -58,9 +52,10 @@ class DepartamentoController extends Controller
                 'tiposInmueble' => TipoInmueble::orderBy('nombre')->get(),
                 'tiposDepartamento' => TipoDepartamento::orderBy('nombre')->get(),
                 'estadosDepartamento' => EstadoDepartamento::orderBy('nombre')->get(),
+                'tipoFinanciamiento' => TipoFinanciamiento::orderBy('nombre')->get(),
                 'vistas' => Vista::orderBy('nombre')->get(),
                 'monedas' => Moneda::activas()->get(),
-                'estados' => Estado::whereIn('id', [1, 2])->get() // Activo/Inactivo
+                'estados' => Estado::whereIn('id', [1, 2])->get()
             ]);
         } catch (\Exception $e) {
             Log::error('Error al mostrar formulario de creación: ' . $e->getMessage());
@@ -68,9 +63,6 @@ class DepartamentoController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $this->validateRequest($request);
@@ -78,12 +70,11 @@ class DepartamentoController extends Controller
         try {
             DB::beginTransaction();
 
-            $departamento = Departamento::create($validated);
-            
-            // Lógica adicional para relaciones especiales
             if ($validated['bono_techo_propio'] && empty($validated['num_bono_tp'])) {
-                $departamento->update(['num_bono_tp' => 'BTP-' . strtoupper(uniqid())]);
+                $validated['num_bono_tp'] = 'BTP-' . strtoupper(uniqid());
             }
+
+            $departamento = Departamento::create($validated);
 
             DB::commit();
 
@@ -92,15 +83,10 @@ class DepartamentoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al crear departamento: ' . $e->getMessage());
-            return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Error al crear el departamento: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Error al crear el departamento: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Departamento $departamento)
     {
         try {
@@ -112,7 +98,8 @@ class DepartamentoController extends Controller
                 'estadoDepartamento',
                 'vista',
                 'moneda',
-                'estado'
+                'estado',
+                'tipoFinanciamiento',
             ]);
 
             return view('departamentos.show', compact('departamento'));
@@ -122,9 +109,6 @@ class DepartamentoController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Departamento $departamento)
     {
         try {
@@ -135,6 +119,7 @@ class DepartamentoController extends Controller
                 'tiposInmueble' => TipoInmueble::orderBy('nombre')->get(),
                 'tiposDepartamento' => TipoDepartamento::orderBy('nombre')->get(),
                 'estadosDepartamento' => EstadoDepartamento::orderBy('nombre')->get(),
+                'tipoFinanciamiento' => TipoFinanciamiento::orderBy('nombre')->get(),
                 'vistas' => Vista::orderBy('nombre')->get(),
                 'monedas' => Moneda::activas()->get(),
                 'estados' => Estado::whereIn('id', [1, 2])->get()
@@ -145,9 +130,6 @@ class DepartamentoController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Departamento $departamento)
     {
         $validated = $this->validateRequest($request, $departamento);
@@ -155,12 +137,11 @@ class DepartamentoController extends Controller
         try {
             DB::beginTransaction();
 
-            $departamento->update($validated);
-            
-            // Si se activó el bono pero no tiene número, generamos uno
             if ($validated['bono_techo_propio'] && empty($validated['num_bono_tp'])) {
-                $departamento->update(['num_bono_tp' => 'BTP-' . strtoupper(uniqid())]);
+                $validated['num_bono_tp'] = 'BTP-' . strtoupper(uniqid());
             }
+
+            $departamento->update($validated);
 
             DB::commit();
 
@@ -169,21 +150,15 @@ class DepartamentoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al actualizar departamento: ' . $e->getMessage());
-            return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Error al actualizar el departamento: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Error al actualizar el departamento: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Departamento $departamento)
     {
         try {
-            if ($departamento->operaciones()->exists()) {
-                return back()->with('error', 
-                    'No se puede eliminar el departamento porque tiene operaciones relacionadas.');
+            if (method_exists($departamento, 'operaciones') && $departamento->operaciones()->exists()) {
+                return back()->with('error', 'No se puede eliminar el departamento porque tiene operaciones relacionadas.');
             }
 
             $departamento->delete();
@@ -196,9 +171,6 @@ class DepartamentoController extends Controller
         }
     }
 
-    /**
-     * Valida los datos de la solicitud para creación/actualización
-     */
     protected function validateRequest(Request $request, ?Departamento $departamento = null): array
     {
         $rules = [
@@ -209,13 +181,12 @@ class DepartamentoController extends Controller
             'estado_departamento_id' => 'required|exists:estados_departamento,id',
             'vista_id' => 'nullable|exists:vistas,id',
             'moneda_id' => 'required|exists:monedas,id',
-            'numero_inicial' => 'required|string|max:20|unique:departamentos,numero_inicial' 
-                . ($departamento ? ",{$departamento->id}" : ''),
+            'numero_inicial' => 'required|string|max:20|unique:departamentos,numero_inicial' . ($departamento ? ",{$departamento->id}" : ''),
             'numero_final' => 'nullable|string|max:20',
             'ficha_indep' => 'nullable|string|max:50',
             'num_departamento' => 'nullable|string|max:255',
             'num_piso' => 'required|integer|min:0|max:150',
-            'num_dormitorios' => 'required|integer|min:0|max:10',                        
+            'num_dormitorios' => 'required|integer|min:0|max:10',
             'num_bano' => 'required|integer|min:0|max:6',
             'num_certificado' => 'nullable|string|max:50',
             'bono_techo_propio' => 'boolean',
@@ -242,6 +213,7 @@ class DepartamentoController extends Controller
             'direccion' => 'required|string|max:500',
             'observaciones' => 'nullable|string|max:1000',
             'estado_id' => 'required|exists:estados,id',
+            'tipo_financiamiento_id' => 'required|exists:tipo_financiamiento,id',
         ];
 
         return $request->validate($rules);

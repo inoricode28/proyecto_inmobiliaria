@@ -20,7 +20,6 @@ class TipoFinanciamiento extends Model
     // Deshabilitar timestamps si no los usas
     public $timestamps = false;
 
-    // Relación con la tabla de 'departamentos' (si aplica)
     public function departamentos()
     {
         return $this->hasMany(Departamento::class, 'tipo_financiamiento_id');
