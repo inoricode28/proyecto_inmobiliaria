@@ -8,16 +8,18 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('estados_departamento', function (Blueprint $table) {
-            $table->string('color')->default('#6b7280')->after('descripcion');
-            $table->boolean('is_default')->default(false)->after('color');
+        Schema::create('estados_departamento', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 100)->unique();
+            $table->text('descripcion')->nullable();
+            $table->string('color')->default('#6b7280');
+            $table->boolean('is_default')->default(false);
+            $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::table('estados_departamento', function (Blueprint $table) {
-            $table->dropColumn(['color', 'is_default']);
-        });
+        Schema::dropIfExists('estados_departamento');
     }
 };

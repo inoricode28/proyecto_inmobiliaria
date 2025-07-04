@@ -1,4 +1,6 @@
 <div class="bg-white rounded-lg shadow border w-full">
+
+
     <div class="flex items-center w-full px-2 py-2">
         <span class="font-bold text-gray-700 mr-3 whitespace-nowrap text-sm w-[70px] flex-shrink-0">
             Estados
@@ -14,7 +16,7 @@
                         title="{{ $data['descripcion'] }}"
                     >
                         <!-- Barra de color superior -->
-                        <div class="h-1.5 w-full" style="background-color: {{ $data['color'] }}"></div>
+                        <div class="h-2.5 w-full" style="background-color: {{ $data['color'] }}"></div>
 
                         <!-- Contenido del botón -->
                         <div class="bg-gray-50 p-1 border border-gray-200 flex flex-col items-center min-w-0">

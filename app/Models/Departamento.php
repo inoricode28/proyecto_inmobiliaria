@@ -19,7 +19,7 @@ class Departamento extends Model
         'numero_final',
         'ficha_indep',
         'num_departamento',
-        'num_piso',         
+        'num_piso',
         'num_dormitorios',
         'num_bano',
         'num_certificado',
@@ -94,4 +94,10 @@ class Departamento extends Model
     {
         return $this->belongsTo(EstadoDepartamento::class, 'estado_departamento_id');
     }
+
+    public function fotoDepartamentos()
+{
+    return $this->hasMany(FotoDepartamento::class, 'departamento_id');
+}
+
 }
