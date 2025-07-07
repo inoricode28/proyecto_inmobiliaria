@@ -37,7 +37,18 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'creation_token',
         'type',
         'oidc_username',
+        'oidc_sub',
         'email_verified_at',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+        'remember_token',
+        'is_vendedor',
+        'vendedor_id',
+        'fecha_ingreso',
+        'fecha_egreso',
+        'comision',
+        'perfil',
     ];
 
     /**
@@ -48,6 +59,8 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -57,6 +70,11 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'two_factor_confirmed_at' => 'datetime',
+        'is_vendedor' => 'boolean',
+        'fecha_ingreso' => 'datetime',
+        'fecha_egreso' => 'datetime',
+        'comision' => 'decimal:2',
     ];
 
     public static function boot()
@@ -77,6 +95,34 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         });
     }
 
+    /**
+     * Relación con el modelo Vendedor
+     */
+    public function vendedor()
+    {
+        return $this->belongsTo(Vendedor::class);
+    }
+
+    /**
+     * Accesor para verificar si es vendedor
+     */
+    public function isVendedor(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->is_vendedor || $this->vendedor_id !== null
+        );
+    }
+
+    /**
+     * Scope para filtrar usuarios vendedores
+     */
+    public function scopeVendedores($query)
+    {
+        return $query->where('is_vendedor', true)
+                    ->orWhereNotNull('vendedor_id');
+    }
+
+    // Relaciones existentes
     public function projectsOwning(): HasMany
     {
         return $this->hasMany(Project::class, 'owner_id', 'id');

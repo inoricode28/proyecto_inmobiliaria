@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\FormaContacto;
+use App\Models\NivelInteres;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -28,6 +30,12 @@ class DatabaseSeeder extends Seeder
         $this->call(EstadosProyectoSeeder::class);
         $this->call(EstadoSeeder::class);
         $this->call(TiposFinanciamientoSeeder::class);
+
+        $this->call(FormaContactoSeeder::class);
+        $this->call(TipoGestionSeeder::class);
+        $this->call(ComoSeEnteroSeeder::class);
+        $this->call(NivelInteresSeeder::class);
+        $this->call(TipoDocumentoSeeder::class);
         
         
               

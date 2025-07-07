@@ -82,6 +82,18 @@ php artisan make:migration create_vistas_table
 php artisan make:migration create_moneda_table
 php artisan make:migration create_estado_table
 
+
+php artisan make:migration create_como_se_entero_table
+php artisan make:migration create_formas_contacto_table
+php artisan make:migration create_niveles_interes_table
+php artisan make:migration create_tipo_documento_table
+php artisan make:migration create_tipos_gestion_table
+php artisan make:migration create_prospectos_table
+php artisan make:migration create_tareas_table
+php artisan make:migration create_vendedores_table
+php artisan make:migration add_columns_user_table
+
+
 --> php artisan migrate
 
 Nota: Las tablas se ejecutan de uno en uno y tiene su propia logica cada uno de ellas
@@ -100,6 +112,18 @@ Creacion del sembrado(Datos) de las tablas
 --> php artisan make:seeder TiposFinanciamientoSeeder
 
 
+--> php artisan make:seeder ComoSeEnteroSeeder
+--> php artisan make:seeder FormaContactoSeeder
+--> php artisan make:seeder TipoGestionSeeder
+--> php artisan make:seeder NivelInteresSeeder
+--> php artisan make:seeder TipoDocumentoSeeder
+
+
+
+
+
+
+
 
 Nota: El comando permite crear un archivo para ingresarle la logica de los datos que tendra esta tabla equievalente al Insert Into
 
@@ -116,6 +140,13 @@ Crear los Modelos
 --> php artisan make:model EstadoDepartamento
 --> php artisan make:model Departamento
 --> php artisan make:model FotoDepartamento
+--> php artisan make:model Tareas
+--> php artisan make:model FormaContacto
+--> php artisan make:model NivelInteres
+--> php artisan make:model Prospecto
+--> php artisan make:model TipoGestion
+--> php artisan make:model TipoDocumento
+--> php artisan make:model Vendedor
 
 ========================================================================================================================================================
 --------------------------------------------------------------->PASO 13<--------------------------------------------------------------------------------
@@ -143,6 +174,11 @@ Vistas Web Del Proyecto
 --> php artisan make:filament-resource EstadoDepartamento
 --> php artisan make:filament-resource Departamento
 --> php artisan make:filament-resource FotoDepartamento
+--> php artisan make:filament-resource GestionSeguimiento
+--> php artisan make:filament-resource PanelSeguimiento
+--> php artisan make:filament-resource Vendedor
+
+
 
 Nota: este comando crea Vistas con crud predeterminados osea un archivo principal y y una carpeta con el mismo nombre donde se encuentra tres archivos mas
 			que son las vistas crud, cada una de ellas debe tener su logica para su funcionamiento.
