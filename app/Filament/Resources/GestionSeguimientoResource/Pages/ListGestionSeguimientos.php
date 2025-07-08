@@ -15,15 +15,17 @@ class ListGestionSeguimientos extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->label('Nuevo Prospecto')
-                ->icon('heroicon-o-plus'),
+                ->button()
+                ->icon('heroicon-o-plus')
+                ->color('primary'),
         ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Resources\GestionSeguimientoResource\Widgets\ProspectosStats::class,
-            ];
+            GestionSeguimientoResource\Widgets\ProspectosStats::class,
+        ];
     }
 
     protected function getTableEmptyStateHeading(): ?string

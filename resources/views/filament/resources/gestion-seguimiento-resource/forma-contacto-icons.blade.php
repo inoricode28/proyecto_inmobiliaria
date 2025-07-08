@@ -1,0 +1,79 @@
+@php
+    $formas = \App\Models\FormaContacto::all();
+    $currentValue = $getState();
+    $error = $errors->first($getStatePath());
+@endphp
+
+<div class="space-y-2">
+    <label class="block text-sm font-medium text-gray-700">
+        Forma de Contacto <span class="text-red-500">*</span>
+    </label>
+    <input type="hidden" name="forma_contacto_id" wire:model="{{ $getStatePath() }}" required>
+
+    <div class="flex flex-wrap gap-4">
+        @foreach($formas as $forma)
+            <button
+                type="button"
+                wire:click="$set('{{ $getStatePath() }}', {{ $forma->id }})"
+                class="flex flex-col items-center justify-center p-3 rounded-md transition-colors w-24 h-24
+                    {{ $currentValue == $forma->id
+                        ? 'bg-primary-100 border border-primary-500'
+                        : 'bg-gray-50 hover:bg-gray-100' }}"
+                title="{{ $forma->descripcion ?? $forma->nombre }}"
+            >
+                @switch($forma->id)
+                    @case(1) <!-- E-MAIL -->
+                        <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        @break
+                    @case(2) <!-- FACEBOOK -->
+                        <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
+                        </svg>
+                        @break
+                    @case(3) <!-- FERIA INMOBILIARIA -->
+                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        @break
+                    @case(4) <!-- NEXO -->
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        @break
+                    @case(5) <!-- PAGINA WEB -->
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                        </svg>
+                        @break
+                    @case(6) <!-- Plugins WhatsApp -->
+                        <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-6.293 5.03c-.247.098-.7.198-1.368.073-1.025-.173-2.223-.758-3.006-1.389-1.264-1.013-2.126-2.48-2.343-3.243-.108-.371.108-.719.347-.837.173-.09.434-.143.434-.143.272-.08.52-.25.694-.421.174-.172.223-.297.347-.496.124-.198.062-.372.031-.446-.03-.074-.272-.558-.371-.764-.099-.208-.198-.173-.372-.099-.173.074-.372.173-.57.272-.198.099-.347.124-.52.037-.173-.086-.744-.272-1.426-.272-1.164 0-2.257.421-3.01.772-.954.434-1.093 1.232-.892 1.633.223.434 1.222 2.35 2.74 3.453 1.519 1.104 3.558 1.786 4.893 1.943.446.053.835.032 1.155-.021.555-.09 1.397-.446 1.595-1.075.198-.628.198-1.162.149-1.275-.05-.112-.198-.173-.446-.27"/>
+                        </svg>
+                        @break
+                    @case(7) <!-- SALA DE VENTA -->
+                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        @break
+                    @case(8) <!-- TELEFÓNICO -->
+                        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                        @break
+                    @case(9) <!-- WHATSAPP -->
+                        <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-6.293 5.03c-.247.098-.7.198-1.368.073-1.025-.173-2.223-.758-3.006-1.389-1.264-1.013-2.126-2.48-2.343-3.243-.108-.371.108-.719.347-.837.173-.09.434-.143.434-.143.272-.08.52-.25.694-.421.174-.172.223-.297.347-.496.124-.198.062-.372.031-.446-.03-.074-.272-.558-.371-.764-.099-.208-.198-.173-.372-.099-.173.074-.372.173-.57.272-.198.099-.347.124-.52.037-.173-.086-.744-.272-1.426-.272-1.164 0-2.257.421-3.01.772-.954.434-1.093 1.232-.892 1.633.223.434 1.222 2.35 2.74 3.453 1.519 1.104 3.558 1.786 4.893 1.943.446.053.835.032 1.155-.021.555-.09 1.397-.446 1.595-1.075.198-.628.198-1.162.149-1.275-.05-.112-.198-.173-.446-.27"/>
+                        </svg>
+                        @break
+                @endswitch
+                <span class="mt-2 text-xs text-center">{{ $forma->nombre }}</span>
+            </button>
+        @endforeach
+    </div>
+
+    @error($getStatePath())
+        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+    @enderror
+</div>

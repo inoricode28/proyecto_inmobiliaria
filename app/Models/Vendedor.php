@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Vendedor extends Model
 {
@@ -39,6 +40,26 @@ class Vendedor extends Model
     protected $casts = [
         'comision' => 'decimal:2'
     ];
+
+
+    protected static function boot()
+{
+    parent::boot();
+
+    // Asigna automáticamente el usuario creador y actualizador
+    static::creating(function ($model) {
+        if (Auth::check()) {
+            $model->created_by = Auth::id();
+            $model->updated_by = Auth::id();
+        }
+    });
+
+    static::updating(function ($model) {
+        if (Auth::check()) {
+            $model->updated_by = Auth::id();
+        }
+    });
+}
 
     // Relación con User
     public function user()

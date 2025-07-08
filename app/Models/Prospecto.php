@@ -90,4 +90,9 @@ class Prospecto extends Model
     {
         return $this->hasMany(Tarea::class);
     }
+
+    public function nivelInteres()
+    {
+        return $this->belongsTo(NivelInteres::class);
+    }
 }
