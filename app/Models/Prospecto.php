@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Prospecto extends Model
 {
     use SoftDeletes;
+    protected $with = ['tareaAsignada.usuarioAsignado'];
+
 
     protected $table = 'prospectos';
 
@@ -95,4 +97,9 @@ class Prospecto extends Model
     {
         return $this->belongsTo(NivelInteres::class);
     }
+    public function tareaAsignada()
+{
+    return $this->hasOne(Tarea::class)->latestOfMany(); // O firstOfMany() si prefieres la más antigua
+}
+
 }

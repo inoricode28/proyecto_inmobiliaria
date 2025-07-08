@@ -52,8 +52,11 @@ class UserPolicy
      */
     public function update(User $user, User $model)
     {
-        return $user->can('Update user');
+        return $user->can('Update usuauriosasa');
     }
+
+
+    
 
     /**
      * Determine whether the user can delete the model.

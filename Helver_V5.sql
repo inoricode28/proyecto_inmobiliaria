@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 9.0.1, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: helper
 -- ------------------------------------------------------
--- Server version	8.0.30
+-- Server version	9.0.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -38,7 +38,7 @@ CREATE TABLE `activities` (
 --
 
 /*!40000 ALTER TABLE `activities` DISABLE KEYS */;
-INSERT INTO `activities` VALUES (1,'Programming','Programming related activities','2025-07-07 08:49:10','2025-07-07 08:49:10',NULL),(2,'Testing','Testing related activities','2025-07-07 08:49:10','2025-07-07 08:49:10',NULL),(3,'Learning','Activities related to learning and training','2025-07-07 08:49:10','2025-07-07 08:49:10',NULL),(4,'Research','Activities related to research','2025-07-07 08:49:10','2025-07-07 08:49:10',NULL),(5,'Other','Other activities','2025-07-07 08:49:10','2025-07-07 08:49:10',NULL);
+INSERT INTO `activities` VALUES (1,'Programming','Programming related activities','2025-07-09 01:48:27','2025-07-09 01:48:27',NULL),(2,'Testing','Testing related activities','2025-07-09 01:48:27','2025-07-09 01:48:27',NULL),(3,'Learning','Activities related to learning and training','2025-07-09 01:48:27','2025-07-09 01:48:27',NULL),(4,'Research','Activities related to research','2025-07-09 01:48:27','2025-07-09 01:48:27',NULL),(5,'Other','Other activities','2025-07-09 01:48:27','2025-07-09 01:48:27',NULL);
 /*!40000 ALTER TABLE `activities` ENABLE KEYS */;
 
 --
@@ -147,7 +147,7 @@ CREATE TABLE `departamentos` (
 --
 
 /*!40000 ALTER TABLE `departamentos` DISABLE KEYS */;
-INSERT INTO `departamentos` VALUES (1,1,NULL,1,1,1,2,4,'001','345','Independiente','101',1,5,3,'543',1,'5453',NULL,'4543','543',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coraleinas 458','dsfg',1,'2025-07-04 20:25:29','2025-07-04 20:25:29',NULL),(2,1,NULL,1,1,2,2,4,'001','345','Independiente','102',1,5,3,'455454',1,'4324325',NULL,'343245','4324',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 20:37:38','2025-07-04 20:37:38',NULL),(3,1,NULL,1,1,2,2,4,'001','345','Independiente','103',1,5,3,'455454',1,'343543654',NULL,'243243','5435',1,45,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 20:40:51','2025-07-04 20:40:51',NULL),(4,1,NULL,1,1,3,2,4,'001','345','Independiente','104',1,5,3,'455454',1,'43546',NULL,'334656','342353',2,20,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 20:44:03','2025-07-04 20:44:03',NULL),(5,1,NULL,1,1,1,2,9,'001','345','Independiente','105',1,5,3,'455454',1,'4535436',NULL,'35465436','35445643',1,21,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 20:47:13','2025-07-04 20:47:13',NULL),(6,1,NULL,1,1,1,4,1,'001','345','Independiente','201',2,5,3,'455454',1,'4365767',NULL,'5646','456',1,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 20:50:45','2025-07-04 20:50:45',NULL),(7,1,NULL,1,1,3,9,3,'001','345','Independiente','202',2,5,3,'455454',1,'2343534',NULL,'454334','324543',1,23,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 20:54:52','2025-07-04 20:54:52',NULL),(8,1,NULL,1,1,1,2,10,'001','345','Independiente','301',3,5,3,'455454',1,'65765675',NULL,'54353','432543',1,29,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 20:59:17','2025-07-04 20:59:17',NULL),(9,1,NULL,1,1,1,2,1,'001','345','Independiente','401',4,5,3,'43543',1,'43543',NULL,'454356','543654',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 21:07:17','2025-07-04 21:07:17',NULL),(10,1,NULL,1,1,3,9,10,'001','345','Independiente','501',5,5,3,'43543',1,'35645',NULL,'2345','46787',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 21:11:14','2025-07-04 21:11:14',NULL),(11,1,NULL,1,1,3,9,4,'001','345','Independiente','601',6,5,3,'455454',1,'45654',NULL,'3435643','45436',2,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 21:14:49','2025-07-04 21:14:49',NULL),(12,1,NULL,1,1,1,5,2,'001','345','Independiente','701',7,5,3,'455454',1,'43546',NULL,'231432','1321432',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 21:18:00','2025-07-04 21:18:00',NULL),(13,1,NULL,1,1,3,3,8,'001','345','Independiente','801',8,5,3,'455454',1,'3524543',NULL,'3254325','4325',2,26,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 21:20:55','2025-07-04 21:20:55',NULL),(14,1,NULL,1,1,1,7,5,'001','345','Independiente','901',9,5,3,'455454',1,'56576',NULL,'543654','654',1,27,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-04 21:23:36','2025-07-04 21:23:36',NULL);
+INSERT INTO `departamentos` VALUES (1,1,NULL,1,1,1,2,4,'001','345','Independiente','101',1,5,3,'543',1,'5453',NULL,'4543','543',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coraleinas 458','dsfg',1,'2025-07-05 01:25:29','2025-07-05 01:25:29',NULL),(2,1,NULL,1,1,2,2,4,'001','345','Independiente','102',1,5,3,'455454',1,'4324325',NULL,'343245','4324',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:37:38','2025-07-05 01:37:38',NULL),(3,1,NULL,1,1,2,2,4,'001','345','Independiente','103',1,5,3,'455454',1,'343543654',NULL,'243243','5435',1,45,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:40:51','2025-07-05 01:40:51',NULL),(4,1,NULL,1,1,3,2,4,'001','345','Independiente','104',1,5,3,'455454',1,'43546',NULL,'334656','342353',2,20,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:44:03','2025-07-05 01:44:03',NULL),(5,1,NULL,1,1,1,2,9,'001','345','Independiente','105',1,5,3,'455454',1,'4535436',NULL,'35465436','35445643',1,21,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:47:13','2025-07-05 01:47:13',NULL),(6,1,NULL,1,1,1,4,1,'001','345','Independiente','201',2,5,3,'455454',1,'4365767',NULL,'5646','456',1,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:50:45','2025-07-05 01:50:45',NULL),(7,1,NULL,1,1,3,9,3,'001','345','Independiente','202',2,5,3,'455454',1,'2343534',NULL,'454334','324543',1,23,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:54:52','2025-07-05 01:54:52',NULL),(8,1,NULL,1,1,1,2,10,'001','345','Independiente','301',3,5,3,'455454',1,'65765675',NULL,'54353','432543',1,29,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:59:17','2025-07-05 01:59:17',NULL),(9,1,NULL,1,1,1,2,1,'001','345','Independiente','401',4,5,3,'43543',1,'43543',NULL,'454356','543654',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:07:17','2025-07-05 02:07:17',NULL),(10,1,NULL,1,1,3,9,10,'001','345','Independiente','501',5,5,3,'43543',1,'35645',NULL,'2345','46787',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:11:14','2025-07-05 02:11:14',NULL),(11,1,NULL,1,1,3,9,4,'001','345','Independiente','601',6,5,3,'455454',1,'45654',NULL,'3435643','45436',2,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:14:49','2025-07-05 02:14:49',NULL),(12,1,NULL,1,1,1,5,2,'001','345','Independiente','701',7,5,3,'455454',1,'43546',NULL,'231432','1321432',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:18:00','2025-07-05 02:18:00',NULL),(13,1,NULL,1,1,3,3,8,'001','345','Independiente','801',8,5,3,'455454',1,'3524543',NULL,'3254325','4325',2,26,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:20:55','2025-07-05 02:20:55',NULL),(14,1,NULL,1,1,1,7,5,'001','345','Independiente','901',9,5,3,'455454',1,'56576',NULL,'543654','654',1,27,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:23:36','2025-07-05 02:23:36',NULL);
 /*!40000 ALTER TABLE `departamentos` ENABLE KEYS */;
 
 --
@@ -179,7 +179,7 @@ CREATE TABLE `edificios` (
 --
 
 /*!40000 ALTER TABLE `edificios` DISABLE KEYS */;
-INSERT INTO `edificios` VALUES (1,1,'Bloque A','Boke',10,100,'2025-07-11','2026-07-02','2025-07-04 20:23:59','2025-07-04 20:23:59'),(2,1,'EDIFICIO 2','ghjgjgj',20,40,'2025-07-13','2026-07-10','2025-07-07 09:07:02','2025-07-07 09:07:02');
+INSERT INTO `edificios` VALUES (1,1,'Bloque A','Boke',10,100,'2025-07-11','2026-07-02','2025-07-05 01:23:59','2025-07-05 01:23:59'),(2,1,'EDIFICIO 2','ghjgjgj',20,40,'2025-07-13','2026-07-10','2025-07-07 14:07:02','2025-07-07 14:07:02');
 /*!40000 ALTER TABLE `edificios` ENABLE KEYS */;
 
 --
@@ -209,7 +209,7 @@ CREATE TABLE `empresas` (
 --
 
 /*!40000 ALTER TABLE `empresas` DISABLE KEYS */;
-INSERT INTO `empresas` VALUES (1,'Dorsan','10422292743','jr.las coralinas 458','951456785','dorsan@gmail.com','Luis','2025-07-04 20:22:56','2025-07-04 20:30:51');
+INSERT INTO `empresas` VALUES (1,'Dorsan','10422292743','jr.las coralinas 458','951456785','dorsan@gmail.com','Luis','2025-07-05 01:22:56','2025-07-05 01:30:51');
 /*!40000 ALTER TABLE `empresas` ENABLE KEYS */;
 
 --
@@ -400,7 +400,7 @@ CREATE TABLE `foto_departamentos` (
 --
 
 /*!40000 ALTER TABLE `foto_departamentos` DISABLE KEYS */;
-INSERT INTO `foto_departamentos` VALUES (1,1,1,1,'departamentos/194837.jpg','2025-07-04 20:27:14','2025-07-04 20:27:14'),(2,1,1,2,'departamentos/194844.jpg','2025-07-04 20:38:20','2025-07-04 20:38:20'),(3,1,1,3,'departamentos/194847.jpg','2025-07-04 20:41:32','2025-07-04 20:41:32'),(4,1,1,4,'departamentos/194855.jpg','2025-07-04 20:44:46','2025-07-07 09:06:07'),(5,1,1,5,'departamentos/194852.jpg','2025-07-04 20:47:57','2025-07-04 20:47:57'),(6,1,1,7,'departamentos/194853.jpg','2025-07-04 20:51:34','2025-07-07 09:05:37'),(7,1,1,6,'departamentos/194861.jpg','2025-07-04 20:55:29','2025-07-07 09:05:17'),(8,1,1,8,'departamentos/194841.jpg','2025-07-04 20:59:55','2025-07-04 20:59:55'),(9,1,1,9,'departamentos/194863.jpg','2025-07-04 21:08:04','2025-07-07 09:04:58'),(10,1,1,10,'departamentos/194855.jpg','2025-07-04 21:12:02','2025-07-07 09:04:38'),(11,1,1,11,'departamentos/194839.jpg','2025-07-04 21:15:26','2025-07-07 09:04:18'),(12,1,1,12,'departamentos/194838.jpg','2025-07-04 21:18:42','2025-07-07 09:03:58'),(13,1,1,13,'departamentos/194857.jpg','2025-07-04 21:24:25','2025-07-04 21:24:25'),(14,1,1,14,'departamentos/194837.jpg','2025-07-04 21:24:52','2025-07-07 09:03:02');
+INSERT INTO `foto_departamentos` VALUES (1,1,1,1,'departamentos/194837.jpg','2025-07-05 01:27:14','2025-07-05 01:27:14'),(2,1,1,2,'departamentos/194844.jpg','2025-07-05 01:38:20','2025-07-05 01:38:20'),(3,1,1,3,'departamentos/194847.jpg','2025-07-05 01:41:32','2025-07-05 01:41:32'),(4,1,1,4,'departamentos/194855.jpg','2025-07-05 01:44:46','2025-07-07 14:06:07'),(5,1,1,5,'departamentos/194852.jpg','2025-07-05 01:47:57','2025-07-05 01:47:57'),(6,1,1,7,'departamentos/194853.jpg','2025-07-05 01:51:34','2025-07-07 14:05:37'),(7,1,1,6,'departamentos/194861.jpg','2025-07-05 01:55:29','2025-07-07 14:05:17'),(8,1,1,8,'departamentos/194841.jpg','2025-07-05 01:59:55','2025-07-05 01:59:55'),(9,1,1,9,'departamentos/194863.jpg','2025-07-05 02:08:04','2025-07-07 14:04:58'),(10,1,1,10,'departamentos/194855.jpg','2025-07-05 02:12:02','2025-07-07 14:04:38'),(11,1,1,11,'departamentos/194839.jpg','2025-07-05 02:15:26','2025-07-07 14:04:18'),(12,1,1,12,'departamentos/194838.jpg','2025-07-05 02:18:42','2025-07-07 14:03:58'),(13,1,1,13,'departamentos/194857.jpg','2025-07-05 02:24:25','2025-07-05 02:24:25'),(14,1,1,14,'departamentos/194837.jpg','2025-07-05 02:24:52','2025-07-07 14:03:02');
 /*!40000 ALTER TABLE `foto_departamentos` ENABLE KEYS */;
 
 --
@@ -482,7 +482,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=83 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -490,7 +490,7 @@ CREATE TABLE `migrations` (
 --
 
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2014_10_12_100000_create_password_resets_table',1),(3,'2019_08_19_000000_create_failed_jobs_table',1),(4,'2019_12_14_000001_create_personal_access_tokens_table',1),(5,'2022_11_02_111430_add_two_factor_columns_to_table',1),(6,'2022_11_02_113007_create_permission_tables',1),(7,'2022_11_02_124027_create_project_statuses_table',1),(8,'2022_11_02_124028_create_projects_table',1),(9,'2022_11_02_131753_create_project_users_table',1),(10,'2022_11_02_134510_create_media_table',1),(11,'2022_11_02_152359_create_project_favorites_table',1),(12,'2022_11_02_193241_create_ticket_statuses_table',1),(13,'2022_11_02_193242_create_tickets_table',1),(14,'2022_11_06_155109_add_tickets_prefix_to_projects',1),(15,'2022_11_06_163226_add_code_to_tickets',1),(16,'2022_11_06_164004_create_ticket_types_table',1),(17,'2022_11_06_165400_add_type_to_ticket',1),(18,'2022_11_06_173220_add_order_to_tickets',1),(19,'2022_11_06_184448_add_order_to_ticket_statuses',1),(20,'2022_11_06_193051_create_ticket_activities_table',1),(21,'2022_11_06_194000_create_ticket_priorities_table',1),(22,'2022_11_06_194728_add_priority_to_tickets',1),(23,'2022_11_06_203702_add_status_type_to_project',1),(24,'2022_11_06_204227_add_project_to_ticket_statuses',1),(25,'2022_11_07_064347_create_ticket_comments_table',1),(26,'2022_11_08_084509_create_ticket_subscribers_table',1),(27,'2022_11_08_144611_create_notifications_table',1),(28,'2022_11_08_150309_create_jobs_table',1),(29,'2022_11_08_163244_create_ticket_relations_table',1),(30,'2022_11_08_172846_create_settings_table',1),(31,'2022_11_08_173004_general_settings',1),(32,'2022_11_08_173852_create_general_settings',1),(33,'2022_11_09_085506_create_socialite_users_table',1),(34,'2022_11_09_085638_make_user_password_nullable',1),(35,'2022_11_09_110740_remove_unique_from_users',1),(36,'2022_11_09_110955_add_soft_deletes_to_users',1),(37,'2022_11_09_173852_add_social_login_to_general_settings',1),(38,'2022_11_10_193214_create_ticket_hours_table',1),(39,'2022_11_10_200608_add_estimation_to_tickets',1),(40,'2022_11_12_134201_add_creation_token_to_users',1),(41,'2022_11_12_142644_create_pending_user_emails_table',1),(42,'2022_11_12_173852_add_default_role_to_general_settings',1),(43,'2022_11_12_173852_add_login_form_oidc_enabled_flags_to_general_settings',1),(44,'2022_11_12_173852_add_site_language_to_general_settings',1),(45,'2022_12_15_100852_create_epics_table',1),(46,'2022_12_15_101035_add_epic_to_ticket',1),(47,'2022_12_16_133836_add_parent_to_epics',1),(48,'2022_12_27_082239_add_comment_to_ticket_hours',1),(49,'2023_01_05_182946_add_attachments_to_tickets',1),(50,'2023_01_09_113159_create_activities_table',1),(51,'2023_01_09_113847_add_activity_to_ticket_hours_table',1),(52,'2023_01_12_203211_remove_unique_constraint_from_users',1),(53,'2023_01_12_204221_drop_attachments',1),(54,'2023_01_15_201358_add_type_to_projects',1),(55,'2023_01_15_202225_create_sprints_table',1),(56,'2023_01_15_204606_add_sprint_to_tickets',1),(57,'2023_01_15_214849_add_epic_to_sprints',1),(58,'2023_01_16_085329_add_started_ended_at_to_sprints',1),(59,'2023_01_24_084637_update_users_for_oidc',1),(60,'2023_04_10_123922_add_unique_ticket_prefix_to_projects_table',1),(61,'2025_05_17_024703_create_tipos_financiamiento_table',1),(62,'2025_06_15_233914_create_tipo_inmueble_table',1),(63,'2025_06_15_234227_create_vistas_table',1),(64,'2025_06_15_234233_create_moneda_table',1),(65,'2025_06_15_234238_create_estado_table',1),(66,'2025_06_17_173712_create_estados_proyecto_table',1),(67,'2025_06_17_174336_create_empresas_table',1),(68,'2025_06_17_174503_create_proyectos_table',1),(69,'2025_06_17_174715_create_edificios_table',1),(70,'2025_06_17_174836_create_tipos_departamento_table',1),(71,'2025_06_17_174925_create_estados_departamento_table',1),(72,'2025_06_17_175030_create_departamentos_table',1),(73,'2025_06_19_222520_create_foto_departamentos_table',1),(74,'2025_07_06_002017_create_como_se_entero_table',1),(75,'2025_07_06_002107_create_formas_contacto_table',1),(76,'2025_07_06_002112_create_niveles_interes_table',1),(77,'2025_07_06_002113_create_tipo_documento_table',1),(78,'2025_07_06_002114_create_tipos_gestion_table',1),(79,'2025_07_06_002117_create_prospectos_table',1),(80,'2025_07_06_002122_create_tareas_table',1),(81,'2025_07_06_002138_create_vendedores_table',1);
+INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2014_10_12_100000_create_password_resets_table',1),(3,'2019_08_19_000000_create_failed_jobs_table',1),(4,'2019_12_14_000001_create_personal_access_tokens_table',1),(5,'2022_11_02_111430_add_two_factor_columns_to_table',1),(6,'2022_11_02_113007_create_permission_tables',1),(7,'2022_11_02_124027_create_project_statuses_table',1),(8,'2022_11_02_124028_create_projects_table',1),(9,'2022_11_02_131753_create_project_users_table',1),(10,'2022_11_02_134510_create_media_table',1),(11,'2022_11_02_152359_create_project_favorites_table',1),(12,'2022_11_02_193241_create_ticket_statuses_table',1),(13,'2022_11_02_193242_create_tickets_table',1),(14,'2022_11_06_155109_add_tickets_prefix_to_projects',1),(15,'2022_11_06_163226_add_code_to_tickets',1),(16,'2022_11_06_164004_create_ticket_types_table',1),(17,'2022_11_06_165400_add_type_to_ticket',1),(18,'2022_11_06_173220_add_order_to_tickets',1),(19,'2022_11_06_184448_add_order_to_ticket_statuses',1),(20,'2022_11_06_193051_create_ticket_activities_table',1),(21,'2022_11_06_194000_create_ticket_priorities_table',1),(22,'2022_11_06_194728_add_priority_to_tickets',1),(23,'2022_11_06_203702_add_status_type_to_project',1),(24,'2022_11_06_204227_add_project_to_ticket_statuses',1),(25,'2022_11_07_064347_create_ticket_comments_table',1),(26,'2022_11_08_084509_create_ticket_subscribers_table',1),(27,'2022_11_08_144611_create_notifications_table',1),(28,'2022_11_08_150309_create_jobs_table',1),(29,'2022_11_08_163244_create_ticket_relations_table',1),(30,'2022_11_08_172846_create_settings_table',1),(31,'2022_11_08_173004_general_settings',1),(32,'2022_11_08_173852_create_general_settings',1),(33,'2022_11_09_085506_create_socialite_users_table',1),(34,'2022_11_09_085638_make_user_password_nullable',1),(35,'2022_11_09_110740_remove_unique_from_users',1),(36,'2022_11_09_110955_add_soft_deletes_to_users',1),(37,'2022_11_09_173852_add_social_login_to_general_settings',1),(38,'2022_11_10_193214_create_ticket_hours_table',1),(39,'2022_11_10_200608_add_estimation_to_tickets',1),(40,'2022_11_12_134201_add_creation_token_to_users',1),(41,'2022_11_12_142644_create_pending_user_emails_table',1),(42,'2022_11_12_173852_add_default_role_to_general_settings',1),(43,'2022_11_12_173852_add_login_form_oidc_enabled_flags_to_general_settings',1),(44,'2022_11_12_173852_add_site_language_to_general_settings',1),(45,'2022_12_15_100852_create_epics_table',1),(46,'2022_12_15_101035_add_epic_to_ticket',1),(47,'2022_12_16_133836_add_parent_to_epics',1),(48,'2022_12_27_082239_add_comment_to_ticket_hours',1),(49,'2023_01_05_182946_add_attachments_to_tickets',1),(50,'2023_01_09_113159_create_activities_table',1),(51,'2023_01_09_113847_add_activity_to_ticket_hours_table',1),(52,'2023_01_12_203211_remove_unique_constraint_from_users',1),(53,'2023_01_12_204221_drop_attachments',1),(54,'2023_01_15_201358_add_type_to_projects',1),(55,'2023_01_15_202225_create_sprints_table',1),(56,'2023_01_15_204606_add_sprint_to_tickets',1),(57,'2023_01_15_214849_add_epic_to_sprints',1),(58,'2023_01_16_085329_add_started_ended_at_to_sprints',1),(59,'2023_01_24_084637_update_users_for_oidc',1),(60,'2023_04_10_123922_add_unique_ticket_prefix_to_projects_table',1),(61,'2025_05_17_024703_create_tipos_financiamiento_table',1),(62,'2025_06_15_233914_create_tipo_inmueble_table',1),(63,'2025_06_15_234227_create_vistas_table',1),(64,'2025_06_15_234233_create_moneda_table',1),(65,'2025_06_15_234238_create_estado_table',1),(66,'2025_06_17_173712_create_estados_proyecto_table',1),(67,'2025_06_17_174336_create_empresas_table',1),(68,'2025_06_17_174503_create_proyectos_table',1),(69,'2025_06_17_174715_create_edificios_table',1),(70,'2025_06_17_174836_create_tipos_departamento_table',1),(71,'2025_06_17_174925_create_estados_departamento_table',1),(72,'2025_06_17_175030_create_departamentos_table',1),(73,'2025_06_19_222520_create_foto_departamentos_table',1),(74,'2025_07_06_002017_create_como_se_entero_table',1),(75,'2025_07_06_002107_create_formas_contacto_table',1),(76,'2025_07_06_002112_create_niveles_interes_table',1),(77,'2025_07_06_002113_create_tipo_documento_table',1),(78,'2025_07_06_002114_create_tipos_gestion_table',1),(79,'2025_07_06_002117_create_prospectos_table',1),(80,'2025_07_06_002122_create_tareas_table',1),(81,'2025_07_06_002138_create_vendedores_table',1),(82,'2025_07_08_203217_make_numero_documento_nullable_in_prospectos_table',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 
 --
@@ -539,7 +539,7 @@ CREATE TABLE `model_has_roles` (
 --
 
 /*!40000 ALTER TABLE `model_has_roles` DISABLE KEYS */;
-INSERT INTO `model_has_roles` VALUES (1,'App\\Models\\User',1);
+INSERT INTO `model_has_roles` VALUES (1,'App\\Models\\User',1),(2,'App\\Models\\User',2);
 /*!40000 ALTER TABLE `model_has_roles` ENABLE KEYS */;
 
 --
@@ -682,7 +682,7 @@ CREATE TABLE `permissions` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `permissions_name_guard_name_unique` (`name`,`guard_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -690,7 +690,7 @@ CREATE TABLE `permissions` (
 --
 
 /*!40000 ALTER TABLE `permissions` DISABLE KEYS */;
-INSERT INTO `permissions` VALUES (1,'List permissions','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(2,'View permission','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(3,'Create permission','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(4,'Update permission','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(5,'Delete permission','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(6,'List projects','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(7,'View project','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(8,'Create project','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(9,'Update project','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(10,'Delete project','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(11,'List project statuses','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(12,'View project status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(13,'Create project status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(14,'Update project status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(15,'Delete project status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(16,'List roles','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(17,'View role','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(18,'Create role','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(19,'Update role','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(20,'Delete role','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(21,'List tickets','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(22,'View ticket','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(23,'Create ticket','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(24,'Update ticket','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(25,'Delete ticket','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(26,'List ticket priorities','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(27,'View ticket priority','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(28,'Create ticket priority','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(29,'Update ticket priority','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(30,'Delete ticket priority','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(31,'List ticket statuses','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(32,'View ticket status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(33,'Create ticket status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(34,'Update ticket status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(35,'Delete ticket status','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(36,'List ticket types','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(37,'View ticket type','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(38,'Create ticket type','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(39,'Update ticket type','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(40,'Delete ticket type','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(41,'List users','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(42,'View user','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(43,'Create user','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(44,'Update user','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(45,'Delete user','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(46,'List activities','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(47,'View activity','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(48,'Create activity','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(49,'Update activity','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(50,'Delete activity','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(51,'List sprints','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(52,'View sprint','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(53,'Create sprint','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(54,'Update sprint','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(55,'Delete sprint','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(56,'Manage general settings','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(57,'Import from Jira','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(58,'List timesheet data','web','2025-07-07 08:49:10','2025-07-07 08:49:10'),(59,'View timesheet dashboard','web','2025-07-07 08:49:10','2025-07-07 08:49:10');
+INSERT INTO `permissions` VALUES (1,'List permissions','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(2,'View permission','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(3,'Create permission','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(4,'Update permission','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(5,'Delete permission','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(6,'List projects','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(7,'View project','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(8,'Create project','web','2025-07-09 01:48:27','2025-07-09 02:20:15'),(9,'Update project','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(10,'Delete project','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(11,'List project statuses','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(12,'View project status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(13,'Create project status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(14,'Update project status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(15,'Delete project status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(16,'List roles','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(17,'View role','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(18,'Create role','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(19,'Update role','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(20,'Delete role','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(21,'List tickets','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(22,'View ticket','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(23,'Create ticket','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(24,'Update ticket','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(25,'Delete ticket','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(26,'List ticket priorities','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(27,'View ticket priority','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(28,'Create ticket priority','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(29,'Update ticket priority','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(30,'Delete ticket priority','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(31,'List ticket statuses','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(32,'View ticket status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(33,'Create ticket status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(34,'Update ticket status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(35,'Delete ticket status','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(36,'List ticket types','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(37,'View ticket type','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(38,'Create ticket type','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(39,'Update ticket type','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(40,'Delete ticket type','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(41,'List users','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(42,'View user','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(43,'Create user','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(44,'Update user','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(45,'Delete user','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(46,'List activities','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(47,'View activity','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(48,'Create activity','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(49,'Update activity','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(50,'Delete activity','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(51,'List sprints','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(52,'View sprint','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(53,'Create sprint','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(54,'Update sprint','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(55,'Delete sprint','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(56,'Manage general settings','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(57,'Import from Jira','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(58,'List timesheet data','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(59,'View timesheet dashboard','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(60,'List empresas','web','2025-07-09 02:25:13','2025-07-09 02:25:13');
 /*!40000 ALTER TABLE `permissions` ENABLE KEYS */;
 
 --
@@ -853,10 +853,10 @@ CREATE TABLE `prospectos` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tipo_documento_id` bigint unsigned NOT NULL,
-  `numero_documento` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nombres` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ape_paterno` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ape_materno` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `numero_documento` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombres` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ape_paterno` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ape_materno` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `razon_social` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `celular` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `correo_electronico` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -887,7 +887,7 @@ CREATE TABLE `prospectos` (
   CONSTRAINT `prospectos_tipo_gestion_id_foreign` FOREIGN KEY (`tipo_gestion_id`) REFERENCES `tipos_gestion` (`id`),
   CONSTRAINT `prospectos_tipo_inmueble_id_foreign` FOREIGN KEY (`tipo_inmueble_id`) REFERENCES `tipo_inmueble` (`id`),
   CONSTRAINT `prospectos_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -895,6 +895,7 @@ CREATE TABLE `prospectos` (
 --
 
 /*!40000 ALTER TABLE `prospectos` DISABLE KEYS */;
+INSERT INTO `prospectos` VALUES (1,'2025-07-08 05:00:00',5,NULL,'dss','WEWE','SDDS',NULL,'dsdsd','josepintadoyamo@gmail.com',1,1,2,9,1,1,1,NULL,'2025-07-09 02:05:06','2025-07-09 02:05:06'),(2,'2025-07-08 05:00:00',4,'760494993','Miguel','Chavez','RAMOS',NULL,'9847343','josepintadoyamo@gmail.com',1,1,9,2,1,1,1,NULL,'2025-07-09 02:06:23','2025-07-09 02:06:23'),(3,'2025-07-08 05:00:00',7,'393943434',NULL,NULL,NULL,'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh','323232','josepintadoyamo@gmail.com',1,1,8,8,1,1,1,NULL,'2025-07-09 02:07:21','2025-07-09 02:07:21');
 /*!40000 ALTER TABLE `prospectos` ENABLE KEYS */;
 
 --
@@ -928,7 +929,7 @@ CREATE TABLE `proyectos` (
 --
 
 /*!40000 ALTER TABLE `proyectos` DISABLE KEYS */;
-INSERT INTO `proyectos` VALUES (1,'Proyecto Talara','Talara','pueblo libre','2025-07-09','2026-07-04',1,1,'2025-07-04 20:23:24','2025-07-04 20:23:24');
+INSERT INTO `proyectos` VALUES (1,'Proyecto Talara','Talara','pueblo libre','2025-07-09','2026-07-04',1,1,'2025-07-05 01:23:24','2025-07-05 01:23:24');
 /*!40000 ALTER TABLE `proyectos` ENABLE KEYS */;
 
 --
@@ -953,7 +954,7 @@ CREATE TABLE `role_has_permissions` (
 --
 
 /*!40000 ALTER TABLE `role_has_permissions` DISABLE KEYS */;
-INSERT INTO `role_has_permissions` VALUES (1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1),(13,1),(14,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),(21,1),(22,1),(23,1),(24,1),(25,1),(26,1),(27,1),(28,1),(29,1),(30,1),(31,1),(32,1),(33,1),(34,1),(35,1),(36,1),(37,1),(38,1),(39,1),(40,1),(41,1),(42,1),(43,1),(44,1),(45,1),(46,1),(47,1),(48,1),(49,1),(50,1),(51,1),(52,1),(53,1),(54,1),(55,1),(56,1),(57,1),(58,1),(59,1);
+INSERT INTO `role_has_permissions` VALUES (1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1),(13,1),(14,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),(21,1),(22,1),(23,1),(24,1),(25,1),(26,1),(27,1),(28,1),(29,1),(30,1),(31,1),(32,1),(33,1),(34,1),(35,1),(36,1),(37,1),(38,1),(39,1),(40,1),(41,1),(42,1),(43,1),(44,1),(45,1),(46,1),(47,1),(48,1),(49,1),(50,1),(51,1),(52,1),(53,1),(54,1),(55,1),(56,1),(57,1),(58,1),(59,1),(3,2),(5,2),(8,2),(13,2),(23,2),(28,2),(38,2),(48,2),(50,2),(53,2);
 /*!40000 ALTER TABLE `role_has_permissions` ENABLE KEYS */;
 
 --
@@ -971,7 +972,7 @@ CREATE TABLE `roles` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `roles_name_guard_name_unique` (`name`,`guard_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -979,7 +980,7 @@ CREATE TABLE `roles` (
 --
 
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
-INSERT INTO `roles` VALUES (1,'Default role','web','2025-07-07 08:49:10','2025-07-07 08:49:10');
+INSERT INTO `roles` VALUES (1,'Default role','web','2025-07-09 01:48:27','2025-07-09 01:48:27'),(2,'rol vendedor','web','2025-07-09 02:26:01','2025-07-09 02:26:01');
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 
 --
@@ -1007,7 +1008,7 @@ CREATE TABLE `settings` (
 --
 
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
-INSERT INTO `settings` VALUES (1,'general','site_name',0,'\"Helper\"','2025-07-07 08:48:59','2025-07-07 08:49:10'),(2,'general','site_logo',0,'null','2025-07-07 08:48:59','2025-07-07 08:49:10'),(3,'general','enable_registration',0,'true','2025-07-07 08:48:59','2025-07-07 08:49:10'),(4,'general','enable_social_login',0,'\"1\"','2025-07-07 08:48:59','2025-07-07 08:49:10'),(5,'general','default_role',0,'\"1\"','2025-07-07 08:48:59','2025-07-07 08:49:10'),(6,'general','enable_login_form',0,'\"1\"','2025-07-07 08:48:59','2025-07-07 08:49:10'),(7,'general','enable_oidc_login',0,'\"1\"','2025-07-07 08:48:59','2025-07-07 08:49:10'),(8,'general','site_language',0,'\"en\"','2025-07-07 08:48:59','2025-07-07 08:49:10');
+INSERT INTO `settings` VALUES (1,'general','site_name',0,'\"Proyecto TF25\"','2025-07-09 01:47:58','2025-07-09 01:48:27'),(2,'general','site_logo',0,'null','2025-07-09 01:47:58','2025-07-09 01:48:27'),(3,'general','enable_registration',0,'true','2025-07-09 01:47:58','2025-07-09 01:48:27'),(4,'general','enable_social_login',0,'\"1\"','2025-07-09 01:47:58','2025-07-09 01:48:27'),(5,'general','default_role',0,'\"1\"','2025-07-09 01:47:59','2025-07-09 01:48:27'),(6,'general','enable_login_form',0,'\"1\"','2025-07-09 01:47:59','2025-07-09 01:48:27'),(7,'general','enable_oidc_login',0,'\"1\"','2025-07-09 01:47:59','2025-07-09 01:48:27'),(8,'general','site_language',0,'\"en\"','2025-07-09 01:47:59','2025-07-09 01:48:27');
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 
 --
@@ -1105,7 +1106,7 @@ CREATE TABLE `tareas` (
   CONSTRAINT `tareas_prospecto_id_foreign` FOREIGN KEY (`prospecto_id`) REFERENCES `prospectos` (`id`),
   CONSTRAINT `tareas_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`),
   CONSTRAINT `tareas_usuario_asignado_id_foreign` FOREIGN KEY (`usuario_asignado_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1113,6 +1114,7 @@ CREATE TABLE `tareas` (
 --
 
 /*!40000 ALTER TABLE `tareas` DISABLE KEYS */;
+INSERT INTO `tareas` VALUES (1,1,1,3,1,'2025-07-08','10:00:00','dsdsdsd',1,1,NULL,'2025-07-09 02:05:06','2025-07-09 02:05:06'),(2,2,2,4,1,'2025-07-08','10:00:00','MIGUEL',1,1,NULL,'2025-07-09 02:06:23','2025-07-09 02:06:23'),(3,3,4,4,1,'2025-07-08','10:00:00','SDDSD',1,1,NULL,'2025-07-09 02:07:21','2025-07-09 02:07:21');
 /*!40000 ALTER TABLE `tareas` ENABLE KEYS */;
 
 --
@@ -1236,7 +1238,7 @@ CREATE TABLE `ticket_priorities` (
 --
 
 /*!40000 ALTER TABLE `ticket_priorities` DISABLE KEYS */;
-INSERT INTO `ticket_priorities` VALUES (1,'Low','#008000',0,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(2,'Normal','#CECECE',1,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(3,'High','#ff0000',0,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10');
+INSERT INTO `ticket_priorities` VALUES (1,'Low','#008000',0,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27'),(2,'Normal','#CECECE',1,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27'),(3,'High','#ff0000',0,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27');
 /*!40000 ALTER TABLE `ticket_priorities` ENABLE KEYS */;
 
 --
@@ -1297,7 +1299,7 @@ CREATE TABLE `ticket_statuses` (
 --
 
 /*!40000 ALTER TABLE `ticket_statuses` DISABLE KEYS */;
-INSERT INTO `ticket_statuses` VALUES (1,'Todo','#cecece',1,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10',1,NULL),(2,'In progress','#ff7f00',0,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10',2,NULL),(3,'Done','#008000',0,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10',3,NULL),(4,'Archived','#ff0000',0,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10',4,NULL);
+INSERT INTO `ticket_statuses` VALUES (1,'Todo','#cecece',1,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27',1,NULL),(2,'In progress','#ff7f00',0,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27',2,NULL),(3,'Done','#008000',0,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27',3,NULL),(4,'Archived','#ff0000',0,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27',4,NULL);
 /*!40000 ALTER TABLE `ticket_statuses` ENABLE KEYS */;
 
 --
@@ -1353,7 +1355,7 @@ CREATE TABLE `ticket_types` (
 --
 
 /*!40000 ALTER TABLE `ticket_types` DISABLE KEYS */;
-INSERT INTO `ticket_types` VALUES (1,'Task','heroicon-o-check-circle','#00FFFF',1,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(2,'Evolution','heroicon-o-clipboard-list','#008000',0,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(3,'Bug','heroicon-o-x','#ff0000',0,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10');
+INSERT INTO `ticket_types` VALUES (1,'Task','heroicon-o-check-circle','#00FFFF',1,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27'),(2,'Evolution','heroicon-o-clipboard-list','#008000',0,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27'),(3,'Bug','heroicon-o-x','#ff0000',0,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27');
 /*!40000 ALTER TABLE `ticket_types` ENABLE KEYS */;
 
 --
@@ -1432,7 +1434,7 @@ CREATE TABLE `tipo_documento` (
 --
 
 /*!40000 ALTER TABLE `tipo_documento` DISABLE KEYS */;
-INSERT INTO `tipo_documento` VALUES (1,'Carnet de Extranjería','Documento de identidad para extranjeros residentes',NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(2,'Carnet Diplomático','Documento para personal diplomático',NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(3,'CI','Cédula de Identidad (para algunos países)',NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(4,'DNI','Documento Nacional de Identidad',NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(5,'INDOCUMENTADO','Persona que no posee documento de identidad',NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(6,'PASAPORTE','Documento de identidad para viajes internacionales',NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10'),(7,'RUC','Registro Único de Contribuyentes',NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10');
+INSERT INTO `tipo_documento` VALUES (1,'Carnet de Extranjería','Documento de identidad para extranjeros residentes',NULL,'2025-07-09 01:48:28','2025-07-09 01:48:28'),(2,'Carnet Diplomático','Documento para personal diplomático',NULL,'2025-07-09 01:48:28','2025-07-09 01:48:28'),(3,'CI','Cédula de Identidad (para algunos países)',NULL,'2025-07-09 01:48:28','2025-07-09 01:48:28'),(4,'DNI','Documento Nacional de Identidad',NULL,'2025-07-09 01:48:28','2025-07-09 01:48:28'),(5,'INDOCUMENTADO','Persona que no posee documento de identidad',NULL,'2025-07-09 01:48:28','2025-07-09 01:48:28'),(6,'PASAPORTE','Documento de identidad para viajes internacionales',NULL,'2025-07-09 01:48:28','2025-07-09 01:48:28'),(7,'RUC','Registro Único de Contribuyentes',NULL,'2025-07-09 01:48:28','2025-07-09 01:48:28');
 /*!40000 ALTER TABLE `tipo_documento` ENABLE KEYS */;
 
 --
@@ -1561,7 +1563,7 @@ CREATE TABLE `users` (
   `oidc_username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `oidc_sub` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1569,7 +1571,7 @@ CREATE TABLE `users` (
 --
 
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'John DOE','john.doe@helper.app','2025-07-07 08:49:10','$2y$10$d6JTvD6/TVTO6MB/Gk.iAOdM/mc.cbG2Pz6VHbH4FtCV2wZ7lSe/K',NULL,NULL,NULL,NULL,'2025-07-07 08:49:10','2025-07-07 08:49:10',NULL,NULL,'db',NULL,NULL);
+INSERT INTO `users` VALUES (1,'John DOE','john.doe@helper.app','2025-07-09 01:48:27','$2y$10$5j9wU28pMoaS5VjnGPko4ecL93qO89K0o/OUHb6Lsd/eMOzhuBdL.',NULL,NULL,NULL,NULL,'2025-07-09 01:48:27','2025-07-09 01:48:27',NULL,NULL,'db',NULL,NULL),(2,'Jose Ilmer, Pintado Yamo','josepintadoyamo@gmail.com','2025-07-09 02:16:10','$2y$10$13zzNC.EIS6IoiprIV3TPO0lfcZnlMm5nvJxtiECjj3EtXIUv1xfi',NULL,NULL,NULL,'GHD05ELy5yzQuM4j0Vcm3S2yMceccbDjj8tgATBHxKnpVFk8PxavWEwN6JZ2','2025-07-09 02:15:41','2025-07-09 02:16:10',NULL,NULL,'db',NULL,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 --
@@ -1611,7 +1613,7 @@ CREATE TABLE `vendedores` (
   CONSTRAINT `vendedores_tipo_documento_id_foreign` FOREIGN KEY (`tipo_documento_id`) REFERENCES `tipo_documento` (`id`),
   CONSTRAINT `vendedores_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`),
   CONSTRAINT `vendedores_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1619,6 +1621,7 @@ CREATE TABLE `vendedores` (
 --
 
 /*!40000 ALTER TABLE `vendedores` DISABLE KEYS */;
+INSERT INTO `vendedores` VALUES (1,1,4,'sasas','jose','sasas','josepintadoyamo@gmail.com',1,'2025-07-08','2025-07-24',1,12.00,'34dfvc',2,2,NULL,'2025-07-09 02:40:41','2025-07-09 02:40:41'),(2,1,4,'353535','Miguel Chavez','343434','Miguel@gmail.com',1,'2025-07-08','2025-07-16',1,12.00,'21212',2,2,NULL,'2025-07-09 02:42:21','2025-07-09 02:42:21');
 /*!40000 ALTER TABLE `vendedores` ENABLE KEYS */;
 
 --
@@ -1656,4 +1659,4 @@ INSERT INTO `vistas` VALUES (1,'Interno'),(2,'Externo');
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-06 23:15:30
+-- Dump completed on 2025-07-08 17:06:14
