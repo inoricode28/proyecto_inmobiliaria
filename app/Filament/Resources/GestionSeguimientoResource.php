@@ -54,10 +54,12 @@ class GestionSeguimientoResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationLabel = 'Búsqueda de Prospectos';
     protected static ?string $modelLabel = 'Prospecto';
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $pluralModelLabel = 'Búsqueda de Prospectos';
     protected static ?string $navigationGroup = 'Gestión Seguimiento';
 
-    
+
 public static function form(Form $form): Form
 {
     $tipoDni = TipoDocumento::where('nombre', 'DNI')->value('id');
@@ -66,7 +68,7 @@ public static function form(Form $form): Form
 
     return $form->schema([
         Grid::make(3)->schema([
-            DatePicker::make('prospecto_fecha_registro') 
+            DatePicker::make('prospecto_fecha_registro')
                 ->label('Fecha Registro')
                 ->displayFormat('d/m/Y')
                 ->default(now()->format('Y-m-d'))
@@ -89,7 +91,7 @@ public static function form(Form $form): Form
 
             TextInput::make('numero_documento')
     ->label('N° Documento')
-   
+
     ->disabled(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado)
     ->placeholder(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado ? 'No aplica' : '')
     ->extraAttributes(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado
@@ -193,7 +195,7 @@ public static function form(Form $form): Form
 
                             Grid::make(3)->schema([
 
-                               
+
 
                                 Grid::make(3)->schema([
                                     Select::make('usuario_asignado_id')
@@ -203,7 +205,7 @@ public static function form(Form $form): Form
                                         ->required()
                                         ->columnSpan(1),
 
-                                    DatePicker::make('tarea_fecha_realizar') 
+                                    DatePicker::make('tarea_fecha_realizar')
                                         ->label('Fecha Realizar')
                                         ->displayFormat('d/m/Y')
                                         ->default(now()->format('Y-m-d'))
@@ -277,7 +279,7 @@ public static function form(Form $form): Form
                     ->searchable()
                     ->sortable(),
 
-                    
+
                 TextColumn::make('fecha_registro')
                     ->label('Fecha Registro')
                     ->date('d/m/Y')
@@ -299,7 +301,7 @@ public static function form(Form $form): Form
 
 
 
-                
+
             ])
             ->filters([
                 SelectFilter::make('proyecto_id')

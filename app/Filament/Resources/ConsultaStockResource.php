@@ -24,8 +24,8 @@ class ConsultaStockResource extends Resource
     protected static ?int $navigationSort = 2;
 
 
-     public static function table(Table $table): Table
-{
+    public static function table(Table $table): Table
+    {
     return $table
         ->columns([
             // tus columnas aquí...
@@ -36,7 +36,7 @@ class ConsultaStockResource extends Resource
         ->actions([])
         ->bulkActions([])
         ->defaultSort('tipo_inmueble_id');
-}
+    }
 
     public static function getPages(): array
     {

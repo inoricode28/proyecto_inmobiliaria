@@ -17,9 +17,13 @@ class TipoGestion extends Model
 
     public $timestamps = false;
 
-    // Relación con Prospectos
-    public function prospectos()
-    {
-        return $this->hasMany(Prospecto::class);
-    }
+
+
+    // TipoGestion.php
+public function prospectos()
+{
+    return $this->hasMany(\App\Models\Prospecto::class, 'tipo_gestion_id');
+}
+
+
 }

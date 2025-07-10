@@ -147,6 +147,7 @@ Crear los Modelos
 --> php artisan make:model TipoGestion
 --> php artisan make:model TipoDocumento
 --> php artisan make:model Vendedor
+--> php artisan make:model PanelSeguimiento
 
 ========================================================================================================================================================
 --------------------------------------------------------------->PASO 13<--------------------------------------------------------------------------------
@@ -195,7 +196,7 @@ rmdir /S /Q app\Filament\Resources\DepartamentoResource
 
 
 
-ESTE DE ACA Se ejecuta para dará acceso a las capetas 
+ESTE DE ACA Se ejecuta para dará acceso a las capetas
 
 php artisan storage:link
 

@@ -49,4 +49,13 @@ class Tarea extends Model
     {
         return $this->belongsTo(FormaContacto::class);
     }
+
+
+public function proyecto()
+{
+    return $this->belongsTo(Proyecto::class);
 }
+
+
+}
+
