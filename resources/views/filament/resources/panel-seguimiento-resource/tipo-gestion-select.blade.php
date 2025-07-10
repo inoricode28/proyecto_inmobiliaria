@@ -9,23 +9,24 @@
     }
 
     // Configuración de colores para cada tipo
-    $colores = [
-        1 => ['bg' => 'bg-gray-100', 'selected' => 'bg-gray-600', 'text' => 'text-gray-800'],
-        2 => ['bg' => 'bg-blue-100', 'selected' => 'bg-blue-600', 'text' => 'text-blue-800'],
-        3 => ['bg' => 'bg-green-100', 'selected' => 'bg-green-600', 'text' => 'text-green-800'],
-        4 => ['bg' => 'bg-yellow-100', 'selected' => 'bg-yellow-600', 'text' => 'text-yellow-800'],
-        5 => ['bg' => 'bg-red-100', 'selected' => 'bg-red-600', 'text' => 'text-red-800']
-    ];
+    $coloresBase = [
+    ['bg' => 'bg-gray-100', 'selected' => 'bg-gray-600', 'text' => 'text-gray-800'],
+    ['bg' => 'bg-blue-100', 'selected' => 'bg-blue-600', 'text' => 'text-blue-800'],
+    ['bg' => 'bg-green-100', 'selected' => 'bg-green-600', 'text' => 'text-green-800'],
+    ['bg' => 'bg-yellow-100', 'selected' => 'bg-yellow-600', 'text' => 'text-yellow-800'],
+    ['bg' => 'bg-red-100', 'selected' => 'bg-red-600', 'text' => 'text-red-800'],
+];
 @endphp
 
 <input type="hidden" name="{{ $getStatePath() }}" wire:model="{{ $getStatePath() }}" />
 
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 w-full">
     @foreach($tiposGestion as $tipo)
-        @php
-            $colorConfig = $colores[$tipo->id] ?? $colores[1];
-            $isSelected = $currentValue == $tipo->id;
-        @endphp
+    @php
+        $colorConfig = $coloresBase[$loop->index % count($coloresBase)];
+        $isSelected = $currentValue == $tipo->id;
+        $conteo = $conteos[$tipo->id] ?? 0;
+    @endphp
 
         <button
             type="button"

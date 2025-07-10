@@ -20,13 +20,7 @@ class SeguimientoFilters extends Widget implements HasForms
 
     protected static string $view = 'filament.resources.panel-seguimiento-resource.seguimiento-filters';
 
-    public ?array $data = [];
-
-
-    protected $proyecto = 'TODOS';
-    protected $usuario = 'TODOS';
-    protected $comoSeEntero = 'TODOS';
-    protected $tipo_gestion_id;
+    public array $data = [];
 
     protected function getFormSchema(): array
     {
@@ -38,13 +32,12 @@ class SeguimientoFilters extends Widget implements HasForms
                             Select::make('proyecto')
                                 ->label('Proyecto')
                                 ->options([
-                                    'TODOS' => 'TODOS',
                                     ...Proyecto::query()
                                         ->orderBy('nombre')
                                         ->pluck('nombre', 'id')
                                         ->toArray()
+                                        
                                 ])
-                                ->default('TODOS')
                                 ->reactive(),
 
                             Select::make('usuario')
@@ -61,7 +54,6 @@ class SeguimientoFilters extends Widget implements HasForms
 
                             Select::make('comoSeEntero')
                                 ->label('Cómo se enteró')
-
                                 ->options([
                                     'TODOS' => 'TODOS',
                                     ...ComoSeEntero::query()
@@ -71,60 +63,72 @@ class SeguimientoFilters extends Widget implements HasForms
                                 ])
                                 ->default('TODOS')
                                 ->reactive(),
-
                         ]),
 
-                    Grid::make(3)
+                    Grid::make(2)
                         ->schema([
-
                             DatePicker::make('fechaInicio')
                                 ->label('Fecha Inicio')
-                                ->displayFormat('d/m/Y'),
+                                ->displayFormat('d/m/Y')
+                                ->reactive(),
 
                             DatePicker::make('fechaFin')
                                 ->label('Fecha Fin')
-                                ->displayFormat('d/m/Y'),
-
+                                ->displayFormat('d/m/Y')
+                                ->reactive(),
                         ]),
 
                     Select::make('tipo_gestion_id')
-    ->label('Tipo de Gestión')
-    ->view('filament.resources.panel-seguimiento-resource.tipo-gestion-select')
-    ->reactive()
-    ->options(function (callable $get) {
+                        ->label('Tipo de Gestión')
+                        ->view('filament.resources.panel-seguimiento-resource.tipo-gestion-select') // opcional
+                        ->reactive()
+                        ->options(function (callable $get) {
+
         $filters = [
-            'proyecto' => $get('proyecto'),
-            'usuario' => $get('usuario'),
+            'proyecto'     => $get('proyecto'),
+            'usuario'      => $get('usuario'),
             'comoSeEntero' => $get('comoSeEntero'),
+            'fechaInicio'  => $get('fechaInicio'),
+            'fechaFin'     => $get('fechaFin'),
         ];
 
-        $query = \App\Models\TipoGestion::query()
-            ->withCount(['prospectos as prospectos_count' => function ($q) use ($filters) {
-                // Proyecto
-                if (!empty($filters['proyecto']) && $filters['proyecto'] !== 'TODOS') {
-                    $q->where('proyecto_id', $filters['proyecto']);
-                }
+        $prospectosQuery = \App\Models\Prospecto::query();
 
-                // Cómo se enteró
-                if (!empty($filters['comoSeEntero']) && $filters['comoSeEntero'] !== 'TODOS') {
-                    $q->where('como_se_entero_id', $filters['comoSeEntero']);
-                }
+        if ($filters['proyecto'] && $filters['proyecto'] !== 'TODOS') {
+            $prospectosQuery->where('proyecto_id', $filters['proyecto']);
+        }
 
-                // Usuario (desde tareas del prospecto)
-                if (!empty($filters['usuario']) && $filters['usuario'] !== 'TODOS') {
-                    $q->whereHas('tareas', function ($tareaQuery) use ($filters) {
-                        $tareaQuery->where('usuario_asignado_id', $filters['usuario']);
-                    });
-                }
-            }])
-            ->orderBy('nombre');
+        if ($filters['comoSeEntero'] && $filters['comoSeEntero'] !== 'TODOS') {
+            $prospectosQuery->where('como_se_entero_id', $filters['comoSeEntero']);
+        }
 
-        return $query->get()->mapWithKeys(function ($tipo) {
-            return [$tipo->id => "{$tipo->nombre} ({$tipo->prospectos_count})"];
-        });
+        if ($filters['usuario'] && $filters['usuario'] !== 'TODOS') {
+            $prospectosQuery->whereHas('tareas', function ($q) use ($filters) {
+                $q->where('usuario_asignado_id', $filters['usuario']);
+            });
+        }
+
+        if ($filters['fechaInicio']) {
+            $prospectosQuery->whereDate('fecha_registro', '>=', $filters['fechaInicio']);
+        }
+        if ($filters['fechaFin']) {
+            $prospectosQuery->whereDate('fecha_registro', '<=', $filters['fechaFin']);
+        }
+
+        $conteos = $prospectosQuery
+            ->whereNotNull('tipo_gestion_id')
+            ->selectRaw('tipo_gestion_id, COUNT(*) as total')
+            ->groupBy('tipo_gestion_id')
+            ->pluck('total', 'tipo_gestion_id');
+
+        return \App\Models\TipoGestion::orderBy('nombre')
+            ->get()
+            ->mapWithKeys(function ($tipo) use ($conteos) {
+                $total = $conteos->get($tipo->id, 0);
+                return [$tipo->id => "{$tipo->nombre} ({$total})"];
+            });
     })
-    ->afterStateUpdated(fn () => $this->submitFilters()),
-
+    ->afterStateUpdated(fn () => $this->submitFilters())
 
 
 

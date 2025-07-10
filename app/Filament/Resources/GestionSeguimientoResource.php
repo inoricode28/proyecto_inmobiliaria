@@ -285,6 +285,7 @@ public static function form(Form $form): Form
                     ->date('d/m/Y')
                     ->sortable(),
 
+                    /*
                 BooleanColumn::make('estado_id')
                     ->label('Estado')
                     ->getStateUsing(fn ($record): bool => $record->estado_id === 1)
@@ -293,6 +294,7 @@ public static function form(Form $form): Form
                     ->trueColor('success')
                     ->falseColor('danger')
                     ->sortable(),
+                    */
 
                 TextColumn::make('tareaAsignada.usuarioAsignado.name')
                     ->label('Responsable')
@@ -308,13 +310,7 @@ public static function form(Form $form): Form
                     ->label('Proyecto')
                     ->relationship('proyecto', 'nombre'),
 
-                SelectFilter::make('estado')
-                    ->options([
-                        'ACTIVO' => 'Activo',
-                        'INACTIVO' => 'Inactivo',
-                        'POTENCIAL' => 'Potencial'
-                    ]),
-
+            
                 Filter::make('fecha_registro')
                     ->form([
                         DatePicker::make('fecha_inicio')
