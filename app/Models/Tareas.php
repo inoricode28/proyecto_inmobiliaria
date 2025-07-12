@@ -30,11 +30,7 @@ class Tarea extends Model
         'deleted_at'
     ];
 
-    public function prospecto()
-    {
-        return $this->belongsTo(Prospecto::class);
-    }
-
+  
     public function usuarioAsignado()
     {
         return $this->belongsTo(User::class, 'usuario_asignado_id');
@@ -54,6 +50,11 @@ class Tarea extends Model
 public function proyecto()
 {
     return $this->belongsTo(Proyecto::class);
+}
+// En app/Models/Tarea.php
+public function prospecto()
+{
+    return $this->belongsTo(Prospecto::class);
 }
 
 

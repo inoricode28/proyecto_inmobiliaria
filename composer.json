@@ -20,6 +20,7 @@
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "league/oauth2-client": "^2.6",
+        "livewire-ui/modal": "^1.0",
         "maatwebsite/excel": "^3.1",
         "owenvoke/blade-fontawesome": "^2.1",
         "protonemedia/laravel-verify-new-email": "^1.6",
