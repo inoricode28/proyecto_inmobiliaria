@@ -43,7 +43,7 @@ class PanelSeguimientoResource extends Resource
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
-                    
+
                 TextColumn::make('prospecto.nombres')
                 ->label('Nombres')
                 ->formatStateUsing(function ($record) {
@@ -97,20 +97,20 @@ class PanelSeguimientoResource extends Resource
                         ->extraAttributes(['class' => 'mr-2'])
                         ->modalHeading(function ($record) {
                             // Obtener nombre completo o razón social
-                            $nombreCompleto = $record->prospecto->nombres 
+                            $nombreCompleto = $record->prospecto->nombres
                                 ? $record->prospecto->nombres . ' ' . $record->prospecto->ape_paterno . ($record->prospecto->ape_materno ? ' ' . $record->prospecto->ape_materno : '')
                                 : $record->prospecto->razon_social;
-                            
+
                             // Combinar con teléfono
                             return 'Realizar Tarea - ' . $nombreCompleto . ' - ' . $record->prospecto->celular;
                         })
                         ->modalWidth('4xl')
                         ->mountUsing(function ($record, $form) {
                             // Determinar qué nombre mostrar
-                            $nombre = $record->prospecto->nombres 
+                            $nombre = $record->prospecto->nombres
                                 ? $record->prospecto->nombres . ' ' . $record->prospecto->ape_paterno . ($record->prospecto->ape_materno ? ' ' . $record->prospecto->ape_materno : '')
                                 : $record->prospecto->razon_social;
-                            
+
                             $form->fill([
                                 'nombre' => $nombre,
                                 'telefono' => $record->prospecto->celular,
@@ -123,81 +123,88 @@ class PanelSeguimientoResource extends Resource
                                     TextInput::make('nombre')
                                         ->label('Nombre del Prospecto')
                                         ->disabled(),
-                                        
+
                                     TextInput::make('telefono')
                                         ->label('Teléfono/Celular')
                                         ->disabled(),
-                                        
+
                                     TextInput::make('proyecto')
                                         ->label('Proyecto de interés')
                                         ->disabled(),
-                                        
+
                                     Radio::make('respuesta')
                                         ->label('Resultado del contacto')
                                         ->options([
-                                            'efectiva' => 'Se logró contactar',
-                                            'no_efectiva' => 'No se contactó'
+                                            'efectiva' => 'EFECTIVA',
+                                            'no_efectiva' => 'NO EFECTIVA'
                                         ])
                                         ->required()
                                         ->inline(),
-                                    
+
                                     Textarea::make('comentario')
                                         ->label('Comentarios adicionales')
                                         ->placeholder('Detalles de la conversación')
                                         ->rows(3)
                                         ->maxLength(500),
-                                        
+/*
                                     DateTimePicker::make('fecha_tarea')
                                         ->label('Próximo contacto')
                                         ->required()
                                         ->minDate(now())
                                         ->displayFormat('d/m/Y H:i'),
+                                        */
                                 ])
                         ])
-                    ->action(function (Tarea $record, array $data) {
+                        ->action(function (Tarea $record, array $data) {
                         try {
+                            // Validar si intenta retroceder de Contactados a Por Contactar
+                            if ($data['respuesta'] !== 'efectiva'
+                                && $record->prospecto->tipo_gestion_id == 3) {
+                                Notification::make()
+                                    ->title('Acción no permitida')
+                                    ->body('No se puede retroceder de Contactados a Por Contactar')
+                                    ->danger()
+                                    ->send();
+                                return; // Detener la ejecución
+                            }
+
                             // Actualizar la tarea
                             $record->update([
                                 'fecha_contacto' => now(),
-                                'fecha_vencimiento' => $data['fecha_tarea'],
                                 'nota' => $data['comentario'] ?? null,
                             ]);
-                            
+
                             // Determinar el nuevo tipo de gestión según la respuesta
                             $nuevoTipoGestion = null;
-                            
+                            $updateData = []; // Inicializar array de actualización
+
                             if ($data['respuesta'] === 'efectiva') {
-                                // Si es efectivo, cambiar a "Contactados" (ID 3)
-                                $nuevoTipoGestion = 3;
+                                $nuevoTipoGestion = 3; // Contactados
                             } else {
-                                // Si no es efectivo y está en "No gestionado" (ID 1), cambiar a "Por Contactar" (ID 2)
+                                // Solo cambiar a Por Contactar si está en No gestionado (1)
                                 if ($record->prospecto->tipo_gestion_id == 1) {
-                                    $nuevoTipoGestion = 2;
+                                    $nuevoTipoGestion = 2; // Por Contactar
                                 }
                             }
-                            
+
                             // Actualizar el prospecto si hay cambio de estado
-                           
-                            
                             if ($nuevoTipoGestion) {
                                 $updateData['tipo_gestion_id'] = $nuevoTipoGestion;
+                                $record->prospecto->update($updateData);
                             }
-                            
-                            $record->prospecto->update($updateData);
-                            
+
                             Notification::make()
                                 ->title('Tarea registrada correctamente')
                                 ->success()
                                 ->send();
-                                
+
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->title('Error al guardar los cambios')
                                 ->body($e->getMessage())
                                 ->danger()
                                 ->send();
-                                
-                            throw $e; // Opcional: re-lanzar la excepción para debugging
+                            throw $e;
                         }
                     })
             ], position: \Filament\Tables\Actions\Position::BeforeColumns); // Posiciona las acciones a la izquierda
