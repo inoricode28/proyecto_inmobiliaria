@@ -19,6 +19,8 @@ class CreateGestionSeguimiento extends CreateRecord
     $tipoIndocumentado = \App\Models\TipoDocumento::where('nombre', 'INDOCUMENTADO')->value('id');
     $tipoRuc = \App\Models\TipoDocumento::where('nombre', 'RUC')->value('id');
 
+        $data['tipo_gestion_id'] = 1;
+
     // Limpiar datos según tipo de documento
     $numeroDocumento = $data['tipo_documento_id'] == $tipoIndocumentado ? null : $data['numero_documento'];
     $razonSocial = $data['tipo_documento_id'] == $tipoRuc ? $data['razon_social'] : null;

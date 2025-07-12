@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 9.0.1, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: helper
 -- ------------------------------------------------------
--- Server version	9.0.1
+-- Server version	8.0.30
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,8 +24,8 @@ DROP TABLE IF EXISTS `activities`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `activities` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -50,8 +50,8 @@ DROP TABLE IF EXISTS `como_se_entero`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `como_se_entero` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -76,25 +76,25 @@ DROP TABLE IF EXISTS `departamentos`;
 CREATE TABLE `departamentos` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `proyecto_id` bigint unsigned DEFAULT NULL,
-  `centro_costos` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `centro_costos` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `edificio_id` bigint unsigned NOT NULL,
   `tipo_inmueble_id` bigint unsigned DEFAULT NULL,
   `tipo_departamento_id` bigint unsigned DEFAULT NULL,
   `estado_departamento_id` bigint unsigned DEFAULT NULL,
   `tipos_financiamiento_id` bigint unsigned DEFAULT NULL,
-  `numero_inicial` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `numero_final` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ficha_indep` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `num_departamento` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `numero_inicial` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `numero_final` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ficha_indep` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `num_departamento` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `num_piso` smallint unsigned DEFAULT NULL,
   `num_dormitorios` tinyint unsigned DEFAULT NULL,
   `num_bano` tinyint unsigned DEFAULT NULL,
-  `num_certificado` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `num_certificado` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bono_techo_propio` tinyint(1) NOT NULL DEFAULT '0',
-  `num_bono_tp` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `num_bono_tp` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cantidad_uit` decimal(10,2) DEFAULT NULL,
-  `codigo_bancario` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `codigo_catastral` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `codigo_bancario` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `codigo_catastral` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `vista_id` bigint unsigned DEFAULT NULL,
   `orden` smallint unsigned DEFAULT NULL,
   `moneda_id` bigint unsigned DEFAULT NULL,
@@ -108,14 +108,14 @@ CREATE TABLE `departamentos` (
   `construida` decimal(10,2) DEFAULT NULL,
   `terraza` decimal(10,2) DEFAULT NULL,
   `jardin` decimal(10,2) DEFAULT NULL,
-  `adicional` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `adicional` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `vendible` tinyint(1) NOT NULL DEFAULT '1',
   `frente` decimal(10,2) DEFAULT NULL,
   `derecha` decimal(10,2) DEFAULT NULL,
   `izquierda` decimal(10,2) DEFAULT NULL,
   `fondo` decimal(10,2) DEFAULT NULL,
-  `direccion` text COLLATE utf8mb4_unicode_ci,
-  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `direccion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `observaciones` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `estado_id` bigint unsigned NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -139,7 +139,7 @@ CREATE TABLE `departamentos` (
   CONSTRAINT `departamentos_tipo_inmueble_id_foreign` FOREIGN KEY (`tipo_inmueble_id`) REFERENCES `tipo_inmueble` (`id`),
   CONSTRAINT `departamentos_tipos_financiamiento_id_foreign` FOREIGN KEY (`tipos_financiamiento_id`) REFERENCES `tipos_financiamiento` (`id`) ON DELETE SET NULL,
   CONSTRAINT `departamentos_vista_id_foreign` FOREIGN KEY (`vista_id`) REFERENCES `vistas` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -147,7 +147,7 @@ CREATE TABLE `departamentos` (
 --
 
 /*!40000 ALTER TABLE `departamentos` DISABLE KEYS */;
-INSERT INTO `departamentos` VALUES (1,1,NULL,1,1,1,2,4,'001','345','Independiente','101',1,5,3,'543',1,'5453',NULL,'4543','543',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coraleinas 458','dsfg',1,'2025-07-05 01:25:29','2025-07-05 01:25:29',NULL),(2,1,NULL,1,1,2,2,4,'001','345','Independiente','102',1,5,3,'455454',1,'4324325',NULL,'343245','4324',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:37:38','2025-07-05 01:37:38',NULL),(3,1,NULL,1,1,2,2,4,'001','345','Independiente','103',1,5,3,'455454',1,'343543654',NULL,'243243','5435',1,45,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:40:51','2025-07-05 01:40:51',NULL),(4,1,NULL,1,1,3,2,4,'001','345','Independiente','104',1,5,3,'455454',1,'43546',NULL,'334656','342353',2,20,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:44:03','2025-07-05 01:44:03',NULL),(5,1,NULL,1,1,1,2,9,'001','345','Independiente','105',1,5,3,'455454',1,'4535436',NULL,'35465436','35445643',1,21,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:47:13','2025-07-05 01:47:13',NULL),(6,1,NULL,1,1,1,4,1,'001','345','Independiente','201',2,5,3,'455454',1,'4365767',NULL,'5646','456',1,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:50:45','2025-07-05 01:50:45',NULL),(7,1,NULL,1,1,3,9,3,'001','345','Independiente','202',2,5,3,'455454',1,'2343534',NULL,'454334','324543',1,23,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:54:52','2025-07-05 01:54:52',NULL),(8,1,NULL,1,1,1,2,10,'001','345','Independiente','301',3,5,3,'455454',1,'65765675',NULL,'54353','432543',1,29,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:59:17','2025-07-05 01:59:17',NULL),(9,1,NULL,1,1,1,2,1,'001','345','Independiente','401',4,5,3,'43543',1,'43543',NULL,'454356','543654',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:07:17','2025-07-05 02:07:17',NULL),(10,1,NULL,1,1,3,9,10,'001','345','Independiente','501',5,5,3,'43543',1,'35645',NULL,'2345','46787',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:11:14','2025-07-05 02:11:14',NULL),(11,1,NULL,1,1,3,9,4,'001','345','Independiente','601',6,5,3,'455454',1,'45654',NULL,'3435643','45436',2,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:14:49','2025-07-05 02:14:49',NULL),(12,1,NULL,1,1,1,5,2,'001','345','Independiente','701',7,5,3,'455454',1,'43546',NULL,'231432','1321432',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:18:00','2025-07-05 02:18:00',NULL),(13,1,NULL,1,1,3,3,8,'001','345','Independiente','801',8,5,3,'455454',1,'3524543',NULL,'3254325','4325',2,26,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:20:55','2025-07-05 02:20:55',NULL),(14,1,NULL,1,1,1,7,5,'001','345','Independiente','901',9,5,3,'455454',1,'56576',NULL,'543654','654',1,27,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:23:36','2025-07-05 02:23:36',NULL);
+INSERT INTO `departamentos` VALUES (1,1,NULL,1,1,1,2,4,'001','345','Independiente','101',1,5,3,'543',1,'5453',NULL,'4543','543',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coraleinas 458','dsfg',1,'2025-07-05 01:25:29','2025-07-05 01:25:29',NULL),(2,1,NULL,1,1,2,2,4,'001','345','Independiente','102',1,5,3,'455454',1,'4324325',NULL,'343245','4324',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:37:38','2025-07-05 01:37:38',NULL),(3,1,NULL,1,1,2,2,4,'001','345','Independiente','103',1,5,3,'455454',1,'343543654',NULL,'243243','5435',1,45,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:40:51','2025-07-05 01:40:51',NULL),(4,1,NULL,1,1,3,2,4,'001','345','Independiente','104',1,5,3,'455454',1,'43546',NULL,'334656','342353',2,20,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:44:03','2025-07-05 01:44:03',NULL),(5,1,NULL,1,1,1,2,9,'001','345','Independiente','105',1,5,3,'455454',1,'4535436',NULL,'35465436','35445643',1,21,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:47:13','2025-07-05 01:47:13',NULL),(6,1,NULL,1,1,1,4,1,'001','345','Independiente','201',2,5,3,'455454',1,'4365767',NULL,'5646','456',1,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:50:45','2025-07-05 01:50:45',NULL),(7,1,NULL,1,1,3,9,3,'001','345','Independiente','202',2,5,3,'455454',1,'2343534',NULL,'454334','324543',1,23,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:54:52','2025-07-05 01:54:52',NULL),(8,1,NULL,1,1,1,2,10,'001','345','Independiente','301',3,5,3,'455454',1,'65765675',NULL,'54353','432543',1,29,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 01:59:17','2025-07-05 01:59:17',NULL),(9,1,NULL,1,1,1,2,1,'001','345','Independiente','401',4,5,3,'43543',1,'43543',NULL,'454356','543654',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:07:17','2025-07-05 02:07:17',NULL),(10,1,NULL,1,1,3,9,10,'001','345','Independiente','501',5,5,3,'43543',1,'35645',NULL,'2345','46787',1,13,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:11:14','2025-07-05 02:11:14',NULL),(11,1,NULL,1,1,3,9,4,'001','345','Independiente','601',6,5,3,'455454',1,'45654',NULL,'3435643','45436',2,18,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:14:49','2025-07-05 02:14:49',NULL),(12,1,NULL,1,1,1,5,2,'001','345','Independiente','701',7,5,3,'455454',1,'43546',NULL,'231432','1321432',1,25,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:18:00','2025-07-05 02:18:00',NULL),(13,1,NULL,1,1,3,3,8,'001','345','Independiente','801',8,5,3,'455454',1,'3524543',NULL,'3254325','4325',2,26,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:20:55','2025-07-05 02:20:55',NULL),(14,1,NULL,1,1,1,7,5,'001','345','Independiente','901',9,5,3,'455454',1,'56576',NULL,'543654','654',1,27,1,350000.00,NULL,NULL,10.00,75.00,75.00,75.00,75.00,75.00,75.00,NULL,1,75.00,75.00,75.00,75.00,'jr.las coralinas 458','Ninguna',1,'2025-07-05 02:23:36','2025-07-05 02:23:36',NULL),(15,2,NULL,2,1,3,2,4,'101','110','1011','101',1,3,2,'999',1,'22222',NULL,'01','01',1,222,1,222222.00,NULL,NULL,22.00,22.00,22.00,22.00,22.00,22.00,222.00,NULL,1,22.00,2.00,22.00,22.00,'calle sullana 1987 urb chacra rios norte cercado de lima lima peru','22222222',1,'2025-07-12 08:07:50','2025-07-12 08:07:50',NULL);
 /*!40000 ALTER TABLE `departamentos` ENABLE KEYS */;
 
 --
@@ -160,8 +160,8 @@ DROP TABLE IF EXISTS `edificios`;
 CREATE TABLE `edificios` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `proyecto_id` bigint unsigned NOT NULL,
-  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `cantidad_pisos` int DEFAULT NULL,
   `cantidad_departamentos` int DEFAULT NULL,
   `fecha_inicio` date DEFAULT NULL,
@@ -171,7 +171,7 @@ CREATE TABLE `edificios` (
   PRIMARY KEY (`id`),
   KEY `edificios_proyecto_id_foreign` (`proyecto_id`),
   CONSTRAINT `edificios_proyecto_id_foreign` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -191,12 +191,12 @@ DROP TABLE IF EXISTS `empresas`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `empresas` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ruc` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `direccion` text COLLATE utf8mb4_unicode_ci,
-  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `representante_legal` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ruc` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `direccion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `representante_legal` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -222,7 +222,7 @@ DROP TABLE IF EXISTS `epics`;
 CREATE TABLE `epics` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `project_id` bigint unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `starts_at` date NOT NULL,
   `ends_at` date NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -275,9 +275,9 @@ DROP TABLE IF EXISTS `estados_departamento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estados_departamento` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
-  `color` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -303,8 +303,8 @@ DROP TABLE IF EXISTS `estados_proyecto`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estados_proyecto` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `estados_proyecto_nombre_unique` (`nombre`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -327,11 +327,11 @@ DROP TABLE IF EXISTS `failed_jobs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `failed_jobs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
@@ -354,8 +354,8 @@ DROP TABLE IF EXISTS `formas_contacto`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `formas_contacto` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -382,7 +382,7 @@ CREATE TABLE `foto_departamentos` (
   `proyecto_id` bigint unsigned NOT NULL,
   `edificio_id` bigint unsigned NOT NULL,
   `departamento_id` bigint unsigned NOT NULL,
-  `imagen` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `imagen` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -412,8 +412,8 @@ DROP TABLE IF EXISTS `jobs`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `jobs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `attempts` tinyint unsigned NOT NULL,
   `reserved_at` int unsigned DEFAULT NULL,
   `available_at` int unsigned NOT NULL,
@@ -439,15 +439,15 @@ DROP TABLE IF EXISTS `media`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `media` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `model_id` bigint unsigned NOT NULL,
-  `uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `collection_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `file_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mime_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `disk` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `conversions_disk` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `collection_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mime_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `disk` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `conversions_disk` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `size` bigint unsigned NOT NULL,
   `manipulations` json NOT NULL,
   `custom_properties` json NOT NULL,
@@ -479,7 +479,7 @@ DROP TABLE IF EXISTS `migrations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `migrations` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=83 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -502,7 +502,7 @@ DROP TABLE IF EXISTS `model_has_permissions`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `model_has_permissions` (
   `permission_id` bigint unsigned NOT NULL,
-  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `model_id` bigint unsigned NOT NULL,
   PRIMARY KEY (`permission_id`,`model_id`,`model_type`),
   KEY `model_has_permissions_model_id_model_type_index` (`model_id`,`model_type`),
@@ -526,7 +526,7 @@ DROP TABLE IF EXISTS `model_has_roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `model_has_roles` (
   `role_id` bigint unsigned NOT NULL,
-  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `model_id` bigint unsigned NOT NULL,
   PRIMARY KEY (`role_id`,`model_id`,`model_type`),
   KEY `model_has_roles_model_id_model_type_index` (`model_id`,`model_type`),
@@ -551,7 +551,7 @@ DROP TABLE IF EXISTS `moneda`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `moneda` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -573,9 +573,9 @@ DROP TABLE IF EXISTS `niveles_interes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `niveles_interes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
+  `nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -598,11 +598,11 @@ DROP TABLE IF EXISTS `notifications`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notifications` (
-  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `notifiable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `notifiable_id` bigint unsigned NOT NULL,
-  `data` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `read_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -626,8 +626,8 @@ DROP TABLE IF EXISTS `password_resets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `password_resets` (
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   KEY `password_resets_email_index` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -649,10 +649,10 @@ DROP TABLE IF EXISTS `pending_user_emails`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pending_user_emails` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` bigint unsigned NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `pending_user_emails_user_type_user_id_index` (`user_type`,`user_id`),
@@ -676,8 +676,8 @@ DROP TABLE IF EXISTS `permissions`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `permissions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -702,11 +702,11 @@ DROP TABLE IF EXISTS `personal_access_tokens`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `personal_access_tokens` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tokenable_id` bigint unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -761,8 +761,8 @@ DROP TABLE IF EXISTS `project_statuses`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_statuses` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `color` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -789,7 +789,7 @@ CREATE TABLE `project_users` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
   `project_id` bigint unsigned NOT NULL,
-  `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -816,16 +816,16 @@ DROP TABLE IF EXISTS `projects`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `projects` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` longtext COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `owner_id` bigint unsigned NOT NULL,
   `status_id` bigint unsigned NOT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `ticket_prefix` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'default',
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'kanban',
+  `status_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'default',
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'kanban',
   PRIMARY KEY (`id`),
   UNIQUE KEY `projects_ticket_prefix_unique` (`ticket_prefix`),
   KEY `projects_owner_id_foreign` (`owner_id`),
@@ -857,9 +857,9 @@ CREATE TABLE `prospectos` (
   `nombres` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ape_paterno` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ape_materno` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `razon_social` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `celular` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `correo_electronico` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `razon_social` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `celular` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `correo_electronico` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `proyecto_id` bigint unsigned NOT NULL,
   `tipo_inmueble_id` bigint unsigned NOT NULL,
   `forma_contacto_id` bigint unsigned NOT NULL,
@@ -887,7 +887,7 @@ CREATE TABLE `prospectos` (
   CONSTRAINT `prospectos_tipo_gestion_id_foreign` FOREIGN KEY (`tipo_gestion_id`) REFERENCES `tipos_gestion` (`id`),
   CONSTRAINT `prospectos_tipo_inmueble_id_foreign` FOREIGN KEY (`tipo_inmueble_id`) REFERENCES `tipo_inmueble` (`id`),
   CONSTRAINT `prospectos_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -895,7 +895,7 @@ CREATE TABLE `prospectos` (
 --
 
 /*!40000 ALTER TABLE `prospectos` DISABLE KEYS */;
-INSERT INTO `prospectos` VALUES (1,'2025-07-08 05:00:00',5,NULL,'dss','WEWE','SDDS',NULL,'dsdsd','josepintadoyamo@gmail.com',1,1,2,9,1,1,1,NULL,'2025-07-09 02:05:06','2025-07-09 02:05:06'),(2,'2025-07-08 05:00:00',4,'760494993','Miguel','Chavez','RAMOS',NULL,'9847343','josepintadoyamo@gmail.com',1,1,9,2,1,1,1,NULL,'2025-07-09 02:06:23','2025-07-09 02:06:23'),(3,'2025-07-08 05:00:00',7,'393943434',NULL,NULL,NULL,'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh','323232','josepintadoyamo@gmail.com',1,1,8,8,1,1,1,NULL,'2025-07-09 02:07:21','2025-07-09 02:07:21');
+INSERT INTO `prospectos` VALUES (1,'2025-07-08 05:00:00',5,NULL,'dss','WEWE','SDDS',NULL,'dsdsd','josepintadoyamo@gmail.com',1,1,2,9,3,1,1,'2025-07-12 11:36:16','2025-07-09 02:05:06','2025-07-12 11:36:16'),(2,'2025-07-08 05:00:00',4,'760494993','Miguel','Chavez','RAMOS',NULL,'9847343','josepintadoyamo@gmail.com',1,1,9,2,3,1,1,NULL,'2025-07-09 02:06:23','2025-07-12 08:47:53'),(3,'2025-07-08 05:00:00',7,'393943434',NULL,NULL,NULL,'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh','323232','josepintadoyamo@gmail.com',1,1,8,8,3,1,1,NULL,'2025-07-09 02:07:21','2025-07-12 11:17:44'),(4,'2025-07-12 05:00:00',5,NULL,'JUAN','HHHHHH','HHHHHH',NULL,'rtttr','serven_vicava@hotmail.com',1,1,3,4,3,1,1,NULL,'2025-07-12 08:04:50','2025-07-12 11:19:24'),(5,'2025-07-12 05:00:00',5,NULL,'Miguel','Chavez','EWEWE',NULL,'DSDSD','serven_vicava@hotmail.com',2,1,2,2,3,1,1,NULL,'2025-07-12 08:09:42','2025-07-12 08:49:24'),(6,'2025-07-12 05:00:00',5,NULL,'Miguel','DDDDDDD','DDDDDDD',NULL,'DSDSD','serven_vicava@hotmail.com',2,1,5,4,3,1,1,NULL,'2025-07-12 08:10:11','2025-07-12 11:07:56'),(7,'2025-07-12 05:00:00',5,NULL,'SSSSSSSSSS','Chavez','SSSSSSS',NULL,'SSSSSSSSS','serven_vicava@hotmail.com',1,1,2,2,1,1,1,NULL,'2025-07-12 08:10:40','2025-07-12 08:10:40'),(8,'2025-07-12 05:00:00',4,'23232323','PEUWBa ','prer','sasas',NULL,'4343434','pt76079786@idat.edu.pe',2,1,1,3,1,1,1,NULL,'2025-07-12 11:31:53','2025-07-12 11:31:53');
 /*!40000 ALTER TABLE `prospectos` ENABLE KEYS */;
 
 --
@@ -907,9 +907,9 @@ DROP TABLE IF EXISTS `proyectos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `proyectos` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
-  `ubicacion` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `ubicacion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `fecha_inicio` date DEFAULT NULL,
   `fecha_entrega` date DEFAULT NULL,
   `estado_proyecto_id` bigint unsigned NOT NULL,
@@ -921,7 +921,7 @@ CREATE TABLE `proyectos` (
   KEY `proyectos_empresa_constructora_id_foreign` (`empresa_constructora_id`),
   CONSTRAINT `proyectos_empresa_constructora_id_foreign` FOREIGN KEY (`empresa_constructora_id`) REFERENCES `empresas` (`id`),
   CONSTRAINT `proyectos_estado_proyecto_id_foreign` FOREIGN KEY (`estado_proyecto_id`) REFERENCES `estados_proyecto` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -929,7 +929,7 @@ CREATE TABLE `proyectos` (
 --
 
 /*!40000 ALTER TABLE `proyectos` DISABLE KEYS */;
-INSERT INTO `proyectos` VALUES (1,'Proyecto Talara','Talara','pueblo libre','2025-07-09','2026-07-04',1,1,'2025-07-05 01:23:24','2025-07-05 01:23:24');
+INSERT INTO `proyectos` VALUES (1,'Proyecto Talara','Talara','pueblo libre','2025-07-09','2026-07-04',1,1,'2025-07-05 01:23:24','2025-07-05 01:23:24'),(2,'serven vicava sac','GGGGGG','AV. SAN MIGUEL 133','2025-07-11','2025-07-11',3,1,'2025-07-12 08:05:33','2025-07-12 08:05:33');
 /*!40000 ALTER TABLE `proyectos` ENABLE KEYS */;
 
 --
@@ -966,8 +966,8 @@ DROP TABLE IF EXISTS `roles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -992,8 +992,8 @@ DROP TABLE IF EXISTS `settings`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `settings` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `group` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `group` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `locked` tinyint(1) NOT NULL DEFAULT '0',
   `payload` json NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1021,8 +1021,8 @@ DROP TABLE IF EXISTS `socialite_users`;
 CREATE TABLE `socialite_users` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
-  `provider` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `provider_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `provider` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `provider_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1046,10 +1046,10 @@ DROP TABLE IF EXISTS `sprints`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sprints` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `starts_at` date NOT NULL,
   `ends_at` date NOT NULL,
-  `description` longtext COLLATE utf8mb4_unicode_ci,
+  `description` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `project_id` bigint unsigned NOT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1087,7 +1087,7 @@ CREATE TABLE `tareas` (
   `usuario_asignado_id` bigint unsigned NOT NULL,
   `fecha_realizar` date NOT NULL,
   `hora` time NOT NULL,
-  `nota` text COLLATE utf8mb4_unicode_ci,
+  `nota` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_by` bigint unsigned NOT NULL,
   `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -1106,7 +1106,7 @@ CREATE TABLE `tareas` (
   CONSTRAINT `tareas_prospecto_id_foreign` FOREIGN KEY (`prospecto_id`) REFERENCES `prospectos` (`id`),
   CONSTRAINT `tareas_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`),
   CONSTRAINT `tareas_usuario_asignado_id_foreign` FOREIGN KEY (`usuario_asignado_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1114,7 +1114,7 @@ CREATE TABLE `tareas` (
 --
 
 /*!40000 ALTER TABLE `tareas` DISABLE KEYS */;
-INSERT INTO `tareas` VALUES (1,1,1,3,1,'2025-07-08','10:00:00','dsdsdsd',1,1,NULL,'2025-07-09 02:05:06','2025-07-09 02:05:06'),(2,2,2,4,1,'2025-07-08','10:00:00','MIGUEL',1,1,NULL,'2025-07-09 02:06:23','2025-07-09 02:06:23'),(3,3,4,4,1,'2025-07-08','10:00:00','SDDSD',1,1,NULL,'2025-07-09 02:07:21','2025-07-09 02:07:21');
+INSERT INTO `tareas` VALUES (1,1,1,3,1,'2025-07-08','10:00:00',NULL,1,1,NULL,'2025-07-09 02:05:06','2025-07-12 08:11:11'),(2,2,2,4,1,'2025-07-08','10:00:00',NULL,1,1,NULL,'2025-07-09 02:06:23','2025-07-12 08:47:04'),(3,3,4,4,1,'2025-07-08','10:00:00',NULL,1,1,NULL,'2025-07-09 02:07:21','2025-07-12 11:16:12'),(4,4,4,4,2,'2025-07-12','10:00:00',NULL,1,1,NULL,'2025-07-12 08:04:51','2025-07-12 11:19:05'),(5,5,2,2,2,'2025-07-12','10:00:00',NULL,1,1,NULL,'2025-07-12 08:09:42','2025-07-12 08:12:06'),(6,6,3,3,2,'2025-07-12','10:00:00',NULL,1,1,NULL,'2025-07-12 08:10:11','2025-07-12 11:07:56'),(7,7,2,6,1,'2025-07-12','10:00:00','SSSSSSSSSSSSSSSSSSS',1,1,NULL,'2025-07-12 08:10:40','2025-07-12 08:10:40'),(8,8,3,4,2,'2025-07-12','10:00:00','jjejeje',1,1,NULL,'2025-07-12 11:31:53','2025-07-12 11:31:53');
 /*!40000 ALTER TABLE `tareas` ENABLE KEYS */;
 
 --
@@ -1162,7 +1162,7 @@ CREATE TABLE `ticket_comments` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `ticket_id` bigint unsigned NOT NULL,
   `user_id` bigint unsigned NOT NULL,
-  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1195,7 +1195,7 @@ CREATE TABLE `ticket_hours` (
   `value` double(8,2) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `comment` longtext COLLATE utf8mb4_unicode_ci,
+  `comment` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `activity_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `ticket_hours_ticket_id_foreign` (`ticket_id`),
@@ -1223,8 +1223,8 @@ DROP TABLE IF EXISTS `ticket_priorities`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ticket_priorities` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `color` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1252,7 +1252,7 @@ CREATE TABLE `ticket_relations` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `ticket_id` bigint unsigned NOT NULL,
   `relation_id` bigint unsigned NOT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sort` int NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1280,8 +1280,8 @@ DROP TABLE IF EXISTS `ticket_statuses`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ticket_statuses` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `color` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1339,9 +1339,9 @@ DROP TABLE IF EXISTS `ticket_types`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ticket_types` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `color` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#cecece',
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -1367,8 +1367,8 @@ DROP TABLE IF EXISTS `tickets`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tickets` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `owner_id` bigint unsigned NOT NULL,
   `responsible_id` bigint unsigned DEFAULT NULL,
   `status_id` bigint unsigned NOT NULL,
@@ -1376,7 +1376,7 @@ CREATE TABLE `tickets` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `type_id` bigint unsigned NOT NULL,
   `order` int NOT NULL DEFAULT '0',
   `priority_id` bigint unsigned NOT NULL,
@@ -1419,8 +1419,8 @@ DROP TABLE IF EXISTS `tipo_documento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipo_documento` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1446,7 +1446,7 @@ DROP TABLE IF EXISTS `tipo_inmueble`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipo_inmueble` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1468,8 +1468,8 @@ DROP TABLE IF EXISTS `tipos_departamento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipos_departamento` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tipos_departamento_nombre_unique` (`nombre`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1492,9 +1492,9 @@ DROP TABLE IF EXISTS `tipos_financiamiento`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipos_financiamiento` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` text COLLATE utf8mb4_unicode_ci,
-  `color` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1520,9 +1520,9 @@ DROP TABLE IF EXISTS `tipos_gestion`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipos_gestion` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descripcion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
+  `nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#6b7280',
   `orden` int NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1547,21 +1547,21 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `two_factor_secret` text COLLATE utf8mb4_unicode_ci,
-  `two_factor_recovery_codes` text COLLATE utf8mb4_unicode_ci,
+  `two_factor_secret` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `two_factor_recovery_codes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `two_factor_confirmed_at` timestamp NULL DEFAULT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `creation_token` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'db',
-  `oidc_username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `oidc_sub` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creation_token` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'db',
+  `oidc_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `oidc_sub` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1585,16 +1585,16 @@ CREATE TABLE `vendedores` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
   `tipo_documento_id` bigint unsigned NOT NULL,
-  `numero_documento` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `numero_documento` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `estado_id` bigint unsigned NOT NULL,
   `fecha_ingreso` date NOT NULL,
   `fecha_egreso` date DEFAULT NULL,
   `proyecto_id` bigint unsigned DEFAULT NULL,
   `comision` decimal(10,2) DEFAULT NULL,
-  `perfil` text COLLATE utf8mb4_unicode_ci,
+  `perfil` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_by` bigint unsigned NOT NULL,
   `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -1633,7 +1633,7 @@ DROP TABLE IF EXISTS `vistas`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vistas` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1659,4 +1659,4 @@ INSERT INTO `vistas` VALUES (1,'Interno'),(2,'Externo');
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-08 17:06:14
+-- Dump completed on 2025-07-12  1:42:28

@@ -35,14 +35,18 @@ class PanelSeguimientoResource extends Resource
         return $form->schema([]);
     }
 
+
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+                /*
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
+                    */
 
                 TextColumn::make('prospecto.nombres')
                 ->label('Nombres')
@@ -86,15 +90,26 @@ class PanelSeguimientoResource extends Resource
 
                 TextColumn::make('usuarioAsignado.name')
                     ->label('Responsable'),
-            ])
-            ->actions([
-                    Action::make('realizarTarea')
-                        ->label('Realizar Tarea')
-                        ->icon('heroicon-o-clipboard-check')
-                        ->color('success')
-                        ->button()
-                        ->size('sm')
-                        ->extraAttributes(['class' => 'mr-2'])
+                ])
+                        ->actions([
+                            Action::make('realizarTarea')
+                                ->label('Realizar Tarea')
+                                ->icon('heroicon-o-clipboard-check')
+                                ->color('primary') // Base azul de Filament
+                                ->button()
+                                ->size('sm')
+                                ->extraAttributes([
+                                'class' => 'mr-2',
+                                'style' => '
+                                    background-color: #1d4ed8;
+                                    border-color: #1e40af;
+                                    color: white;
+                                    &:hover {
+                                        background-color: #1e40af;
+                                    }
+                                '
+                            ])
+
                         ->modalHeading(function ($record) {
                             // Obtener nombre completo o razón social
                             $nombreCompleto = $record->prospecto->nombres
@@ -156,57 +171,60 @@ class PanelSeguimientoResource extends Resource
                                 ])
                         ])
                         ->action(function (Tarea $record, array $data) {
-                        try {
-                            // Validar si intenta retroceder de Contactados a Por Contactar
-                            if ($data['respuesta'] !== 'efectiva'
-                                && $record->prospecto->tipo_gestion_id == 3) {
-                                Notification::make()
-                                    ->title('Acción no permitida')
-                                    ->body('No se puede retroceder de Contactados a Por Contactar')
-                                    ->danger()
-                                    ->send();
-                                return; // Detener la ejecución
-                            }
+                            try {
+                                // Validar si intenta retroceder de Contactados a Por Contactar
+                                if ($data['respuesta'] !== 'efectiva'
+                                    && $record->prospecto->tipo_gestion_id == 3) {
+                                    Notification::make()
+                                        ->title('Acción no permitida')
+                                        ->body('No se puede retroceder de Contactados a Por Contactar')
+                                        ->danger()
+                                        ->send();
 
-                            // Actualizar la tarea
-                            $record->update([
-                                'fecha_contacto' => now(),
-                                'nota' => $data['comentario'] ?? null,
-                            ]);
-
-                            // Determinar el nuevo tipo de gestión según la respuesta
-                            $nuevoTipoGestion = null;
-                            $updateData = []; // Inicializar array de actualización
-
-                            if ($data['respuesta'] === 'efectiva') {
-                                $nuevoTipoGestion = 3; // Contactados
-                            } else {
-                                // Solo cambiar a Por Contactar si está en No gestionado (1)
-                                if ($record->prospecto->tipo_gestion_id == 1) {
-                                    $nuevoTipoGestion = 2; // Por Contactar
+                                    return; // Detener la ejecución
                                 }
-                            }
 
-                            // Actualizar el prospecto si hay cambio de estado
-                            if ($nuevoTipoGestion) {
-                                $updateData['tipo_gestion_id'] = $nuevoTipoGestion;
-                                $record->prospecto->update($updateData);
-                            }
+                                // Actualizar la tarea
+                                $record->update([
+                                    'fecha_contacto' => now(),
+                                    'nota' => $data['comentario'] ?? null,
+                                ]);
 
-                            Notification::make()
+                                // Determinar el nuevo tipo de gestión según la respuesta
+                                $nuevoTipoGestion = null;
+                                $updateData = []; // Inicializar array de actualización
+
+                                if ($data['respuesta'] === 'efectiva') {
+                                    $nuevoTipoGestion = 3; // Contactados
+                                } else {
+                                    // Solo cambiar a Por Contactar si está en No gestionado (1)
+                                    if ($record->prospecto->tipo_gestion_id == 1) {
+                                        $nuevoTipoGestion = 2; // Por Contactar
+                                    }
+                                }
+
+                                // Actualizar el prospecto si hay cambio de estado
+                                if ($nuevoTipoGestion) {
+                                    $updateData['tipo_gestion_id'] = $nuevoTipoGestion;
+                                    $record->prospecto->update($updateData);
+                                }
+
+                                Notification::make()
                                 ->title('Tarea registrada correctamente')
                                 ->success()
                                 ->send();
 
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Error al guardar los cambios')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                            throw $e;
-                        }
-                    })
+                                return redirect(request()->header('Referer'));
+
+                            } catch (\Exception $e) {
+                                Notification::make()
+                                    ->title('Error al guardar los cambios')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                                throw $e;
+                            }
+                        })
             ], position: \Filament\Tables\Actions\Position::BeforeColumns); // Posiciona las acciones a la izquierda
     }
 

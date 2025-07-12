@@ -158,7 +158,7 @@ class ProspectosStats extends Widget implements HasForms
                 ]),
         ];
     }
-       
+
     public function buscar()
     {
         $this->emit('aplicarFiltros', [

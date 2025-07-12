@@ -21,11 +21,6 @@ class NivelInteresSeeder extends Seeder
                 'color' => '#3B82F6' // Azul
             ],
             [
-                'nombre' => 'TALARA',
-                'descripcion' => 'Prospecto relacionado con Talara',
-                'color' => '#6366F1' // Índigo
-            ],
-            [
                 'nombre' => 'SEGUIMIENTO',
                 'descripcion' => 'Prospecto en seguimiento',
                 'color' => '#8B5CF6' // Violeta

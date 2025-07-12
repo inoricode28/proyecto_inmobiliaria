@@ -90,16 +90,16 @@ public static function form(Form $form): Form
 
 
             TextInput::make('numero_documento')
-    ->label('N° Documento')
+                ->label('N° Documento')
 
-    ->disabled(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado)
-    ->placeholder(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado ? 'No aplica' : '')
-    ->extraAttributes(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado
-        ? [
-            'class' => 'bg-gray-800',
-        ] : []
-    )
-    ->columnSpan(1),
+                ->disabled(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado)
+                ->placeholder(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado ? 'No aplica' : '')
+                ->extraAttributes(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado
+                    ? [
+                        'class' => 'bg-gray-800',
+                    ] : []
+                )
+                ->columnSpan(1),
 
         ]),
 
@@ -133,13 +133,13 @@ public static function form(Form $form): Form
                 ->label('Celular')
                 ->required()
                 ->columnSpan(1),
-
-            Select::make('tipo_gestion_id')
-                ->label('Tipo Gestión')
+/*
+             Select::make('tipo_gestion_id')
+                ->label('Tipo de Gestión')
                 ->options(TipoGestion::all()->pluck('nombre', 'id'))
-                ->required()
-                ->columnSpan(1),
-
+                ->default(1) // Establece NO GESTIONADO (ID 1) como valor por defecto
+                ->required(),
+*/
             TextInput::make('correo_electronico')
                 ->label('Correo Electrónico')
                 ->email()
@@ -235,32 +235,32 @@ public static function form(Form $form): Form
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('nombre_completo')
-    ->label('Nombre Completo')
-    ->getStateUsing(function ($record) {
-        // Si tiene razón social y NO tiene nombres personales
-        if (empty($record->nombres) && empty($record->ape_paterno) && empty($record->ape_materno)) {
-            return $record->razon_social ?? '-';
-        }
+                ->columns([
+                    TextColumn::make('nombre_completo')
+                    ->label('Nombre Completo')
+                    ->getStateUsing(function ($record) {
+                        // Si tiene razón social y NO tiene nombres personales
+                        if (empty($record->nombres) && empty($record->ape_paterno) && empty($record->ape_materno)) {
+                            return $record->razon_social ?? '-';
+                        }
 
-        // Armar nombre completo
-        $nombreCompleto = trim("{$record->nombres} {$record->ape_paterno} {$record->ape_materno}");
-        return $nombreCompleto;
-    })
-    ->searchable(query: function (Builder $query, string $search): Builder {
-        return $query
-            ->where('nombres', 'like', "%{$search}%")
-            ->orWhere('ape_paterno', 'like', "%{$search}%")
-            ->orWhere('ape_materno', 'like', "%{$search}%")
-            ->orWhere('razon_social', 'like', "%{$search}%");
-    })
-    ->sortable(query: function (Builder $query, string $direction): Builder {
-        return $query
-            ->orderByRaw("COALESCE(ape_paterno, razon_social) {$direction}")
-            ->orderBy('ape_materno', $direction)
-            ->orderBy('nombres', $direction);
-    })
+                        // Armar nombre completo
+                        $nombreCompleto = trim("{$record->nombres} {$record->ape_paterno} {$record->ape_materno}");
+                        return $nombreCompleto;
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query
+                            ->where('nombres', 'like', "%{$search}%")
+                            ->orWhere('ape_paterno', 'like', "%{$search}%")
+                            ->orWhere('ape_materno', 'like', "%{$search}%")
+                            ->orWhere('razon_social', 'like', "%{$search}%");
+                    })
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query
+                            ->orderByRaw("COALESCE(ape_paterno, razon_social) {$direction}")
+                            ->orderBy('ape_materno', $direction)
+                            ->orderBy('nombres', $direction);
+                    })
 
                     ->sortable(),
 
@@ -310,7 +310,7 @@ public static function form(Form $form): Form
                     ->label('Proyecto')
                     ->relationship('proyecto', 'nombre'),
 
-            
+/*
                 Filter::make('fecha_registro')
                     ->form([
                         DatePicker::make('fecha_inicio')
@@ -330,14 +330,14 @@ public static function form(Form $form): Form
                                 $data['fecha_fin'],
                                 fn (Builder $query, $date): Builder => $query->whereDate('fecha_registro', '<=', $date),
                             );
-                    }),
+                    }),*/
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
+               // Tables\Actions\EditAction::make(),
+               // Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                //Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
