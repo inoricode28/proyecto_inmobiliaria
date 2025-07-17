@@ -72,6 +72,11 @@ class Estados_DepartamentoSeeder extends Seeder
             ],
         ];
 
-        DB::table('estados_departamento')->insert($estados);
+        foreach ($estados as $estado) {
+            DB::table('estados_departamento')->updateOrInsert(
+                ['nombre' => $estado['nombre']], // Clave única
+                $estado
+            );
+        }
     }
 }

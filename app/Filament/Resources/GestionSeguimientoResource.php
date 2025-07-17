@@ -220,7 +220,7 @@ public static function form(Form $form): Form
                                         ->columnSpan(1),
 
                                     Textarea::make('nota')
-                                        ->label('Nota')
+                                        ->label('Nota Adicional')
                                         ->placeholder('Ingrese observaciones del seguimiento')
                                         ->columnSpanFull(),
                                 ]),

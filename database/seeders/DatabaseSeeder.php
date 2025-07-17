@@ -36,10 +36,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ComoSeEnteroSeeder::class);
         $this->call(NivelInteresSeeder::class);
         $this->call(TipoDocumentoSeeder::class);
-        
-        
-              
-        
-        
+                      
     }
 }

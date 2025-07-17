@@ -47,16 +47,20 @@ class Tarea extends Model
     }
 
 
-public function proyecto()
-{
-    return $this->belongsTo(Proyecto::class);
-}
-// En app/Models/Tarea.php
-public function prospecto()
-{
-    return $this->belongsTo(Prospecto::class);
-}
+    public function proyecto()
+    {
+        return $this->belongsTo(Proyecto::class);
+    }
+    // En app/Models/Tarea.php
+    public function prospecto()
+    {
+        return $this->belongsTo(Prospecto::class);
+    }
 
+    public function cita()
+    {
+        return $this->hasOne(Cita::class);
+    }
 
 }
 

@@ -9,15 +9,20 @@ class TiposDepartamentoSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run(): void
     {
-        DB::table('tipos_departamento')->insert([
+        $tipos = [
             ['nombre' => 'FLAT', 'descripcion' => 'FLAT'],
             ['nombre' => 'DUPLEX', 'descripcion' => 'DUPLEX'],
             ['nombre' => 'TRIPLEX', 'descripcion' => 'TRIPLEX'],
-        ]);
+        ];
+
+        foreach ($tipos as $tipo) {
+            DB::table('tipos_departamento')->updateOrInsert(
+                ['nombre' => $tipo['nombre']],
+                $tipo
+            );
+        }
     }
 }
