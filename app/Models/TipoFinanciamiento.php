@@ -22,7 +22,7 @@ class TipoFinanciamiento extends Model
 
     public function departamentos()
     {
-        return $this->hasMany(Departamento::class, 'tipo_financiamiento_id');
+        return $this->hasMany(Departamento::class, 'tipos_financiamiento_id');
     }
 
     // Scope opcional para obtener el tipo de financiamiento por defecto

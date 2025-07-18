@@ -1,9 +1,9 @@
 <div class="w-[85vw] h-screen overflow-y-auto bg-white rounded-lg shadow border p-6 lg:p-11">
 
 
-      <div class="flex justify-between mb-4 gap-4">
+      <div class="flex flex-wrap mb-4 gap-2 items-end">
     <!-- Combo Box para Tipo de Inmueble -->
-    <div class="w-full max-w-xs">
+    <div class="w-60">
         <label for="tipo-inmueble-filter" class="block text-sm font-medium text-gray-700">Tipo de Inmueble</label>
         <select id="tipo-inmueble-filter"
                 wire:model="selectedTipoInmueble"
@@ -14,7 +14,21 @@
             @endforeach
         </select>
     </div>
+
+    <!-- Combo Box para Proyecto -->
+    <div class="w-60">
+        <label for="proyecto-filter" class="block text-sm font-medium text-gray-700">Proyecto</label>
+        <select id="proyecto-filter"
+                wire:model="selectedProyecto"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+            <option value="">Todos los proyectos</option>
+            @foreach($proyectos as $proyecto)
+                <option value="{{ $proyecto->id }}">{{ $proyecto->nombre }}</option>
+            @endforeach
+        </select>
+    </div>
 </div>
+
 
     <!-- Sección de Financiamiento primero -->
     <div class="mb-4">
@@ -60,7 +74,12 @@
 
     <!-- Sección de Pisos -->
   <div x-data="{ imagenModal: null }" class="bg-white rounded-lg shadow border p-4">
-    <h3 class="font-bold text-lg mb-4">Disponibilidad por Pisos</h3>
+     <h3 class="font-bold text-lg mb-4">
+                Disponibilidad por Pisos
+                @if($selectedProyecto)
+                    {{ $proyectos->firstWhere('id', $selectedProyecto)?->nombre }}
+                @endif
+            </h3>
 
     @foreach($this->getPisosData() as $piso => $departamentos)
         <div class="mb-2 flex items-start ml-6">
