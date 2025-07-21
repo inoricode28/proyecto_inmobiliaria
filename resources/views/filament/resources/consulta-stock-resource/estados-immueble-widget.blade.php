@@ -26,7 +26,7 @@
             @endforeach
         </select>
     </div>
-
+</div>
 
 
     <!-- Sección de Financiamiento primero -->
@@ -68,7 +68,7 @@
             @endforeach
         </div>
     </div>
-</div>
+
 
     <!-- Sección de Pisos -->
     <div class="bg-white rounded-lg shadow border p-4">
