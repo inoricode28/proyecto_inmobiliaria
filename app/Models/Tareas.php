@@ -13,6 +13,7 @@ class Tarea extends Model
 
     protected $fillable = [
         'prospecto_id',
+        'tarea_padre_id',
         'forma_contacto_id',
         'nivel_interes_id',
         'usuario_asignado_id',

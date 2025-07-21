@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use App\Http\Controllers\RoadMap\DataController;
 use App\Http\Controllers\Auth\OidcAuthController;
+use App\Filament\Resources\PanelSeguimientoResource\Pages\ViewProspectoInfo;
 
 // Share ticket
 Route::get('/tickets/share/{ticket:code}', function (Ticket $ticket) {
@@ -36,3 +37,6 @@ Route::name('oidc.')
         Route::get('redirect', [OidcAuthController::class, 'redirect'])->name('redirect');
         Route::get('callback', [OidcAuthController::class, 'callback'])->name('callback');
     });
+Route::get('/admin/panel-seguimiento/prospecto/{record}', ViewProspectoInfo::class)
+    ->name('filament.resources.panel-seguimiento.view-prospecto-info');
+    

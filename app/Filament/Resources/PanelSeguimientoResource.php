@@ -19,11 +19,17 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use App\Filament\Resources\PanelSeguimientoResource\Pages;
 use App\Filament\Resources\PanelSeguimientoResource\Widgets\SeguimientoFilters;
 use App\Filament\Resources\Proforma\ProformaResource;
 use App\Filament\Resources\Separaciones\SeparacionResource;
+
+use Illuminate\Support\HtmlString;
+use App\Filament\Resources\PanelSeguimientoResource\Pages\ViewProspectoInfo;
+
 class PanelSeguimientoResource extends Resource
 {
     protected static ?string $model = Tarea::class;
@@ -45,6 +51,7 @@ class PanelSeguimientoResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('prospecto.id')->label('ID')->searchable(),
                 TextColumn::make('prospecto.nombres')
                     ->label('Nombres')
                     ->formatStateUsing(function ($record) {
@@ -57,9 +64,12 @@ class PanelSeguimientoResource extends Resource
                             ? $prospecto->nombres . ' ' . $prospecto->ape_paterno . ' ' . ($prospecto->ape_materno ?? '')
                             : ($prospecto->razon_social ?? '-');
                     })
+                    ->url(fn ($record) => \App\Filament\Resources\PanelSeguimientoResource::getUrl('view', ['record' => $record->prospecto_id]))
+                    ->openUrlInNewTab()
                     ->searchable(),
 
                 TextColumn::make('prospecto.celular')->label('Teléfono')->searchable(),
+                TextColumn::make('prospecto.numero_documento')->label('N° Doc.')->searchable(),
                 TextColumn::make('prospecto.proyecto.nombre')->label('Proyecto'),
                 TextColumn::make('prospecto.comoSeEntero.nombre')->label('Cómo se enteró'),
                 TextColumn::make('prospecto.fecha_registro')->label('Fec. Registro')->date('d/m/Y'),
@@ -75,7 +85,7 @@ class PanelSeguimientoResource extends Resource
                     ->color('primary')
                     ->button()
                     ->size('sm')
-                    ->visible(fn ($record) =>in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3]))
+                    ->visible(fn ($record) =>in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3, 4, 5, 6]))
                     ->extraAttributes([
                         'class' => 'mr-2',
                         'style' => 'background-color: #1d4ed8; border-color: #1e40af; color: white;',
@@ -99,40 +109,121 @@ class PanelSeguimientoResource extends Resource
                         ]);
                     })
                     ->form([
-                        Card::make()->schema([
-                            TextInput::make('nombre')->label('Nombre del Prospecto')->disabled(),
-                            TextInput::make('telefono')->label('Teléfono/Celular')->disabled(),
-                            TextInput::make('proyecto')->label('Proyecto de interés')->disabled(),
-                            Radio::make('respuesta')
-                                ->label('Resultado del contacto')
-                                ->options([
-                                    'efectiva' => 'EFECTIVA',
-                                    'no_efectiva' => 'NO EFECTIVA'
-                                ])
-                                ->required()
-                                ->inline(),
-                            Textarea::make('comentario')
-                                ->label('Comentarios adicionales')
-                                ->placeholder('Detalles de la conversación')
-                                ->rows(3)
-                                ->maxLength(500),
+                        Grid::make(2)->schema([
+
+                            // Columna izquierda
+                            Card::make()->schema([
+                                Grid::make(3)->schema([
+                                    TextInput::make('nombre')->label('Nombre del Prospecto')->disabled(),
+                                    TextInput::make('telefono')->label('Teléfono/Celular')->disabled(),
+                                    TextInput::make('proyecto')->label('Proyecto de interés')->disabled(),
+                                ]),
+                                Radio::make('forma_contacto_id')
+                                    ->label('Forma de contacto')
+                                    ->view('filament.resources.panel-seguimiento-resource.custom-forma-contacto')
+                                    ->required(),
+                                Grid::make(2)->schema([
+                                    DatePicker::make('fecha_realizar')
+                                        ->label('Fecha acción')
+                                        ->required()
+                                        ->default(now()),
+                                    TimePicker::make('hora')
+                                        ->label('Hora acción')
+                                        ->required()
+                                        ->default(now()->format('H:i')),
+                                ]),
+                                Radio::make('respuesta')
+                                    ->label('Resultado del contacto')
+                                    ->options([
+                                        'efectiva' => 'EFECTIVA',
+                                        'no_efectiva' => 'NO EFECTIVA'
+                                    ])
+                                    ->required()
+                                    ->inline(),
+                                Textarea::make('comentario')
+                                    ->label('Comentarios adicionales')
+                                    ->placeholder('Detalles de la conversación')
+                                    ->rows(3)
+                                    ->maxLength(500),
+                                Radio::make('nivel_interes_id')
+                                    ->label('Nivel de Interés')
+                                    ->options(NivelInteres::pluck('nombre', 'id'))
+                                    ->inline() 
+                                    ->required(),
+                                Placeholder::make('ultima_accion')
+                                    ->label('')
+                                    ->content(function ($record) {
+                                        $prospecto = $record?->prospecto ?? null;
+
+                                        if (!$prospecto) {
+                                            return new HtmlString('<hr class="my-4"><div class="text-sm text-gray-500 font-medium">Última Acción</div><div class="text-sm text-gray-500">Sin acciones anteriores.</div>');
+                                        }
+
+                                        $ultimaTarea = $prospecto->tareas()->latest('created_at')->first();
+
+                                        if (!$ultimaTarea) {
+                                            return new HtmlString('<hr class="my-4"><div class="text-sm text-gray-500 font-medium">Última Acción</div><div class="text-sm text-gray-500">Sin acciones anteriores.</div>');
+                                        }
+
+                                        return new HtmlString('
+                                            <hr class="my-4">
+                                            <div class="text-base font-semibold text-gray-800 mb-2">Última Acción</div>
+                                            <div class="space-y-2 text-sm text-gray-700 leading-snug">
+                                                <div class="flex flex-wrap gap-4">
+                                                    <div><strong>Forma de contacto: </strong> ' . e($ultimaTarea->formaContacto?->nombre) . '</div>
+                                                    <div><strong>Fecha: </strong> ' . $ultimaTarea->fecha_realizar->format('d/m/Y') . '</div>
+                                                    <div><strong>Hora: </strong> ' . $ultimaTarea->hora . '</div>
+                                                </div>
+                                                <div><strong>Nivel de interés:</strong> ' . e($ultimaTarea->nivelInteres?->nombre) . '</div>
+                                                <div><strong>Nota:</strong> ' . e($ultimaTarea->nota) . '</div>
+                                            </div>
+                                        ');
+                                    }),
+                            ]), // Fin columna izquierda
+
+                            // Columna derecha
+                            Card::make()->schema([     
+                                Toggle::make('crear_proxima_tarea')
+                                    ->label('¿Crear próxima tarea?'),                       
+                                Radio::make('proxima_forma_contacto_id')
+                                    ->label('Forma de contacto')
+                                    ->view('filament.resources.panel-seguimiento-resource.custom-forma-contacto'),
+                                Grid::make(2)->schema([
+                                    DatePicker::make('proxima_fecha')
+                                        ->label('Fecha próxima tarea')
+                                        ->default(now()->addDays(1)),
+
+                                    TimePicker::make('proxima_hora')
+                                        ->label('Hora próxima tarea')
+                                        ->default('09:00'),
+                                ]),
+                            ]), // Fin columna derecha
+
                         ])
                     ])
                     ->action(function (Tarea $record, array $data) {
                         try {
-                            if ($data['respuesta'] !== 'efectiva' && $record->prospecto->tipo_gestion_id == 3) {
+                            $prospecto = $record->prospecto;
+                            if ($data['respuesta'] !== 'efectiva' && $record->prospecto->tipo_gestion_id == 3) {            
                                 Notification::make()
                                     ->title('Acción no permitida')
                                     ->body('No se puede retroceder de Contactados a Por Contactar')
                                     ->danger()
                                     ->send();
                                 return;
-                            }
+                            } 
 
-                            $record->update([
-                                'fecha_contacto' => now(),
+                            Tarea::create([
+                                'prospecto_id' => $prospecto->id,
+                                'forma_contacto_id' => $data['forma_contacto_id'],                                
+                                'fecha_realizar' => $data['fecha_realizar'],
+                                'hora' => $data['hora'],
                                 'nota' => $data['comentario'] ?? null,
-                            ]);
+                                'nivel_interes_id' => $data['nivel_interes_id'],                                
+                                'usuario_asignado_id' => auth()->id(),
+                                'created_by' => auth()->id(),
+                                'updated_by' => auth()->id(),
+                            ]);                            
 
                             $nuevoTipoGestion = null;
                             if ($data['respuesta'] === 'efectiva') {
@@ -143,6 +234,21 @@ class PanelSeguimientoResource extends Resource
 
                             if ($nuevoTipoGestion) {
                                 $record->prospecto->update(['tipo_gestion_id' => $nuevoTipoGestion]);
+                            }
+
+                            if (!empty($data['crear_proxima_tarea']) && $data['proxima_fecha'] && $data['proxima_forma_contacto_id']) {
+                                Tarea::create([
+                                    'prospecto_id' => $prospecto->id,
+                                    'tarea_padre_id' => $record->id, // Aquí se guarda la trazabilidad
+                                    'forma_contacto_id' => $data['proxima_forma_contacto_id'],
+                                    'fecha_realizar' => $data['proxima_fecha'],
+                                    'hora' => $data['proxima_hora'] ?? '09:00:00', // valor por defecto si no se define
+                                    'nota' => $data['proxima_comentario'] ?? null,
+                                    'nivel_interes_id' => $data['nivel_interes_id'], // reutilizamos el mismo nivel de interés
+                                    'usuario_asignado_id' => auth()->id(),
+                                    'created_by' => auth()->id(),
+                                    'updated_by' => auth()->id(),
+                                ]);
                             }
 
                             Notification::make()
@@ -167,7 +273,7 @@ class PanelSeguimientoResource extends Resource
                     ->color('success')
                     ->button()
                     ->size('sm')
-                    ->visible(fn ($record) =>in_array($record->prospecto?->tipo_gestion_id, [3, 4]))
+                    ->visible(fn ($record) =>in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3, 4]))
                     ->modalHeading(function ($record) {
                         $prospecto = $record->prospecto;
                         $nombreCompleto = $prospecto->nombres
@@ -282,7 +388,7 @@ class PanelSeguimientoResource extends Resource
                         ->color('warning')
                         ->button()
                         ->size('sm')
-                        ->visible(fn ($record) => $record->prospecto?->tipo_gestion_id === 4)
+                        ->visible(fn ($record) =>in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3, 4]))
                         ->url(fn ($record) =>
                             ProformaResource::getUrl('create', ['numero_documento' => $record->prospecto->numero_documento])
                         )
@@ -314,6 +420,7 @@ class PanelSeguimientoResource extends Resource
     {
         return [
             'index' => Pages\ListPanelSeguimientos::route('/'),
+            'view' => ViewProspectoInfo::route('/prospecto/{record}'),
         ];
     }
 }

@@ -112,7 +112,7 @@ class SeguimientoFilters extends Widget implements HasForms
 
         $conteos = $query->clone()
             ->select('prospectos.tipo_gestion_id')
-            ->selectRaw('COUNT(DISTINCT tareas.id) as total')
+            ->selectRaw('COUNT(DISTINCT prospectos.id) as total')
             ->groupBy('prospectos.tipo_gestion_id')
             ->pluck('total', 'tipo_gestion_id');
 

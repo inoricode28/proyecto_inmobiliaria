@@ -21,6 +21,15 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Carbon;
 
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ProspectosImport;
+use Filament\Forms\Form;
+
+use Livewire\WithFileUploads;
+use Illuminate\View\View;
+
 class ProspectosStats extends Widget implements HasForms
 {
     use InteractsWithForms;
@@ -42,6 +51,12 @@ class ProspectosStats extends Widget implements HasForms
     public $eventos_vencidos;
     public $con_score;
     public $prospecto_nuevo;
+    protected $listeners = ['open-import-modal' => 'import'];
+
+    use WithFileUploads;
+
+    public $showImportModal = false;
+    public $importFile;
 
     protected function getFormSchema(): array
     {
@@ -153,7 +168,10 @@ class ProspectosStats extends Widget implements HasForms
 
                         ViewField::make('buscar_button')
                             ->label('')
-                            ->view('filament.resources.gestion-seguimiento-resource.buscar-button')
+                            ->view('filament.resources.gestion-seguimiento-resource.buscar-button'),
+                        /*ViewField::make('importar_button')
+                            ->label('')
+                            ->view('filament.resources.gestion-seguimiento-resource.import-button')*/
                     ])->columns(4)
                 ]),
         ];
@@ -178,4 +196,56 @@ class ProspectosStats extends Widget implements HasForms
             'prospecto_nuevo' => $this->prospecto_nuevo,
         ]);
     }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                FileUpload::make('excel_file')
+                    ->label('Archivo Excel')
+                    ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
+                    ->required(),
+            ]);
+    }
+
+    public function import()
+    {
+        $data = $this->form->getState();
+
+        Excel::import(new ProspectosImport, $data['excel_file']);
+
+        Notification::make()
+            ->title('Importación completada')
+            ->success()
+            ->send();
+    }
+
+    public function openImportModal()
+    {
+        $this->reset('importFile');
+        $this->showImportModal = true;
+    }
+
+    public function importProspects()
+    {
+        $this->validate([
+            'importFile' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        // Aquí procesarías el archivo
+        // Ejemplo: Excel::import(new ProspectosImport, $this->importFile);
+
+        $this->showImportModal = false;
+
+        Notification::make()
+            ->title('Importación completada')
+            ->success()
+            ->send();
+    }
+
+    public function render(): View
+    {
+        return view('filament.resources.gestion-seguimiento-resource.prospecto-stats-form');
+    }
+
 }

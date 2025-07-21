@@ -6,6 +6,7 @@ use App\Filament\Resources\PanelSeguimientoResource;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class ListPanelSeguimientos extends ListRecords
 {
@@ -43,43 +44,36 @@ class ListPanelSeguimientos extends ListRecords
 
     protected function getTableQuery(): Builder
     {
-        $query = parent::getTableQuery()
-            ->with(['prospecto.proyecto', 'prospecto.comoSeEntero', 'usuarioAsignado']);
+        $latestTareas = \DB::table('tareas as t1')
+            ->selectRaw('MAX(t1.id) as id')
+            ->join('prospectos as p', 'p.id', '=', 't1.prospecto_id')
+            ->when($this->filtros['proyecto_id'], function (QueryBuilder $q) {
+                $q->where('p.proyecto_id', $this->filtros['proyecto_id']);
+            })
+            ->when($this->filtros['como_se_entero_id'], function (QueryBuilder $q) {
+                $q->where('p.como_se_entero_id', $this->filtros['como_se_entero_id']);
+            })
+            ->when($this->filtros['tipo_gestion_id'], function (QueryBuilder $q) {
+                $q->where('p.tipo_gestion_id', $this->filtros['tipo_gestion_id']);
+            })
+            ->when($this->filtros['fecha_inicio'], function (QueryBuilder $q) {
+                $q->whereDate('t1.fecha_realizar', '>=', Carbon::parse($this->filtros['fecha_inicio']));
+            })
+            ->when($this->filtros['fecha_fin'], function (QueryBuilder $q) {
+                $q->whereDate('t1.fecha_realizar', '<=', Carbon::parse($this->filtros['fecha_fin']));
+            })
+            ->whereNull('t1.deleted_at')
+            ->groupBy('t1.prospecto_id');
 
-        // Si no se ha seleccionado un tipo de gestión, no mostrar registros
+        $query = \App\Models\Tarea::query()
+            ->with(['prospecto.proyecto', 'prospecto.comoSeEntero', 'usuarioAsignado'])
+            ->whereIn('id', $latestTareas)
+            ->when($this->filtros['usuario_id'], function ($q) {
+                $q->where('usuario_asignado_id', $this->filtros['usuario_id']);
+            });
+
         if (!$this->filtros['filtro_tipo_gestion_aplicado']) {
             return $query->whereRaw('1 = 0');
-        }
-
-        // Aplicar filtros solo si se han establecido valores
-        if ($this->filtros['proyecto_id']) {
-            $query->whereHas('prospecto', function ($q) {
-                $q->where('proyecto_id', $this->filtros['proyecto_id']);
-            });
-        }
-
-        if ($this->filtros['usuario_id']) {
-            $query->where('usuario_asignado_id', $this->filtros['usuario_id']);
-        }
-
-        if ($this->filtros['como_se_entero_id']) {
-            $query->whereHas('prospecto', function ($q) {
-                $q->where('como_se_entero_id', $this->filtros['como_se_entero_id']);
-            });
-        }
-
-        if ($this->filtros['tipo_gestion_id']) {
-            $query->whereHas('prospecto', function ($q) {
-                $q->where('tipo_gestion_id', $this->filtros['tipo_gestion_id']);
-            });
-        }
-
-        if ($this->filtros['fecha_inicio']) {
-            $query->whereDate('fecha_realizar', '>=', Carbon::parse($this->filtros['fecha_inicio']));
-        }
-
-        if ($this->filtros['fecha_fin']) {
-            $query->whereDate('fecha_realizar', '<=', Carbon::parse($this->filtros['fecha_fin']));
         }
 
         return $query;

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\User;
 
 class Prospecto extends Model
 {
@@ -97,9 +98,15 @@ class Prospecto extends Model
     {
         return $this->belongsTo(NivelInteres::class);
     }
+
     public function tareaAsignada()
-{
-    return $this->hasOne(Tarea::class)->latestOfMany(); // O firstOfMany() si prefieres la más antigua
-}
+    {
+        return $this->hasOne(Tarea::class)->latestOfMany(); // O firstOfMany() si prefieres la más antigua
+    }
+
+    public function usuarioAsignado()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
 }
