@@ -161,17 +161,25 @@ class EstadosInmuebleWidget extends Widget
     }
 
     public function mostrarFotos($departamentoId)
-    {
-        $departamento = Departamento::with('fotoDepartamentos')->find($departamentoId);
-        
-        if ($departamento && $departamento->fotoDepartamentos->isNotEmpty()) {
-            $this->fotosModal = $departamento->fotoDepartamentos
-                ->map(fn($foto) => asset('storage/'.$foto->imagen))
-                ->toArray();
-            $this->departamentoSeleccionado = $departamento->num_departamento;
-            $this->dispatchBrowserEvent('abrirModalFotos');
-        }
+{
+    $departamento = Departamento::with('fotoDepartamentos')->find($departamentoId);
+    
+    if ($departamento && $departamento->fotoDepartamentos->isNotEmpty()) {
+        $this->fotosModal = $departamento->fotoDepartamentos
+            ->map(fn($foto) => asset('storage/' . $foto->imagen))
+            ->toArray();
+
+        $this->departamentoSeleccionado = $departamento->num_departamento;
+
+        // ENVÍA LAS IMÁGENES A JAVASCRIPT
+        $this->dispatchBrowserEvent('abrirModalFotos', [
+            'fotos' => $departamento->fotoDepartamentos
+                ->map(fn($foto) => asset('storage/' . $foto->imagen))
+                ->toArray()
+        ]);
     }
+}
+
 
     public function cerrarModal()
     {
