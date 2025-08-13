@@ -36,6 +36,16 @@ class DatabaseSeeder extends Seeder
         $this->call(ComoSeEnteroSeeder::class);
         $this->call(NivelInteresSeeder::class);
         $this->call(TipoDocumentoSeeder::class);
+
+
+        $this->call(GenerosSeeder::class);
+        $this->call(EstadosCivilesSeeder::class);
+        $this->call(NacionalidadesSeeder::class);
+        $this->call(ProvinciasSeeder::class);
+        $this->call(TablasAuxiliaresSeeder::class);
+        $this->call(DistritosSeeder::class);
+        $this->call(GradosEstudioSeeder::class);
+
                       
     }
 }

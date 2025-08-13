@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Separaciones\Pages;
 
 use App\Models\Separacion;
+use App\Models\EstadoDepartamento;
 
 use App\Filament\Resources\Separaciones\SeparacionResource;
 use Filament\Resources\Pages\CreateRecord;
@@ -29,6 +30,17 @@ class CreateSeparacion extends CreateRecord
     protected function afterCreate(): void
     {
         $separacion = $this->record;
+
+        // Cambiar el estado del departamento a 'Separacion'
+        if ($separacion->proforma && $separacion->proforma->departamento) {
+            $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
+            
+            if ($estadoSeparacion) {
+                $separacion->proforma->departamento->update([
+                    'estado_departamento_id' => $estadoSeparacion->id
+                ]);
+            }
+        }
 
         if ($separacion->proforma && $separacion->proforma->prospecto) {
             $separacion->proforma->prospecto->update([

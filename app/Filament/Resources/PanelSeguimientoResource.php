@@ -9,6 +9,7 @@ use Filament\Resources\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use App\Models\FormaContacto;
+use App\Models\User;
 use App\Models\NivelInteres;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\TextInput;
@@ -200,7 +201,17 @@ class PanelSeguimientoResource extends Resource
                             // Columna derecha
                             Card::make()->schema([     
                                 Toggle::make('crear_proxima_tarea')
-                                    ->label('¿Crear próxima tarea?'),                       
+                                    ->label('¿Crear próxima tarea?')
+                                    ->default(true)
+                                    ->afterStateHydrated(function ($component, $state) {
+                                        $component->state(true);
+                                    }),
+                                               
+                                Select::make('proxima_usuario_asignado_id')
+                                    ->label('Asignar a')
+                                    ->options(User::all()->pluck('name', 'id'))
+                                    ->searchable()
+                                    ->required(),
                                 Radio::make('proxima_forma_contacto_id')
                                     ->label('Forma de contacto')
                                     ->view('filament.resources.panel-seguimiento-resource.custom-forma-contacto'),
@@ -324,7 +335,7 @@ class PanelSeguimientoResource extends Resource
                             Grid::make(2)->schema([
                                 Select::make('responsable_id')
                                     ->label('Responsable')
-                                    ->relationship('usuarioAsignado', 'name')
+                                    ->options(User::all()->pluck('name', 'id'))
                                     ->searchable()
                                     ->required(),
 

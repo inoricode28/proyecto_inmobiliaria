@@ -134,6 +134,9 @@ class ProformaResource extends Resource
                                     if (!$proyectoId) return [];
 
                                     return \App\Models\Departamento::where('proyecto_id', $proyectoId)
+                                        ->whereHas('estadoDepartamento', function ($query) {
+                                            $query->where('nombre', 'Disponible');
+                                        })
                                         ->pluck('num_departamento', 'id')
                                         ->toArray();
                                 })
