@@ -86,7 +86,7 @@
                     <div><strong>Respuesta:</strong> ( {{ $tarea->respuesta ?? 'No especificada' }} )</div>
                     <div class="mt-2">
                         <strong>Comentario :</strong><br>
-                        {{ $tarea->comentario ?? 'Sin comentarios' }}
+                        {{ $tarea->nota ?? 'Sin comentarios' }}
                     </div>
                 </div>
             </div>

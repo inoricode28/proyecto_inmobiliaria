@@ -27,6 +27,7 @@ class ProformaResource extends Resource
     {
         return $form->schema([
             Tabs::make('Proforma')
+                -> columnSpan('full')
                 ->tabs([
                     Tab::make('Cliente')->schema([
                         Grid::make(3)->schema([

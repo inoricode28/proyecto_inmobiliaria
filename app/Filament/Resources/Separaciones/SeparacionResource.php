@@ -50,7 +50,9 @@ class SeparacionResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Tabs::make('Separación')->tabs([
+            Tabs::make('Separación')
+                ->columnSpan('full')
+            ->tabs([
                 Tab::make('Cliente')->schema([
                     Grid::make(3)->schema([
                         Select::make('proforma_id')
