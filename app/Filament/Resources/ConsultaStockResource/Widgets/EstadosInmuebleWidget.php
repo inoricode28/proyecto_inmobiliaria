@@ -10,6 +10,7 @@ use App\Models\TipoInmueble;
 use App\Models\Proyecto;
 use Filament\Widgets\Widget;
 use Livewire\WithFileUploads;
+use Livewire\Component;
 
 class EstadosInmuebleWidget extends Widget
 {
@@ -24,6 +25,11 @@ class EstadosInmuebleWidget extends Widget
     public $selectedProyecto = '';
     public $fotosModal = [];
     public $departamentoSeleccionado = null;
+
+    public static function canView(): bool
+    {
+        return true;
+    }
 
     protected function getViewData(): array
     {
@@ -179,6 +185,11 @@ class EstadosInmuebleWidget extends Widget
         ]);
     }
 }
+
+    public function abrirDetalleSeparacion($proformaId)
+    {
+        $this->emit('abrirDetalleSeparacion', $proformaId);
+    }
 
 
     public function cerrarModal()

@@ -3,6 +3,7 @@
      x-show="modalAbierto" 
      x-cloak
      @modal-abierto.window="modalAbierto = true"
+
      style="background-color: rgba(0, 0, 0, 0.5);">
      
     <div class="w-[85vw] h-[90vh] overflow-y-auto bg-white rounded-lg shadow border p-6" 
@@ -128,8 +129,8 @@
                 </div>
             @else
                 <div class="text-center py-8">
-                    <p class="text-gray-500">No se encontraron datos de separación para este inmueble.</p>
-                    <p class="text-sm text-gray-400 mt-2">Departamento ID: {{ $departamentoId }}</p>
+                    <p class="text-gray-500">No se encontraron datos de separación para esta proforma.</p>
+                    <p class="text-sm text-gray-400 mt-2">Proforma ID: {{ $proformaId }}</p>
                 </div>
             @endif
         </div>

@@ -108,6 +108,11 @@ class Departamento extends Model
         return $this->hasMany(FotoDepartamento::class, 'departamento_id');
     }
 
+    public function proformas()
+    {
+        return $this->hasMany(Proforma::class);
+    }
+
     public function separaciones()
     {
         return $this->hasManyThrough(

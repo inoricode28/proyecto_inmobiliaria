@@ -14,7 +14,7 @@ class DetalleSeparacionWidget extends Widget
     
     protected int|string|array $columnSpan = 'full';
     
-    public $departamentoId;
+    public $proformaId;
     public $separacionData;
     public $proformaData;
     public $visitaData;
@@ -25,15 +25,15 @@ class DetalleSeparacionWidget extends Widget
         return true;
     }
 
-    public function mount($departamentoId = null)
+    public function mount($proformaId = null)
     {
-        $this->departamentoId = $departamentoId;
+        $this->proformaId = $proformaId;
         $this->loadSeparacionData();
     }
     
-    public function abrirModal($departamentoId)
+    public function abrirModal($proformaId)
     {
-        $this->departamentoId = $departamentoId;
+        $this->proformaId = $proformaId;
         $this->loadSeparacionData();
         $this->modalAbierto = true;
         $this->dispatch('modal-abierto');
@@ -42,7 +42,7 @@ class DetalleSeparacionWidget extends Widget
     public function cerrarModal()
     {
         $this->modalAbierto = false;
-        $this->departamentoId = null;
+        $this->proformaId = null;
         $this->separacionData = null;
         $this->proformaData = null;
         $this->visitaData = null;
@@ -50,70 +50,41 @@ class DetalleSeparacionWidget extends Widget
     
     protected function loadSeparacionData()
     {
-        if (!$this->departamentoId) return;
+        if (!$this->proformaId) return;
         
-        $departamento = Departamento::with([
-            'proformas.separacion',
-            'estadoDepartamento',
+        $proforma = Proforma::with([
+            'separacion',
             'proyecto',
-            'tipoFinanciamiento'
-        ])->find($this->departamentoId);
+            'departamento.estadoDepartamento'
+        ])->find($this->proformaId);
         
-        if (!$departamento) {
+        if (!$proforma) {
             return;
         }
         
-        // Buscar cualquier estado que contenga "Separacion"
-        $esSeparacion = str_contains(strtolower($departamento->estadoDepartamento->nombre), 'separacion');
+        $this->proformaData = $proforma;
         
-        if (!$esSeparacion) {
-            return;
-        }
-        
-        // Obtener la proforma más reciente con separación
-        $proforma = $departamento->proformas()
-            ->whereHas('separacion')
-            ->with(['separacion', 'proyecto', 'departamento'])
-            ->latest()
-            ->first();
-            
-        if ($proforma && $proforma->separacion) {
-            $this->proformaData = $proforma;
+        if ($proforma->separacion) {
             $this->separacionData = $proforma->separacion;
-            
-            // Datos de visita
-            $this->visitaData = [
-                'fecha_visita' => $proforma->created_at->format('d/m/Y H:i'),
-                'fecha_proforma' => $proforma->created_at->format('d/m/Y H:i'),
-                'fecha_vencimiento' => $proforma->created_at->addDays(15)->format('d/m/Y H:i'),
-            ];
         } else {
-            // Si no hay proforma con separación, crear datos básicos
-            $this->proformaData = (object) [
-                'nombres' => 'Sin datos',
-                'ape_paterno' => '',
-                'proyecto' => $departamento->proyecto,
-                'departamento' => $departamento,
-                'monto_separacion' => $departamento->precio * 0.1, // 10% como ejemplo
-                'created_at' => now()
-            ];
-            
+            // Si no hay separación, crear datos básicos
             $this->separacionData = (object) [
                 'id' => 0,
                 'tipo_separacion' => 'Separación Temporal',
                 'ruc' => 'N/A',
                 'empresa' => 'N/A',
                 'ingresos' => 0,
-                'saldo_a_financiar' => $departamento->precio * 0.9,
+                'saldo_a_financiar' => $proforma->departamento->precio * 0.9,
                 'created_at' => now()
             ];
-            
-            $this->visitaData = [
-                'fecha_visita' => now()->format('d/m/Y H:i'),
-                'fecha_proforma' => now()->format('d/m/Y H:i'),
-                'fecha_vencimiento' => now()->addDays(15)->format('d/m/Y H:i'),
-            ];
         }
+        
+        // Datos de visita
+        $this->visitaData = [
+            'fecha_visita' => $proforma->created_at->format('d/m/Y H:i'),
+            'fecha_proforma' => $proforma->created_at->format('d/m/Y H:i'),
+            'fecha_vencimiento' => $proforma->created_at->addDays(15)->format('d/m/Y H:i'),
+        ];
     }
     
     protected function getViewData(): array
@@ -122,7 +93,7 @@ class DetalleSeparacionWidget extends Widget
             'proformaData' => $this->proformaData,
             'separacionData' => $this->separacionData,
             'visitaData' => $this->visitaData,
-            'departamentoId' => $this->departamentoId,
+            'proformaId' => $this->proformaId,
             'modalAbierto' => $this->modalAbierto
         ];
     }

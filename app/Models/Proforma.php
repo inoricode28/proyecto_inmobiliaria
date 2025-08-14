@@ -99,6 +99,11 @@ class Proforma extends Model
         return $this->hasMany(ProformaDocumento::class);
     }
     
+    public function separacion()
+    {
+        return $this->hasOne(Separacion::class);
+    }
+    
     public function getCodigoFormateadoAttribute()
     {
         return 'PRO' . str_pad($this->id, 5, '0', STR_PAD_LEFT);

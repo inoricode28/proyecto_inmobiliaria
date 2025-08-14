@@ -92,7 +92,14 @@
                         style="background-color: {{ $departamento->estadoDepartamento->color }};"
                         @click="
                             if ('{{ $departamento->estadoDepartamento->nombre }}' === 'Separacion') {
-                                window.open('/detalle-separacion/{{ $departamento->id }}', '_blank');
+                                @php
+                                    $proformaConSeparacion = $departamento->proformas()->whereHas('separacion')->latest()->first();
+                                @endphp
+                                @if($proformaConSeparacion)
+                                    window.location.href = '/Proforma/DetalleProforma/{{ $proformaConSeparacion->id }}';
+                                @else
+                                    alert('No se encontró una proforma con separación para este departamento.');
+                                @endif
                             }
                         ">
                         

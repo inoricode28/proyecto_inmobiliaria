@@ -2,36 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Departamento;
+use App\Models\Proforma;
+use App\Models\Separacion;
 use Illuminate\Http\Request;
 
 class DetalleSeparacionController extends Controller
 {
-    public function show(Departamento $departamento)
+    public function show($proforma_id)
     {
-        // Cargar todas las relaciones necesarias
-        $departamento->load([
-            'estadoDepartamento',
-            'tipoFinanciamiento',
-            'proyecto',
-            'separaciones.proforma.prospecto',
-            'separaciones.proforma.tipoDocumento',
-            'separaciones.proforma.genero',
-            'separaciones.proforma.estadoCivil',
-            'separaciones.proforma.gradoEstudio',
-            'separaciones.proforma.nacionalidad',
-            // 'separaciones.visitas', // Eliminar esta línea
-            'separaciones.notariaKardex',
-            'separaciones.cartaFianza'
-        ]);
-
-        // Obtener la separación más reciente
-        $separacion = $departamento->separaciones()->latest()->first();
+        // Buscar la proforma con todas las relaciones necesarias
+        $proforma = Proforma::with([
+            'separacion',
+            'departamento.estadoDepartamento',
+            'departamento.tipoFinanciamiento',
+            'departamento.proyecto',
+            'prospecto',
+            'tipoDocumento',
+            'genero',
+            'estadoCivil',
+            'gradoEstudio',
+            'nacionalidad',
+            'separacion.notariaKardex',
+            'separacion.cartaFianza'
+        ])->find($proforma_id);
         
-        if (!$separacion) {
-            abort(404, 'No se encontró información de separación para este departamento');
+        if (!$proforma) {
+            abort(404, 'No se encontró la proforma especificada');
+        }
+        
+        if (!$proforma->separacion) {
+            abort(404, 'No se encontró información de separación para esta proforma');
         }
 
-        return view('detalle-separacion', compact('departamento', 'separacion'));
+        $departamento = $proforma->departamento;
+        $separacion = $proforma->separacion;
+
+        return view('detalle-separacion', compact('departamento', 'separacion', 'proforma'));
     }
 }
