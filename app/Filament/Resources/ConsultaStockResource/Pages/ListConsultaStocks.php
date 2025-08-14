@@ -38,6 +38,7 @@ protected function getDefaultTableRecordsPerPageSelectOption(): int
         return [
             ConsultaStockResource\Widgets\EstadosInmuebleWidget::class,
             ConsultaStockResource\Widgets\FinanciamientosInmuebleWidget::class,
+            ConsultaStockResource\Widgets\DetalleSeparacionWidget::class,
         ];
     }
 
@@ -45,3 +46,4 @@ protected function getDefaultTableRecordsPerPageSelectOption(): int
     {
         return 'Lista de Stock por Piso';
     }}
+

@@ -87,9 +87,15 @@
             </div>
 
             <div class="flex">
-                @foreach($departamentos as $departamento)
+                @foreach($departamentos as $departamento)                    
                     <div class="group relative w-16 h-16 border-r-2 border-b-2 cursor-pointer"
-                        style="background-color: {{ $departamento->estadoDepartamento->color }};">
+                        style="background-color: {{ $departamento->estadoDepartamento->color }};"
+                        @click="
+                            if ('{{ $departamento->estadoDepartamento->nombre }}' === 'Separacion') {
+                                window.open('/detalle-separacion/{{ $departamento->id }}', '_blank');
+                            }
+                        ">
+                        
                         <!-- Número -->
                         <div class="text-black text-sm font-bold text-center"
                             style="background-color: {{ $departamento->tipoFinanciamiento->color ?? '#D1D5DB' }};">
@@ -230,6 +236,7 @@
     function imagenViewer() {
         return {
             imagenModal: null,
+            
             init() {
                 window.addEventListener('abrirModalFotos', (event) => {
                     this.imagenModal = event.detail.fotos;

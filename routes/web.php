@@ -39,4 +39,8 @@ Route::name('oidc.')
     });
 Route::get('/admin/panel-seguimiento/prospecto/{record}', ViewProspectoInfo::class)
     ->name('filament.resources.panel-seguimiento.view-prospecto-info');
+
+// Agregar esta ruta
+Route::get('/detalle-separacion/{departamento}', [\App\Http\Controllers\DetalleSeparacionController::class, 'show'])
+    ->name('detalle-separacion.show');
     

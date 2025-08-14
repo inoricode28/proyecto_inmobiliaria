@@ -108,4 +108,16 @@ class Departamento extends Model
         return $this->hasMany(FotoDepartamento::class, 'departamento_id');
     }
 
+    public function separaciones()
+    {
+        return $this->hasManyThrough(
+            Separacion::class,
+            Proforma::class,
+            'departamento_id', // Foreign key en proformas table
+            'proforma_id',     // Foreign key en separaciones table
+            'id',              // Local key en departamentos table
+            'id'               // Local key en proformas table
+        );
+    }
+
 }
