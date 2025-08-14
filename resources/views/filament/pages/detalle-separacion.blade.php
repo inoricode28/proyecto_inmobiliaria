@@ -108,7 +108,7 @@
     <div class="space-y-6">
         <!-- Botones superiores -->
         <div class="flex gap-2 mb-6">
-            <x-filament::button color="primary">
+            <x-filament::button color="primary" x-data="{}" x-on:click="$dispatch('open-modal', { id: 'confirmar-venta-modal' })">
                 PASAR A VENTA
             </x-filament::button>
             <x-filament::button color="gray" tag="a" href="{{ route('filament.resources.panel-seguimiento.view-prospecto-info', ['record' => $separacion->proforma->prospecto->id ?? $separacion->proforma->id]) }}">
@@ -526,4 +526,41 @@
              });
          });
      </script>
+     
+     <!-- Modal de Confirmación para Pasar a Venta -->
+     <x-filament::modal id="confirmar-venta-modal" width="md">
+         <x-slot name="heading">
+             Confirmación
+         </x-slot>
+         
+         <div class="py-4">
+             <p class="text-gray-700">¿Está seguro de pasar a Ventas?</p>
+         </div>
+         
+         <x-slot name="footer">
+             <div class="flex gap-3 justify-end">
+                 <x-filament::button color="danger" x-on:click="$dispatch('close-modal', { id: 'confirmar-venta-modal' })">
+                     CANCELAR
+                 </x-filament::button>
+                 <x-filament::button color="primary" x-on:click="confirmarPasarAVenta()">
+                     ACEPTAR
+                 </x-filament::button>
+             </div>
+         </x-slot>
+     </x-filament::modal>
+
+     <script>
+         function confirmarPasarAVenta() {
+             // Cerrar el modal
+             window.dispatchEvent(new CustomEvent('close-modal', { detail: { id: 'confirmar-venta-modal' } }));
+             
+             // Aquí puedes agregar la lógica para pasar a venta
+             // Por ejemplo, hacer una petición AJAX o redirigir
+             alert('Procesando paso a venta...');
+             
+             // Ejemplo de redirección o petición AJAX:
+             // window.location.href = '/ruta-para-pasar-a-venta';
+         }
+     </script>
+
  </x-filament::page>
