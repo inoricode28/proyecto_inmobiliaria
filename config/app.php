@@ -209,7 +209,7 @@ return [
          * Spatie Permissions Provider...
          */
         Spatie\Permission\PermissionServiceProvider::class,
-
+        Barryvdh\DomPDF\ServiceProvider::class,
     ],
 
     /*
@@ -223,8 +223,9 @@ return [
     |
     */
 
-    'aliases' => Facade::defaultAliases()->merge([
+    'aliases' => [
         // 'ExampleClass' => App\Example\ExampleClass::class,
-    ])->toArray(),
-
+        'PDF' => Barryvdh\DomPDF\Facade\Pdf::class,
+        'Route' => Illuminate\Support\Facades\Route::class,
+    ],
 ];

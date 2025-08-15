@@ -8,14 +8,29 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 use App\Models\Separacion;
 use App\Models\EstadoDepartamento;
+use Barryvdh\DomPDF\Facade\Pdf; // Agregar esta línea
 
 class CreateVenta extends CreateRecord
 {
     protected static string $resource = VentaResource::class;
 
+    // Agregar propiedades públicas para los campos de fecha
+    public $fecha_entrega_inicial;
+    public $fecha_venta;
+    public $fecha_preminuta;
+    public $fecha_minuta;
+    public $estado;
+
     public function mount(): void
     {
         parent::mount();
+        
+        // Inicializar las propiedades
+        $this->fecha_entrega_inicial = null;
+        $this->fecha_venta = null;
+        $this->fecha_preminuta = null;
+        $this->fecha_minuta = null;
+        $this->estado = 'activo';
 
         // Mejorar la URL con parámetros de pre-validación
         if (request()->has('separacion_id')) {
@@ -84,6 +99,12 @@ class CreateVenta extends CreateRecord
             // Preparar los datos para llenar el formulario
             $formData = [
                 'separacion_id' => $separacionId,
+                // Agregar las fechas por defecto
+                'fecha_venta' => now()->format('Y-m-d'),
+                'fecha_entrega_inicial' => now()->format('Y-m-d'),
+                'fecha_preminuta' => now()->format('Y-m-d'),
+                'fecha_minuta' => now()->format('Y-m-d'),
+                'estado' => 'activo',
                 'tipo_documento_nombre' => optional($proforma->tipoDocumento)->nombre,
                 'numero_documento' => $proforma->numero_documento,
                 'nombres' => $proforma->nombres,
@@ -216,5 +237,129 @@ class CreateVenta extends CreateRecord
         $data['updated_by'] = 1; 
 
         return $data;
+    }
+
+    // Agregar estos métodos públicos para manejar la generación de pre-minutas
+    public function generatePreMinutaWord()
+    {
+        try {
+            // Validar que hay datos suficientes para generar el documento
+            if (empty($this->data['separacion_id'])) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Debe seleccionar una separación antes de generar la pre-minuta.')
+                    ->warning()
+                    ->send();
+                return;
+            }
+
+            // Obtener datos de la separación
+            $separacion = \App\Models\Separacion::with([
+                'proforma.tipoDocumento',
+                'proforma.genero', 
+                'proforma.proyecto',
+                'proforma.departamento'
+            ])->find($this->data['separacion_id']);
+
+            if (!$separacion) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Separación no encontrada.')
+                    ->danger()
+                    ->send();
+                return;
+            }
+
+            // Generar documento Word usando PhpWord
+            $phpWord = new \PhpOffice\PhpWord\PhpWord();
+            $section = $phpWord->addSection();
+            
+            // Agregar contenido al documento
+            $section->addTitle('PRE-MINUTA DE VENTA', 1);
+            $section->addTextBreak(2);
+            
+            $section->addText('Cliente: ' . $separacion->proforma->nombres . ' ' . $separacion->proforma->apellidos);
+            $section->addText('Proyecto: ' . $separacion->proforma->proyecto->nombre);
+            $section->addText('Departamento: ' . $separacion->proforma->departamento->numero);
+            $section->addText('Fecha: ' . now()->format('d/m/Y'));
+            
+            // Guardar y descargar
+            $fileName = 'pre-minuta-' . $separacion->codigo . '-' . now()->format('Y-m-d') . '.docx';
+            $tempFile = storage_path('app/temp/' . $fileName);
+            
+            // Crear directorio si no existe
+            if (!file_exists(dirname($tempFile))) {
+                mkdir(dirname($tempFile), 0755, true);
+            }
+            
+            $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+            $writer->save($tempFile);
+            
+            // Retornar descarga sin crear venta
+            return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+            
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error')
+                ->body('Error al generar Pre-Minuta WORD: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function generatePreMinutaPDF()
+    {
+        try {
+            // Validar que hay datos suficientes para generar el documento
+            if (empty($this->data['separacion_id'])) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Debe seleccionar una separación antes de generar la pre-minuta.')
+                    ->warning()
+                    ->send();
+                return;
+            }
+
+            // Obtener datos de la separación
+            $separacion = \App\Models\Separacion::with([
+                'proforma.tipoDocumento',
+                'proforma.genero',
+                'proforma.proyecto', 
+                'proforma.departamento'
+            ])->find($this->data['separacion_id']);
+
+            if (!$separacion) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Separación no encontrada.')
+                    ->danger()
+                    ->send();
+                return;
+            }
+
+            // Generar PDF usando DomPDF
+            $pdf = Pdf::loadView('pdf.pre-minuta', compact('separacion'));
+            
+            $fileName = 'pre-minuta-' . $separacion->codigo . '-' . now()->format('Y-m-d') . '.pdf';
+            $tempFile = storage_path('app/temp/' . $fileName);
+            
+            // Crear directorio si no existe
+            if (!file_exists(dirname($tempFile))) {
+                mkdir(dirname($tempFile), 0755, true);
+            }
+            
+            // Guardar el PDF temporalmente
+            $pdf->save($tempFile);
+            
+            // Retornar descarga igual que el WORD
+            return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+            
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error')
+                ->body('Error al generar Pre-Minuta PDF: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 }

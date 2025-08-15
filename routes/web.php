@@ -48,4 +48,14 @@ Route::get('/Proforma/DetalleProforma/{proforma_id}', \App\Filament\Pages\Detall
 // Agregar esta ruta
 Route::get('/detalle-separacion/{proforma_id}', [\App\Http\Controllers\DetalleSeparacionController::class, 'show'])
     ->name('detalle-separacion.show');
+
+Route::get('/download/temp/{filename}', function ($filename) {
+    $path = storage_path('app/temp/' . $filename);
+    
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    
+    return response()->download($path, $filename)->deleteFileAfterSend(true);
+})->name('download.temp.file');
     

@@ -11,6 +11,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
@@ -28,7 +29,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 
-class VentaResource extends Resource
+class VentaResource extends Resource                 
 {
     protected static ?string $model = Venta::class;
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
@@ -41,17 +42,69 @@ class VentaResource extends Resource
     {
         return $form->schema([
             // Vista Blade personalizada para el header de separación
-            View::make('filament.components.venta-header')
-                ->columnSpan('full'),
 
-                Forms\Components\Hidden::make('fecha_entrega_inicial'),
-                Forms\Components\Hidden::make('fecha_venta'),
-                Forms\Components\Hidden::make('fecha_preminuta'),
-                Forms\Components\Hidden::make('fecha_minuta'),
-            // Campo oculto para separacion_id
-                        Hidden::make('separacion_id')
+            // Reemplazar la sección de campos ocultos con esta nueva sección visible
+            Section::make('')
+                //->description('Gestión de fechas importantes del proceso de venta')
+                ->schema([
+                    Grid::make(3)->schema([
+                        DatePicker::make('fecha_entrega_inicial')
+                            ->label('Fecha Entrega Inicial')
+                            ->displayFormat('d/m/Y')
+                            ->format('Y-m-d')
+                            ->nullable()
+                            ->default(now())
+                            ->columnSpan(1),
+                        
+                            DatePicker::make('fecha_venta')
+                            ->label('Fecha de Venta')
+                            ->displayFormat('d/m/Y')
+                            ->format('Y-m-d')
                             ->required()
-                            ->reactive()
+                            ->default(now())
+                            ->columnSpan(1),
+
+                            View::make('filament.components.boton-vendido')
+                    ]),
+                    
+                    Grid::make(3)->schema([
+
+                        DatePicker::make('fecha_minuta')
+                            ->label('Fecha Minuta')
+                            ->displayFormat('d/m/Y')
+                            ->format('Y-m-d')
+                            ->nullable()
+                            ->default(now())
+                            ->columnSpan(1),
+                            
+                        DatePicker::make('fecha_preminuta')
+                            ->label('Fecha Pre-minuta')
+                            ->displayFormat('d/m/Y')
+                            ->format('Y-m-d')
+                            ->nullable()
+                            ->default(now())
+                            ->columnSpan(1),
+
+                        View::make('filament.components.boton-opciones'),
+
+                    ]),
+        
+        
+        // Botón Vendido usando View
+       
+    ])
+    ->columnSpan('full'),
+
+
+
+       //     View::make('filament.components.venta-header')
+            //    ->columnSpan('full'),
+    
+                
+                // Campo oculto para separacion_id
+                Hidden::make('separacion_id')
+                    ->required()
+                    ->reactive()
                                 ->afterStateUpdated(function ($state, callable $set, $livewire) {
                                     if ($state) {
                                         $separacion = Separacion::with([
@@ -175,33 +228,6 @@ class VentaResource extends Resource
                 ->required()
                 ->hidden(),
 
-            DatePicker::make('fecha_entrega_inicial')
-                ->label('Fecha Entrega Inicial')
-                ->displayFormat('d/m/Y')
-                ->nullable()
-                ->hidden()
-                ->dehydrated(),
-
-            DatePicker::make('fecha_venta')
-                ->label('Fecha Venta')
-                ->displayFormat('d/m/Y')
-                ->nullable()
-                ->hidden()
-                ->dehydrated(),
-
-            DatePicker::make('fecha_preminuta')
-                ->label('Fecha Pre-minuta')
-                ->displayFormat('d/m/Y')
-                ->nullable()
-                ->hidden()
-                ->dehydrated(),
-
-            DatePicker::make('fecha_minuta')
-                ->label('Fecha Minuta')
-                ->displayFormat('d/m/Y')
-                ->nullable()
-                ->hidden()
-                ->dehydrated(),
 
             Tabs::make('Venta')
                 ->columnSpan('full')
@@ -430,3 +456,4 @@ class VentaResource extends Resource
         ];
     }
 }
+   
