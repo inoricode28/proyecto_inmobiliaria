@@ -33,10 +33,16 @@ class Separacion extends Model
         'antiguedad_laboral',
         'ingresos',
         'saldo_a_financiar',
+        'fecha_vencimiento',
         'created_by',
         'updated_by',
     ];
 
+    protected $casts = [
+        'fecha_pep' => 'date',
+        'fecha_vencimiento' => 'date',
+    ];
+    
     public function proforma(): BelongsTo
     {
         return $this->belongsTo(Proforma::class);

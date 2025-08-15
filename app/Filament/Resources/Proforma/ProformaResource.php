@@ -169,6 +169,12 @@ class ProformaResource extends Resource
                             // CAMPOS MANUALES
                             TextInput::make('monto_separacion')->label('Monto de Separación'),
                             TextInput::make('monto_cuota_inicial')->label('Monto de Cuota Inicial'),
+                            DatePicker::make('fecha_vencimiento')
+                                ->label('Fecha de Vencimiento')
+                                ->displayFormat('d/m/Y')
+                                ->format('Y-m-d')
+                                ->nullable()
+                                ->default(now()),
                         ])
                     ]),
 

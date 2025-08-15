@@ -7,6 +7,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\DB;
 
 class ListPanelSeguimientos extends ListRecords
 {
@@ -44,7 +45,7 @@ class ListPanelSeguimientos extends ListRecords
 
     protected function getTableQuery(): Builder
     {
-        $latestTareas = \DB::table('tareas as t1')
+        $latestTareas = DB::table('tareas as t1')
             ->selectRaw('MAX(t1.id) as id')
             ->join('prospectos as p', 'p.id', '=', 't1.prospecto_id')
             ->when($this->filtros['proyecto_id'], function (QueryBuilder $q) {

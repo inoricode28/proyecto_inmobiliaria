@@ -34,11 +34,17 @@ class Proforma extends Model
         'departamento_id',
         'monto_separacion',
         'monto_cuota_inicial',
+        'fecha_vencimiento',
         'observaciones',
         'created_by',
         'updated_by'
     ];
 
+    protected $casts = [
+        'fecha_nacimiento' => 'date',
+        'fecha_vencimiento' => 'date',
+    ];
+    
     public function tipoDocumento()
     {
         return $this->belongsTo(TipoDocumento::class);

@@ -194,8 +194,14 @@ class SeparacionResource extends Resource
                             ->dehydrated(false)
                             ->reactive()
                             ->afterStateHydrated(function (callable $set, callable $get) {
-    \App\Filament\Resources\Separaciones\SeparacionResource::actualizarSaldoFinanciar($set, $get);
+                                \App\Filament\Resources\Separaciones\SeparacionResource::actualizarSaldoFinanciar($set, $get);
                             }),
+                        DatePicker::make('fecha_vencimiento')
+                            ->label('Fecha de Vencimiento')
+                            ->displayFormat('d/m/Y')
+                            ->format('Y-m-d')
+                            ->nullable()
+                            ->default(now()),
                     ]),
                 ]),
 
