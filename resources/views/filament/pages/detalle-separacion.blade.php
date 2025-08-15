@@ -121,14 +121,20 @@
     <div class="space-y-6">
         <!-- Botones superiores -->
         <div class="flex gap-2 mb-6">
-            <x-filament::button color="primary" x-data="{}"
-                x-on:click="$dispatch('open-modal', { id: 'confirmar-venta-modal' })">
-                PASAR A VENTA
-            </x-filament::button>
+            @if(!$tieneVenta)
+                <x-filament::button color="primary" x-data="{}"
+                    x-on:click="$dispatch('open-modal', { id: 'confirmar-venta-modal' })">
+                    PASAR A VENTA
+                </x-filament::button>
+            @else
+             
+            @endif
+            
             <x-filament::button color="gray" tag="a"
                 href="{{ route('filament.resources.panel-seguimiento.view-prospecto-info', ['record' => $separacion->proforma->prospecto->id ?? $separacion->proforma->id]) }}">
                 Información del Contacto
             </x-filament::button>
+            
             <div class="ml-auto flex gap-2">
                 <x-filament::button color="primary" icon="heroicon-o-eye">
                     Descargar Documento
@@ -161,21 +167,22 @@
                 <div class="breadcrumb-step active">
                     Separación Definitiva
                 </div>
+                @if($tieneVenta)
+                <div class="breadcrumb-step" style="background: #4ac204;">
+                    Venta
+                </div>
+                @endif
             </div>
 
             <!-- Date Details -->
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid {{ $tieneVenta ? 'grid-cols-4' : 'grid-cols-3' }} gap-4">
                 <!-- Proforma Details -->
                 <div class="bg-gray-100 p-4 rounded border">
                     <h4 class="font-bold text-gray-700 mb-2">Proforma</h4>
                     <div class="text-xs space-y-1">
-                        <div><strong>Fecha
-                                Creación:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
-                        <div><strong>Fecha
-                                Proforma:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
-                        <div><strong>Fecha de
-                                Vencimiento:</strong><br>{{ $separacion->proforma->fecha_vencimiento ? $separacion->proforma->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}
-                        </div>
+                        <div><strong>Fecha Creación:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Proforma:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha de Vencimiento:</strong><br>{{ $separacion->proforma->fecha_vencimiento ? $separacion->proforma->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
                     </div>
                 </div>
 
@@ -183,24 +190,31 @@
                 <div class="bg-gray-100 p-4 rounded border">
                     <h4 class="font-bold text-gray-700 mb-2">Visita</h4>
                     <div class="text-xs space-y-1">
-                        <div><strong>Fecha
-                                Visita:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Visita:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
                     </div>
                 </div>
 
                 <!-- Separación Definitiva Details -->
-                <div class="bg-orange-100 p-4 rounded border border-orange-300">
+                <div class="bg-orange-100 p-4 rounded border">
                     <h4 class="font-bold text-orange-700 mb-2">Separación Definitiva</h4>
                     <div class="text-xs space-y-1">
-                        <div><strong>Fecha Creación:</strong><br>{{ $separacion->created_at->format('d/m/Y H:i') }}
-                        </div>
-                        <div><strong>Fecha Separación
-                                Definitiva:</strong><br>{{ $separacion->created_at->format('d/m/Y H:i') }}</div>
-                        <div><strong>Fecha de
-                                Vencimiento:</strong><br>{{ $separacion->fecha_vencimiento ? $separacion->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}
-                        </div>
+                        <div><strong>Fecha Creación:</strong><br>{{ $separacion->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Separación Definitiva:</strong><br>{{ $separacion->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha de Vencimiento:</strong><br>{{ $separacion->fecha_vencimiento ? $separacion->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
                     </div>
                 </div>
+                
+                @if($tieneVenta)
+                <!-- Venta Details - Ahora en la misma fila -->
+                <div class="bg-green-100 p-4 rounded border">
+                    <h4 class="font-bold text-green-700 mb-2">Venta</h4>
+                    <div class="text-xs space-y-1">
+                        <div><strong>Fecha Creación:</strong><br>{{ $separacion->venta->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Venta:</strong><br>{{ $separacion->venta->fecha_venta ? $separacion->venta->fecha_venta->format('d/m/Y H:i') : 'N/A' }}</div>
+                        <div><strong>Fecha Preminuta:</strong><br>{{ $separacion->venta->fecha_preminuta ? $separacion->venta->fecha_preminuta->format('d/m/Y H:i') : 'N/A' }}</div>
+                    </div>
+                </div>
+                @endif
             </div>
         </x-filament::card>
 

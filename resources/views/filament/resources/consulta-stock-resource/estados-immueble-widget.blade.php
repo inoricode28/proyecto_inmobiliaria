@@ -85,13 +85,13 @@
                 <span class="text-[9px] font-bold leading-tight">PISO</span>
                 <span class="text-sm font-bold leading-none mt-0.5">{{ $piso }}</span>
             </div>
-
+                                                                                                                                  
             <div class="flex">
                 @foreach($departamentos as $departamento)                    
                     <div class="group relative w-16 h-16 border-r-2 border-b-2 cursor-pointer"
                         style="background-color: {{ $departamento->estadoDepartamento->color }};"
                         @click="
-                            if ('{{ $departamento->estadoDepartamento->nombre }}' === 'Separacion') {
+                            if ('{{ $departamento->estadoDepartamento->nombre }}' === 'Separacion' || '{{ $departamento->estadoDepartamento->nombre }}' === 'Minuta') {
                                 @php
                                     $proformaConSeparacion = $departamento->proformas()->whereHas('separacion')->latest()->first();
                                 @endphp

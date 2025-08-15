@@ -18,6 +18,7 @@ class DetalleSeparacion extends Page
     public $proforma;
     public $separacion;
     public $departamento;
+    public $tieneVenta; // Nueva propiedad
     
     public function mount(Request $request)
     {
@@ -26,6 +27,7 @@ class DetalleSeparacion extends Page
         // Buscar la proforma con todas las relaciones necesarias
         $this->proforma = Proforma::with([
             'separacion',
+            'separacion.venta', // Agregar relación con venta
             'departamento.estadoDepartamento',
             'departamento.tipoFinanciamiento',
             'departamento.proyecto',
@@ -49,6 +51,9 @@ class DetalleSeparacion extends Page
 
         $this->departamento = $this->proforma->departamento;
         $this->separacion = $this->proforma->separacion;
+        
+        // Verificar si la separación tiene una venta asociada
+        $this->tieneVenta = $this->separacion->venta !== null;
     }
     
     protected function getViewData(): array
@@ -57,6 +62,7 @@ class DetalleSeparacion extends Page
             'proforma' => $this->proforma,
             'separacion' => $this->separacion,
             'departamento' => $this->departamento,
+            'tieneVenta' => $this->tieneVenta, // Pasar a la vista
         ];
     }
 }
