@@ -125,4 +125,9 @@ class Departamento extends Model
         );
     }
 
+    // Agregar esta relación al modelo Departamento existente
+    public function entregas()
+    {
+        return $this->hasMany(Entrega::class);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Proforma;
 use App\Models\Separacion;
+use App\Models\Entrega;
 use Filament\Pages\Page;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,8 @@ class DetalleSeparacion extends Page
     public $proforma;
     public $separacion;
     public $departamento;
-    public $tieneVenta; // Nueva propiedad
+    public $tieneVenta;
+    public $entregaExistente;
     
     public function mount(Request $request)
     {
@@ -27,7 +29,8 @@ class DetalleSeparacion extends Page
         // Buscar la proforma con todas las relaciones necesarias
         $this->proforma = Proforma::with([
             'separacion',
-            'separacion.venta', // Agregar relación con venta
+            'separacion.venta',
+            'separacion.venta.entrega', // Agregar relación con entrega
             'departamento.estadoDepartamento',
             'departamento.tipoFinanciamiento',
             'departamento.proyecto',
@@ -54,6 +57,11 @@ class DetalleSeparacion extends Page
         
         // Verificar si la separación tiene una venta asociada
         $this->tieneVenta = $this->separacion->venta !== null;
+        
+        // Verificar si ya existe una entrega para esta venta
+        if ($this->tieneVenta && $this->separacion->venta) {
+            $this->entregaExistente = Entrega::where('venta_id', $this->separacion->venta->id)->first();
+        }
     }
     
     protected function getViewData(): array
@@ -62,7 +70,8 @@ class DetalleSeparacion extends Page
             'proforma' => $this->proforma,
             'separacion' => $this->separacion,
             'departamento' => $this->departamento,
-            'tieneVenta' => $this->tieneVenta, // Pasar a la vista
+            'tieneVenta' => $this->tieneVenta,
+            'entregaExistente' => $this->entregaExistente,
         ];
     }
 }

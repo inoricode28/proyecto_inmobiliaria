@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use App\Models\EstadoDepartamento;
 use App\Models\Departamento;
+use App\Models\Entrega; // Agregar esta línea
 
 class Venta extends Model
 {
@@ -40,6 +41,20 @@ class Venta extends Model
 
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
+        });
+
+        // NUEVO: Crear registro de entrega automáticamente después de crear la venta
+        static::created(function ($model) {
+            if ($model->fecha_entrega_inicial && $model->separacion && $model->separacion->proforma) {
+                Entrega::create([
+                    'venta_id' => $model->id,
+                    'prospecto_id' => $model->separacion->proforma->prospecto_id,
+                    'departamento_id' => $model->separacion->proforma->departamento_id,
+                    'fecha_entrega' => $model->fecha_entrega_inicial, // Aquí se registra la fecha
+                    'descripcion' => 'Entrega creada automáticamente desde la venta',
+                    'created_by' => Auth::id(),
+                ]);
+            }
         });
 
         static::deleting(function ($model) {
@@ -199,5 +214,15 @@ class Venta extends Model
         }
 
         return $this->separacion->proforma->observaciones;
+    }
+    // Agregar esta relación al modelo Venta existente
+    public function entregas()
+    {
+        return $this->hasMany(Entrega::class);
+    }
+
+    public function entrega()
+    {
+        return $this->hasOne(Entrega::class);
     }
 }

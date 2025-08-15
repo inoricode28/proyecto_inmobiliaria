@@ -109,4 +109,9 @@ class Prospecto extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    // Agregar esta relación al modelo Prospecto existente
+    public function entregas()
+    {
+        return $this->hasMany(Entrega::class);
+    }
 }

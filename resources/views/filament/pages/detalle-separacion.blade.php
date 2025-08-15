@@ -127,7 +127,19 @@
                     PASAR A VENTA
                 </x-filament::button>
             @else
-             
+                @if($entregaExistente)
+                    {{-- Si ya existe una entrega, ir al formulario de edición --}}
+                    <x-filament::button color="warning" tag="a"
+                        href="{{ route('filament.resources.entregas.edit', ['record' => $entregaExistente->id]) }}">
+                        ENTREGA DE INMUEBLE
+                    </x-filament::button>
+                @else
+                    {{-- Si no existe entrega, crear una nueva --}}
+                    <x-filament::button color="success" tag="a"
+                        href="{{ route('filament.resources.entregas.create', ['venta_id' => $separacion->venta->id]) }}">
+                        ENTREGA DE INMUEBLE
+                    </x-filament::button>
+                @endif
             @endif
             
             <x-filament::button color="gray" tag="a"
@@ -172,10 +184,15 @@
                     Venta
                 </div>
                 @endif
+                @if($entregaExistente)
+                <div class="breadcrumb-step" style="background: #28a745;">
+                    Entrega
+                </div>
+                @endif
             </div>
 
             <!-- Date Details -->
-            <div class="grid {{ $tieneVenta ? 'grid-cols-4' : 'grid-cols-3' }} gap-4">
+            <div class="grid {{ $entregaExistente ? 'grid-cols-5' : ($tieneVenta ? 'grid-cols-4' : 'grid-cols-3') }} gap-4">
                 <!-- Proforma Details -->
                 <div class="bg-gray-100 p-4 rounded border">
                     <h4 class="font-bold text-gray-700 mb-2">Proforma</h4>
@@ -205,13 +222,29 @@
                 </div>
                 
                 @if($tieneVenta)
-                <!-- Venta Details - Ahora en la misma fila -->
+                <!-- Venta Details -->
                 <div class="bg-green-100 p-4 rounded border">
                     <h4 class="font-bold text-green-700 mb-2">Venta</h4>
                     <div class="text-xs space-y-1">
                         <div><strong>Fecha Creación:</strong><br>{{ $separacion->venta->created_at->format('d/m/Y H:i') }}</div>
                         <div><strong>Fecha Venta:</strong><br>{{ $separacion->venta->fecha_venta ? $separacion->venta->fecha_venta->format('d/m/Y H:i') : 'N/A' }}</div>
                         <div><strong>Fecha Preminuta:</strong><br>{{ $separacion->venta->fecha_preminuta ? $separacion->venta->fecha_preminuta->format('d/m/Y H:i') : 'N/A' }}</div>
+                        <div><strong>Fecha Minuta:</strong><br>{{ $separacion->venta->fecha_minuta ? $separacion->venta->fecha_minuta->format('d/m/Y H:i') : 'N/A' }}</div>
+                    </div>
+                </div>
+                @endif
+
+                @if($entregaExistente)
+                <!-- Entrega Details -->
+                <div class="bg-blue-100 p-4 rounded border">
+                    <h4 class="font-bold text-blue-700 mb-2">Entrega</h4>
+                    <div class="text-xs space-y-1">
+                        <div><strong>Fecha Entrega:</strong><br>{{ $entregaExistente->fecha_entrega ? $entregaExistente->fecha_entrega->format('d/m/Y') : 'N/A' }}</div>
+                      <!--  <div><strong>Fecha Entrega Minuta:</strong><br>{{ $separacion->venta->fecha_minuta ? $separacion->venta->fecha_minuta->format('d/m/Y') : 'N/A' }}</div>
+                        <div><strong>Garantía Acabados:</strong><br>{{ $entregaExistente->fecha_garantia_acabados ? $entregaExistente->fecha_garantia_acabados->format('d/m/Y') : 'N/A' }}</div>
+                        <div><strong>Garantía Vicios Ocultos:</strong><br>{{ $entregaExistente->fecha_garantia_vicios_ocultos ? $entregaExistente->fecha_garantia_vicios_ocultos->format('d/m/Y') : 'N/A' }}</div>
+
+                      -->
                     </div>
                 </div>
                 @endif
