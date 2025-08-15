@@ -87,5 +87,14 @@ class Separacion extends Model
         return $this->belongsTo(Banco::class);
     }
 
-}
+    public function venta()
+    {
+        return $this->hasOne(Venta::class);
+    }
 
+    public function tieneVenta()
+    {
+        return $this->venta()->exists();
+    }
+
+}
