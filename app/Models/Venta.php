@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
+use App\Models\EstadoDepartamento;
+use App\Models\Departamento;
 
 class Venta extends Model
 {
@@ -31,13 +33,25 @@ class Venta extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($model) {
             $model->created_by = Auth::id();
         });
-        
+
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
+        });
+
+        static::deleting(function ($model) {
+            // Cambiar el estado del departamento de vuelta a 'Separacion'
+            if ($model->separacion && $model->separacion->proforma && $model->separacion->proforma->departamento) {
+                $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
+                if ($estadoSeparacion) {
+                    $departamento = $model->separacion->proforma->departamento;
+                    $departamento->estado_departamento_id = $estadoSeparacion->id;
+                    $departamento->save();
+                }
+            }
         });
     }
 
@@ -67,7 +81,7 @@ class Venta extends Model
         }
 
         $proforma = $this->separacion->proforma;
-        
+
         return [
             'tipo_documento' => $proforma->tipoDocumento?->nombre,
             'numero_documento' => $proforma->numero_documento,
@@ -132,7 +146,7 @@ class Venta extends Model
         }
 
         $proforma = $this->separacion->proforma;
-        
+
         return [
             'proyecto' => $proforma->proyecto?->nombre,
             'departamento' => $proforma->departamento?->nombre,
@@ -150,7 +164,7 @@ class Venta extends Model
         }
 
         $notaria = $this->separacion->notariaKardex;
-        
+
         return [
             'notaria' => $notaria->notaria,
             'kardex' => $notaria->kardex,
@@ -167,7 +181,7 @@ class Venta extends Model
         }
 
         $carta = $this->separacion->cartaFianza;
-        
+
         return [
             'banco' => $carta->banco,
             'monto' => $carta->monto,

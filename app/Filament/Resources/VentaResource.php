@@ -43,10 +43,15 @@ class VentaResource extends Resource
             // Vista Blade personalizada para el header de separación
             View::make('filament.components.venta-header')
                 ->columnSpan('full'),
+
+                Forms\Components\Hidden::make('fecha_entrega_inicial'),
+                Forms\Components\Hidden::make('fecha_venta'),
+                Forms\Components\Hidden::make('fecha_preminuta'),
+                Forms\Components\Hidden::make('fecha_minuta'),
             // Campo oculto para separacion_id
-            Hidden::make('separacion_id')
-                ->required()
-                ->reactive()
+                        Hidden::make('separacion_id')
+                            ->required()
+                            ->reactive()
                                 ->afterStateUpdated(function ($state, callable $set, $livewire) {
                                     if ($state) {
                                         $separacion = Separacion::with([
