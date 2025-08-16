@@ -91,7 +91,7 @@
                     <div class="group relative w-16 h-16 border-r-2 border-b-2 cursor-pointer"
                         style="background-color: {{ $departamento->estadoDepartamento->color }};"
                         @click="
-                            if ('{{ $departamento->estadoDepartamento->nombre }}' === 'Separacion' || '{{ $departamento->estadoDepartamento->nombre }}' === 'Minuta') {
+                            if ('{{ $departamento->estadoDepartamento->nombre }}' === 'Separacion' || '{{ $departamento->estadoDepartamento->nombre }}' === 'Minuta' || '{{ $departamento->estadoDepartamento->nombre }}' === 'Entregado') {
                                 @php
                                     $proformaConSeparacion = $departamento->proformas()->whereHas('separacion')->latest()->first();
                                 @endphp
