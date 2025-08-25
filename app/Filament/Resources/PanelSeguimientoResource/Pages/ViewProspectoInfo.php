@@ -268,7 +268,7 @@ class ViewProspectoInfo extends Page
                 'nivel_interes_id' => 1, // Valor por defecto, puedes ajustarlo según tu lógica
                 'fecha_realizar' => $this->fecha_cita,
                 'hora' => $this->hora_cita,
-                'nota' => 'Cita agendada: ' . ($this->observaciones ?? 'Sin observaciones'),
+                'nota' => $this->observaciones ?? 'Sin observaciones',
                 'usuario_asignado_id' => $this->responsable_id,
                 'created_by' => auth()->id(),
                 'updated_by' => auth()->id(),
