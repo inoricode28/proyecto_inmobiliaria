@@ -1,3 +1,6 @@
+@php
+    use App\Filament\Resources\Proforma\ProformaResource; // <- Ajusta el namespace si tu recurso vive en otro subnamespace
+@endphp
 <x-filament::page>
     <h2 class="text-2xl font-bold mb-4">Información del Prospecto</h2>
 
@@ -42,6 +45,32 @@
         <div>
             <strong>Fecha de Registro:</strong> {{ \Carbon\Carbon::parse($prospecto->fecha_registro)->format('d/m/Y H:i') }}
         </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3 mb-6">
+        <a
+            href="{{ ProformaResource::getUrl('create', ['numero_documento' => $prospecto->numero_documento]) }}"
+            target="_blank"
+            class="inline-flex items-center px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition"
+        >
+            Proformar
+        </a>
+
+        <button
+            type="button"
+            disabled
+            class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-400 text-white cursor-not-allowed"
+            title="Próximamente"
+        >
+            Reasignar
+        </button>
+
+        <button
+            type="button"
+            class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+        >
+            Realizar Acción
+        </button>
     </div>
 
     @if ($ultimaTareaPendiente)

@@ -65,7 +65,7 @@ class PanelSeguimientoResource extends Resource
                             ? $prospecto->nombres . ' ' . $prospecto->ape_paterno . ' ' . ($prospecto->ape_materno ?? '')
                             : ($prospecto->razon_social ?? '-');
                     })
-                    ->url(fn ($record) => \App\Filament\Resources\PanelSeguimientoResource::getUrl('view', ['record' => $record->prospecto_id]))
+                    ->url(fn ($record) => PanelSeguimientoResource::getUrl('view', ['record' => $record->prospecto_id]))
                     ->openUrlInNewTab()
                     ->searchable(),
 
@@ -128,7 +128,7 @@ class PanelSeguimientoResource extends Resource
                     ->form([
                         Grid::make(2)->schema([
 
-                            // Columna izquierda
+                            // Columna izquierdanp
                             Card::make()->schema([
                                 Grid::make(3)->schema([
                                     TextInput::make('nombre')->label('Nombre del Prospecto')->disabled(),
