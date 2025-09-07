@@ -107,8 +107,14 @@ class ListPanelSeguimientos extends ListRecords
             )
             ->when($this->filtros['vencimiento'], function ($q) {
                 switch ($this->filtros['vencimiento']) {
-                    case 'vencidos':
-                        $q->whereDate('fecha_realizar', '<', now()->toDateString());
+                    case 'vencido_1':
+                        $q->whereRaw('DATEDIFF(CURDATE(), fecha_realizar) = 1');
+                        break;
+                    case 'vencido_2':
+                        $q->whereRaw('DATEDIFF(CURDATE(), fecha_realizar) = 2');
+                        break;
+                    case 'vencido_3+':
+                        $q->whereRaw('DATEDIFF(CURDATE(), fecha_realizar) >= 3');
                         break;
                     case 'hoy':
                         $q->whereDate('fecha_realizar', '=', now()->toDateString());

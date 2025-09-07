@@ -98,10 +98,12 @@ class SeguimientoFilters extends Widget implements HasForms
                             Select::make('vencimiento')
                                 ->label('Vencimiento de Tarea')
                                 ->options([
-                                    0            => 'TODOS',
-                                    'vencidos'   => 'Vencidos',
-                                    'hoy'        => 'Vence Hoy',
-                                    'por_vencer' => 'Por Vencer',
+                                    0             => 'TODOS',
+                                    'vencido_1'   => 'Vencido 1 día',
+                                    'vencido_2'   => 'Vencido 2 días',
+                                    'vencido_3+'  => 'Vencido 3 o más días',
+                                    'hoy'         => 'Vence Hoy',
+                                    'por_vencer'  => 'Por Vencer',
                                 ])
                                 ->default(0)
                                 ->reactive()

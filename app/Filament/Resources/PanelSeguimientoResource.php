@@ -143,11 +143,11 @@ class PanelSeguimientoResource extends Resource
                                     DatePicker::make('fecha_realizar')
                                         ->label('Fecha acción')
                                         ->required()
-                                        ->default(now()),
+                                        ->afterStateHydrated(fn ($set, $state) => $set('fecha_realizar', $state ?? now()->toDateString())),
                                     TimePicker::make('hora')
                                         ->label('Hora acción')
                                         ->required()
-                                        ->default(now()->format('H:i')),
+                                        ->afterStateHydrated(fn ($set, $state) => $set('hora', $state ?? now()->format('H:i')))
                                 ]),
                                 Radio::make('respuesta')
                                     ->label('Resultado del contacto')
@@ -203,6 +203,7 @@ class PanelSeguimientoResource extends Resource
                                 Toggle::make('crear_proxima_tarea')
                                     ->label('¿Crear próxima tarea?')
                                     ->default(true)
+                                    ->hidden()
                                     ->afterStateHydrated(function ($component, $state) {
                                         $component->state(true);
                                     }),
@@ -222,7 +223,8 @@ class PanelSeguimientoResource extends Resource
 
                                     TimePicker::make('proxima_hora')
                                         ->label('Hora próxima tarea')
-                                        ->default('09:00'),
+                                        ->default(fn () => '09:00')
+                                        ->afterStateHydrated(fn ($set, $state) => $set('proxima_hora', $state ?? '09:00'))
                                 ]),
                             ]), // Fin columna derecha
 

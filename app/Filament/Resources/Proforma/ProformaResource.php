@@ -133,13 +133,22 @@ class ProformaResource extends Resource
                                     $proyectoId = $get('proyecto_id');
                                     if (!$proyectoId) return [];
 
-                                    return \App\Models\Departamento::where('proyecto_id', $proyectoId)
+                                    return \App\Models\Departamento::with(['edificio', 'tipoInmueble', 'estadoDepartamento'])
+                                        ->where('proyecto_id', $proyectoId)
                                         ->whereHas('estadoDepartamento', function ($query) {
                                             $query->where('nombre', 'Disponible');
                                         })
-                                        ->pluck('num_departamento', 'id')
+                                        ->get()
+                                        ->mapWithKeys(function ($departamento) {
+                                            $label = "EDIFICIO: {$departamento->edificio->nombre} - " .
+                                                    "TIPO: {$departamento->tipoInmueble->nombre} - " .
+                                                    "NRO: {$departamento->num_departamento} - " .
+                                                    "CANT. HAB.: {$departamento->num_dormitorios}";
+                                            return [$departamento->id => $label];
+                                        })
                                         ->toArray();
                                 })
+                                ->searchable()
                                 ->required()
                                 ->reactive()
                                 ->afterStateUpdated(function (callable $set, $state) {
