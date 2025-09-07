@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\ComoSeEntero;
 use App\Models\TipoGestion;
 use App\Models\Tarea;
+use App\Models\NivelInteres;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Grid;
@@ -29,7 +30,7 @@ class SeguimientoFilters extends Widget implements HasForms
         return [
             Card::make()
                 ->schema([
-                    Grid::make(3)
+                    Grid::make(4)
                         ->schema([
                             Select::make('proyecto')
                                 ->label('Proyecto')
@@ -39,7 +40,7 @@ class SeguimientoFilters extends Widget implements HasForms
                                 ->afterStateUpdated(fn () => $this->submitFilters()),
 
                             Select::make('usuario_id')
-                                ->label('Usuario')
+                                ->label('Responsable')
                                 ->options(
                                     collect([0 => 'TODOS'])
                                         ->merge(User::orderBy('name')->pluck('name', 'id'))
@@ -57,9 +58,21 @@ class SeguimientoFilters extends Widget implements HasForms
                                 ->default(0)
                                 ->reactive()
                                 ->afterStateUpdated(fn () => $this->submitFilters()),
+                            Select::make('rangoAcciones')
+                                ->label('Cantidad de Acciones')
+                                ->options([
+                                    0      => 'TODOS',
+                                    '1'    => '1',
+                                    '2-5'  => '2 - 5',
+                                    '6-10' => '6 - 10',
+                                    '11+'  => '11 o más',
+                                ])
+                                ->default(0)
+                                ->reactive()
+                                ->afterStateUpdated(fn () => $this->submitFilters()),
                         ]),
 
-                    Grid::make(2)
+                    Grid::make(4)
                         ->schema([
                             DatePicker::make('fechaInicio')
                                 ->label('Fecha Inicio')
@@ -70,6 +83,27 @@ class SeguimientoFilters extends Widget implements HasForms
                             DatePicker::make('fechaFin')
                                 ->label('Fecha Fin')
                                 ->displayFormat('d/m/Y')
+                                ->reactive()
+                                ->afterStateUpdated(fn () => $this->submitFilters()),
+
+                            Select::make('NivelInteres')
+                                ->label('Nivel de Interes')
+                                ->options(
+                                    collect([0 => 'TODOS'])
+                                        ->merge(NivelInteres::orderBy('nombre')->pluck('nombre', 'id'))
+                                )
+                                ->default(0)
+                                ->reactive()
+                                ->afterStateUpdated(fn () => $this->submitFilters()),
+                            Select::make('vencimiento')
+                                ->label('Vencimiento de Tarea')
+                                ->options([
+                                    0            => 'TODOS',
+                                    'vencidos'   => 'Vencidos',
+                                    'hoy'        => 'Vence Hoy',
+                                    'por_vencer' => 'Por Vencer',
+                                ])
+                                ->default(0)
                                 ->reactive()
                                 ->afterStateUpdated(fn () => $this->submitFilters()),
                         ]),

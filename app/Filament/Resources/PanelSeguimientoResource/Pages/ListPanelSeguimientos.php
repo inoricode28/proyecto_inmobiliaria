@@ -25,6 +25,9 @@ class ListPanelSeguimientos extends ListRecords
         'tipo_gestion_id' => null,
         'fecha_inicio' => null,
         'fecha_fin' => null,
+        'nivel_interes_id' => null,
+        'rango_acciones' => null,
+        'vencimiento' => null, 
         'filtro_tipo_gestion_aplicado' => false // Nueva bandera específica para tipo gestión
     ];
 
@@ -37,6 +40,9 @@ class ListPanelSeguimientos extends ListRecords
             'tipo_gestion_id' => $filters['tipo_gestion_id'] ?? null,
             'fecha_inicio' => $filters['fechaInicio'] ?? null,
             'fecha_fin' => $filters['fechaFin'] ?? null,
+            'nivel_interes_id' => ($filters['NivelInteres'] ?? 0) != 0 ? $filters['NivelInteres'] : null,
+            'rango_acciones' => ($filters['rangoAcciones'] ?? 0) != 0 ? $filters['rangoAcciones'] : null,
+            'vencimiento' => ($filters['vencimiento'] ?? 0) != 0 ? $filters['vencimiento'] : null,
             'filtro_tipo_gestion_aplicado' => !empty($filters['tipo_gestion_id']) // Solo true cuando se selecciona tipo gestión
         ];
 
@@ -48,20 +54,47 @@ class ListPanelSeguimientos extends ListRecords
         $latestTareas = DB::table('tareas as t1')
             ->selectRaw('MAX(t1.id) as id')
             ->join('prospectos as p', 'p.id', '=', 't1.prospecto_id')
-            ->when($this->filtros['proyecto_id'], function (QueryBuilder $q) {
-                $q->where('p.proyecto_id', $this->filtros['proyecto_id']);
-            })
-            ->when($this->filtros['como_se_entero_id'], function (QueryBuilder $q) {
-                $q->where('p.como_se_entero_id', $this->filtros['como_se_entero_id']);
-            })
-            ->when($this->filtros['tipo_gestion_id'], function (QueryBuilder $q) {
-                $q->where('p.tipo_gestion_id', $this->filtros['tipo_gestion_id']);
-            })
-            ->when($this->filtros['fecha_inicio'], function (QueryBuilder $q) {
-                $q->whereDate('t1.fecha_realizar', '>=', Carbon::parse($this->filtros['fecha_inicio']));
-            })
-            ->when($this->filtros['fecha_fin'], function (QueryBuilder $q) {
-                $q->whereDate('t1.fecha_realizar', '<=', Carbon::parse($this->filtros['fecha_fin']));
+            ->when($this->filtros['proyecto_id'], fn ($q) =>
+                $q->where('p.proyecto_id', $this->filtros['proyecto_id'])
+            )
+            ->when($this->filtros['como_se_entero_id'], fn ($q) =>
+                $q->where('p.como_se_entero_id', $this->filtros['como_se_entero_id'])
+            )
+            ->when($this->filtros['tipo_gestion_id'], fn ($q) =>
+                $q->where('p.tipo_gestion_id', $this->filtros['tipo_gestion_id'])
+            )
+            ->when($this->filtros['fecha_inicio'], fn ($q) =>
+                $q->whereDate('t1.fecha_realizar', '>=', Carbon::parse($this->filtros['fecha_inicio']))
+            )
+            ->when($this->filtros['fecha_fin'], fn ($q) =>
+                $q->whereDate('t1.fecha_realizar', '<=', Carbon::parse($this->filtros['fecha_fin']))
+            )
+            ->when($this->filtros['nivel_interes_id'], fn ($q) =>
+                $q->where('t1.nivel_interes_id', $this->filtros['nivel_interes_id'])
+            )
+            ->when($this->filtros['rango_acciones'], function ($q) {
+                switch ($this->filtros['rango_acciones']) {
+                    case '1':
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
+                                    WHERE t2.prospecto_id = p.id 
+                                    AND t2.deleted_at IS NULL) = 1');
+                        break;
+                    case '2-5':
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
+                                    WHERE t2.prospecto_id = p.id 
+                                    AND t2.deleted_at IS NULL) BETWEEN 2 AND 5');
+                        break;
+                    case '6-10':
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
+                                    WHERE t2.prospecto_id = p.id 
+                                    AND t2.deleted_at IS NULL) BETWEEN 6 AND 10');
+                        break;
+                    case '11+':
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
+                                    WHERE t2.prospecto_id = p.id 
+                                    AND t2.deleted_at IS NULL) >= 11');
+                        break;
+                }
             })
             ->whereNull('t1.deleted_at')
             ->groupBy('t1.prospecto_id');
@@ -69,8 +102,21 @@ class ListPanelSeguimientos extends ListRecords
         $query = \App\Models\Tarea::query()
             ->with(['prospecto.proyecto', 'prospecto.comoSeEntero', 'usuarioAsignado'])
             ->whereIn('id', $latestTareas)
-            ->when($this->filtros['usuario_id'], function ($q) {
-                $q->where('usuario_asignado_id', $this->filtros['usuario_id']);
+            ->when($this->filtros['usuario_id'], fn ($q) =>
+                $q->where('usuario_asignado_id', $this->filtros['usuario_id'])
+            )
+            ->when($this->filtros['vencimiento'], function ($q) {
+                switch ($this->filtros['vencimiento']) {
+                    case 'vencidos':
+                        $q->whereDate('fecha_realizar', '<', now()->toDateString());
+                        break;
+                    case 'hoy':
+                        $q->whereDate('fecha_realizar', '=', now()->toDateString());
+                        break;
+                    case 'por_vencer':
+                        $q->whereDate('fecha_realizar', '>', now()->toDateString());
+                        break;
+                }
             });
 
         if (!$this->filtros['filtro_tipo_gestion_aplicado']) {
