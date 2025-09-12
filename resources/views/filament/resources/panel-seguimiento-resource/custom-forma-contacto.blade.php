@@ -11,7 +11,7 @@ $selectedId = $getState();
 
 <input type="hidden" name="{{ $getStatePath() }}" wire:model="{{ $getStatePath() }}" />
 
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+<div class="grid grid-cols-3 gap-3">
     @foreach($formasPermitidas as $id => $config)
     @php
     $selected = $selectedId == $id;
