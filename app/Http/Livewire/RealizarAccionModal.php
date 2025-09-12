@@ -171,8 +171,8 @@ class RealizarAccionModal extends Component
             $this->resetForm();
 
             // Emitir evento para refrescar tablas en otras vistas/recursos
-            $this->emit('refreshTable');
-            $this->emit('tareaCreada');
+            $this->dispatch('refreshTable');
+            $this->dispatch('tareaCreada');
 
         } catch (\Exception $e) {
             Notification::make()->title('Error al guardar la tarea')->danger()->body($e->getMessage())->send();

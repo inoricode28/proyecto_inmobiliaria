@@ -158,6 +158,10 @@ class ViewProspectoInfo extends Page
             // Refrescar datos
             $this->refreshData();
 
+            // Emitir eventos para refrescar el panel de seguimientos
+            $this->dispatch('refreshTable');
+            $this->dispatch('tareaCreada');
+
             // Cerrar modal y limpiar
             $this->cerrarModalRealizarTarea();
 
@@ -294,6 +298,10 @@ class ViewProspectoInfo extends Page
             // Refrescar datos
             $this->refreshData();
 
+            // Emitir eventos para refrescar el panel de seguimientos
+            $this->dispatch('refreshTable');
+            $this->dispatch('tareaCreada');
+
             // Cerrar modal y limpiar
             $this->cerrarModalAgendarCita();
 
@@ -402,6 +410,10 @@ class ViewProspectoInfo extends Page
 
             // Refrescar datos
             $this->refreshData();
+
+            // Emitir eventos para refrescar el panel de seguimientos
+            $this->dispatch('refreshTable');
+            $this->dispatch('tareaCreada');
 
             // Cerrar modal y limpiar
             $this->cerrarModalReasignacion();

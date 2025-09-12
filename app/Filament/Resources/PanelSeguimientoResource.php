@@ -144,9 +144,11 @@ class PanelSeguimientoResource extends Resource
                                         ->label('Fecha acción')
                                         ->required()
                                         ->afterStateHydrated(fn ($set, $state) => $set('fecha_realizar', $state ?? now()->toDateString())),
-                                    TimePicker::make('hora')
+                                    TextInput::make('hora')
                                         ->label('Hora acción')
+                                        ->type('time')
                                         ->required()
+                                        ->default(now()->format('H:i'))
                                         ->afterStateHydrated(fn ($set, $state) => $set('hora', $state ?? now()->format('H:i')))
                                 ]),
                                 Radio::make('respuesta')
@@ -165,7 +167,7 @@ class PanelSeguimientoResource extends Resource
                                 Radio::make('nivel_interes_id')
                                     ->label('Nivel de Interés')
                                     ->options(NivelInteres::pluck('nombre', 'id'))
-                                    ->inline() 
+                                    ->inline()
                                     ->required(),
                                 Placeholder::make('ultima_accion')
                                     ->label('')
@@ -199,7 +201,7 @@ class PanelSeguimientoResource extends Resource
                             ]), // Fin columna izquierda
 
                             // Columna derecha
-                            Card::make()->schema([     
+                            Card::make()->schema([
                                 Toggle::make('crear_proxima_tarea')
                                     ->label('¿Crear próxima tarea?')
                                     ->default(true)
@@ -207,7 +209,7 @@ class PanelSeguimientoResource extends Resource
                                     ->afterStateHydrated(function ($component, $state) {
                                         $component->state(true);
                                     }),
-                                               
+
                                 Select::make('proxima_usuario_asignado_id')
                                     ->label('Asignar a')
                                     ->options(User::all()->pluck('name', 'id'))
@@ -221,38 +223,39 @@ class PanelSeguimientoResource extends Resource
                                         ->label('Fecha próxima tarea')
                                         ->default(now()->addDays(1)),
 
-                                    TimePicker::make('proxima_hora')
+                                    TextInput::make('proxima_hora')
                                         ->label('Hora próxima tarea')
-                                        ->default(fn () => '09:00')
-                                        ->afterStateHydrated(fn ($set, $state) => $set('proxima_hora', $state ?? '09:00'))
+                                        ->type('time')
+                                        ->default('18:00')
+                                        ->afterStateHydrated(fn ($set, $state) => $set('proxima_hora', $state ?? '18:00'))
                                 ]),
                             ]), // Fin columna derecha
 
                         ])
                     ])
-                    ->action(function (Tarea $record, array $data) {
+                    ->action(function (Tarea $record, array $data, $livewire) {
                         try {
                             $prospecto = $record->prospecto;
-                            if ($data['respuesta'] !== 'efectiva' && $record->prospecto->tipo_gestion_id == 3) {            
+                            if ($data['respuesta'] !== 'efectiva' && $record->prospecto->tipo_gestion_id == 3) {
                                 Notification::make()
                                     ->title('Acción no permitida')
                                     ->body('No se puede retroceder de Contactados a Por Contactar')
                                     ->danger()
                                     ->send();
                                 return;
-                            } 
+                            }
 
                             Tarea::create([
                                 'prospecto_id' => $prospecto->id,
-                                'forma_contacto_id' => $data['forma_contacto_id'],                                
+                                'forma_contacto_id' => $data['forma_contacto_id'],
                                 'fecha_realizar' => $data['fecha_realizar'],
                                 'hora' => $data['hora'],
                                 'nota' => $data['comentario'] ?? null,
-                                'nivel_interes_id' => $data['nivel_interes_id'],                                
+                                'nivel_interes_id' => $data['nivel_interes_id'],
                                 'usuario_asignado_id' => auth()->id(),
                                 'created_by' => auth()->id(),
                                 'updated_by' => auth()->id(),
-                            ]);                            
+                            ]);
 
                             $nuevoTipoGestion = null;
                             if ($data['respuesta'] === 'efectiva') {
@@ -375,15 +378,15 @@ class PanelSeguimientoResource extends Resource
                                 'hora_cita' => $data['hora_cita'],
                                 'modalidad' => $data['modalidad'],
                                 'lugar' => $data['lugar'],
-                                'observaciones' => $data['observaciones'] ?? null,                                                               
+                                'observaciones' => $data['observaciones'] ?? null,
                                 'created_by' => $userId,
                             ]);
 
                             // Crear nueva tarea asociada a la cita
                             \App\Models\Tarea::create([
                                 'prospecto_id' => $record->prospecto->id,
-                                'forma_contacto_id' => $data['forma_contacto_id'], 
-                                'nivel_interes_id' => 5, 
+                                'forma_contacto_id' => $data['forma_contacto_id'],
+                                'nivel_interes_id' => 5,
                                 'usuario_asignado_id' => auth()->id(),
                                 'fecha_realizar' => now()->toDateString(),
                                 'hora' => now()->format('H:i:s'),
@@ -402,6 +405,9 @@ class PanelSeguimientoResource extends Resource
                                 ->title('Cita agendada correctamente')
                                 ->success()
                                 ->send();
+
+                            return redirect(request()->header('Referer'));
+
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->title('Error al agendar la cita')
@@ -419,7 +425,7 @@ class PanelSeguimientoResource extends Resource
                         ->size('sm')
                         ->visible(fn ($record) =>in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3, 4, 5]))
                         ->url(fn ($record) =>
-                            ProformaResource::getUrl('create', ['numero_documento' => $record->prospecto->numero_documento])
+                            ProformaResource::getUrl('create', ['prospecto_id' => $record->prospecto->id])
                         )
                         ->openUrlInNewTab(),
                     Action::make('separacion')

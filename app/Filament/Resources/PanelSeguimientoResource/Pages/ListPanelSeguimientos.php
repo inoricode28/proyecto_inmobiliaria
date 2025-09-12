@@ -15,7 +15,8 @@ class ListPanelSeguimientos extends ListRecords
 
     protected $listeners = [
         'updateTableFilters' => 'updateFilters',
-        'refreshTable' => '$refresh'
+        'refreshTable' => '$refresh',
+        'tareaCreada' => '$refresh'
     ];
 
     public $filtros = [
@@ -27,7 +28,7 @@ class ListPanelSeguimientos extends ListRecords
         'fecha_fin' => null,
         'nivel_interes_id' => null,
         'rango_acciones' => null,
-        'vencimiento' => null, 
+        'vencimiento' => null,
         'filtro_tipo_gestion_aplicado' => false // Nueva bandera específica para tipo gestión
     ];
 
@@ -75,23 +76,23 @@ class ListPanelSeguimientos extends ListRecords
             ->when($this->filtros['rango_acciones'], function ($q) {
                 switch ($this->filtros['rango_acciones']) {
                     case '1':
-                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
-                                    WHERE t2.prospecto_id = p.id 
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2
+                                    WHERE t2.prospecto_id = p.id
                                     AND t2.deleted_at IS NULL) = 1');
                         break;
                     case '2-5':
-                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
-                                    WHERE t2.prospecto_id = p.id 
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2
+                                    WHERE t2.prospecto_id = p.id
                                     AND t2.deleted_at IS NULL) BETWEEN 2 AND 5');
                         break;
                     case '6-10':
-                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
-                                    WHERE t2.prospecto_id = p.id 
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2
+                                    WHERE t2.prospecto_id = p.id
                                     AND t2.deleted_at IS NULL) BETWEEN 6 AND 10');
                         break;
                     case '11+':
-                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2 
-                                    WHERE t2.prospecto_id = p.id 
+                        $q->whereRaw('(SELECT COUNT(*) FROM tareas t2
+                                    WHERE t2.prospecto_id = p.id
                                     AND t2.deleted_at IS NULL) >= 11');
                         break;
                 }

@@ -143,6 +143,9 @@ public static function form(Form $form): Form
             TextInput::make('correo_electronico')
                 ->label('Correo Electrónico')
                 ->email()
+                ->required()
+                ->unique(table: 'prospectos', column: 'correo_electronico', ignoreRecord: true)
+                ->helperText('Este correo debe ser único en el sistema')
                 ->columnSpan(1),
         ]),
 

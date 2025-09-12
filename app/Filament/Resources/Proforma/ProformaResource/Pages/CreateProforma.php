@@ -5,24 +5,43 @@ namespace App\Filament\Resources\Proforma\ProformaResource\Pages;
 use App\Filament\Resources\Proforma\ProformaResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
+use App\Models\Prospecto;
 
 class CreateProforma extends CreateRecord
 {
     protected static string $resource = ProformaResource::class;
 
-    protected function afterCreate(): void
+    protected function afterCreate()
     {
         $proforma = $this->record;
 
-        if ($proforma->prospecto) {
-            $proforma->prospecto->update([
-                'tipo_gestion_id' => 5,
-            ]);
+        // Cargar la relación del prospecto si no está cargada
+        if (!$proforma->relationLoaded('prospecto')) {
+            $proforma->load('prospecto');
         }
+
+        if ($proforma->prospecto) {
+            try {
+                $proforma->prospecto->update([
+                    'tipo_gestion_id' => 5, // Visitas
+                ]);
+
+                // Log para verificar que la actualización se realizó
+            } catch (\Exception $e) {
+            }
+        }
+
         Notification::make()
             ->title('Proforma creada exitosamente')
             ->success()
             ->send();
+
+        // Emitir eventos para refrescar el panel de seguimientos
+        $this->emit('refreshTable');
+        $this->emit('tareaCreada');
+
+        // Forzar reload completo de la página
+        $this->dispatchBrowserEvent('reload-page');
     }
 
     protected function getRedirectUrl(): string
@@ -32,15 +51,60 @@ class CreateProforma extends CreateRecord
 
     protected function getFormMaxWidth(): string|null
     {
-        return '7x1'; 
+        return '7x1';
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['created_by'] = 1; 
-        $data['updated_by'] = 1; 
+        $data['created_by'] = 1;
+        $data['updated_by'] = 1;
 
         return $data;
+    }
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        // Verificar si viene el parámetro prospecto_id desde seguimientos
+        $prospectoId = request()->get('prospecto_id');
+
+        if ($prospectoId) {
+            $prospecto = Prospecto::find($prospectoId);
+
+            if ($prospecto) {
+                // Precargar TODOS los datos del prospecto disponibles
+                $formData = [
+                    'prospecto_id' => $prospecto->id,
+                    'nombres' => $prospecto->nombres,
+                    'ape_paterno' => $prospecto->ape_paterno,
+                    'ape_materno' => $prospecto->ape_materno,
+                    'razon_social' => $prospecto->razon_social,
+                    'celular' => $prospecto->celular,
+                    'numero_documento' => $prospecto->numero_documento,
+                    'tipo_documento_id' => $prospecto->tipo_documento_id,
+                    'proyecto_id' => $prospecto->proyecto_id,
+                    'tipo_inmueble_id' => $prospecto->tipo_inmueble_id,
+                    'forma_contacto_id' => $prospecto->forma_contacto_id,
+                    'como_se_entero_id' => $prospecto->como_se_entero_id,
+                ];
+
+                // Campos adicionales que podrían estar en el formulario de proforma
+                //if ($prospecto->fecha_registro) {
+                   // $formData['fecha_registro'] = $prospecto->fecha_registro;
+                //}
+
+                // Asignar el correo electrónico tanto en correo como en email
+                $formData['correo'] = $prospecto->correo_electronico;
+                $formData['email'] = $prospecto->correo_electronico;
+
+                // Asignar fecha de vencimiento (fecha actual + 2 días)
+                $formData['fecha_vencimiento'] = now()->addDays(2)->format('Y-m-d');
+
+                // Llenar el formulario con los datos del prospecto
+                $this->form->fill($formData);
+            }
+        }
     }
 
 }

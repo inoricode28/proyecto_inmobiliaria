@@ -27,14 +27,14 @@ class CreateSeparacion extends CreateRecord
         return $separacion;
     }
 
-    protected function afterCreate(): void
+    protected function afterCreate()
     {
         $separacion = $this->record;
 
         // Cambiar el estado del departamento a 'Separacion'
         if ($separacion->proforma && $separacion->proforma->departamento) {
             $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
-            
+
             if ($estadoSeparacion) {
                 $separacion->proforma->departamento->update([
                     'estado_departamento_id' => $estadoSeparacion->id
@@ -52,17 +52,30 @@ class CreateSeparacion extends CreateRecord
             ->title('Separación Definitiva creada exitosamente')
             ->success()
             ->send();
+
+        // Emitir eventos para refrescar el panel de seguimientos
+        $this->emit('refreshTable');
+        $this->emit('tareaCreada');
+        
+        // Forzar reload completo de la página
+        $this->dispatchBrowserEvent('reload-page');
     }
 
     protected function getRedirectUrl(): string
     {
+        // Si viene desde el panel de seguimientos, redirigir de vuelta
+        $numeroDocumento = request()->get('numero_documento');
+        if ($numeroDocumento) {
+            return route('filament.admin.resources.panel-seguimiento.index');
+        }
+
         return SeparacionResource::getUrl('index');
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['created_by'] = 1; 
-        $data['updated_by'] = 1; 
+        $data['created_by'] = 1;
+        $data['updated_by'] = 1;
 
         return $data;
     }

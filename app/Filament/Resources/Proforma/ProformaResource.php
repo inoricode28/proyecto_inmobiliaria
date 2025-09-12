@@ -31,36 +31,40 @@ class ProformaResource extends Resource
                 ->tabs([
                     Tab::make('Cliente')->schema([
                         Grid::make(3)->schema([
+
+                            TextInput::make('correo')
+                                ->label('Correo Electrónico')
+                                ->disabled(), // Campo deshabilitado ya que se precarga desde el action
+
                             Select::make('tipo_documento_id')
                                 ->label('Tipo de Documento')
-                                ->relationship('tipoDocumento', 'nombre')
-                                ->required(),
+                                ->relationship('tipoDocumento', 'nombre'),
+                              //  ->required(),
 
                             TextInput::make('numero_documento')
-                                ->label('N° Documento')
-                                ->required()
-                                ->reactive()
-                                ->afterStateUpdated(function (callable $set, $state) {
-                                    if (!empty($state)) {
-                                        $prospecto = \App\Models\Prospecto::where('numero_documento', $state)->first();
-
-                                        if ($prospecto) {
-                                            $set('prospecto_id', $prospecto->id);
-                                            $set('nombres', $prospecto->nombres);
-                                            $set('ape_paterno', $prospecto->ape_paterno);
-                                            $set('ape_materno', $prospecto->ape_materno);
-                                            $set('razon_social', $prospecto->razon_social);
-                                            $set('celular', $prospecto->celular);
-                                            $set('correo', $prospecto->correo_electronico);
-                                        } else {
-                                            \Filament\Notifications\Notification::make()
-                                                ->title('Prospecto no encontrado')
-                                                ->warning()
-                                                ->send();
-                                            $set('prospecto_id', null);
-                                        }
-                                    }
-                                }),
+                                ->label('N° Documento'),
+                                // ->reactive()
+                                // ->afterStateUpdated(function (callable $set, $state) {
+                                //     if (!empty($state)) {
+                                //         $prospecto = \App\Models\Prospecto::where('numero_documento', $state)->first();
+                                //
+                                //         if ($prospecto) {
+                                //             $set('prospecto_id', $prospecto->id);
+                                //             $set('nombres', $prospecto->nombres);
+                                //             $set('ape_paterno', $prospecto->ape_paterno);
+                                //             $set('ape_materno', $prospecto->ape_materno);
+                                //             $set('razon_social', $prospecto->razon_social);
+                                //             $set('celular', $prospecto->celular);
+                                //             $set('correo', $prospecto->correo_electronico);
+                                //         } else {
+                                //             \Filament\Notifications\Notification::make()
+                                //                 ->title('Prospecto no encontrado')
+                                //                 ->warning()
+                                //                 ->send();
+                                //             $set('prospecto_id', null);
+                                //         }
+                                //     }
+                                // }),
 
                             Hidden::make('prospecto_id'),
                             TextInput::make('nombres')->label('Nombres'),
@@ -74,7 +78,6 @@ class ProformaResource extends Resource
                             Select::make('grado_estudio_id')->label('Grado de Estudio')->relationship('gradoEstudio', 'nombre'),
                             TextInput::make('telefono')->label('Teléfono'),
                             TextInput::make('celular')->label('Celular'),
-                            TextInput::make('correo')->label('Correo Electrónico'),
                             TextInput::make('direccion')->label('Dirección'),
                             Select::make('departamento_ubigeo_id')
                                 ->label('Departamento')
@@ -173,17 +176,30 @@ class ProformaResource extends Resource
 
                             TextInput::make('descuento')
                                 ->label('Descuento')
-                                ->disabled()->dehydrated(false),
+                                ->numeric()
+                                ->suffix('%')
+                                ->nullable()
+                                ->minValue(0)
+                                ->maxValue(5)
+                                ->helperText('Ingrese un descuento entre 0% y 5% (opcional)'),
 
                             // CAMPOS MANUALES
-                            TextInput::make('monto_separacion')->label('Monto de Separación'),
+                            TextInput::make('monto_separacion')
+                                ->label('Monto de Separación')
+                               // ->required()
+                                ->numeric()
+                                ->minValue(500)
+                                ->maxValue(2000)
+                                ->helperText('Debe estar entre 500 y 2000'),
                             TextInput::make('monto_cuota_inicial')->label('Monto de Cuota Inicial'),
                             DatePicker::make('fecha_vencimiento')
                                 ->label('Fecha de Vencimiento')
                                 ->displayFormat('d/m/Y')
                                 ->format('Y-m-d')
                                 ->nullable()
-                                ->default(now()),
+                                ->default(now()->addDays(2)),
+
+
                         ])
                     ]),
 

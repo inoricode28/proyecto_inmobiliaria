@@ -136,6 +136,9 @@ return [
         'email' => [
             'unique' => 'El :attribute ya ha sido registrado.',
         ],
+        'correo_electronico' => [
+            'unique' => 'Este correo electrónico ya está registrado en el sistema.',
+        ],
     ],
 
     /*
