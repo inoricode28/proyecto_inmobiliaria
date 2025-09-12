@@ -6,6 +6,7 @@ use App\Models\Separacion;
 use App\Models\EstadoDepartamento;
 
 use App\Filament\Resources\Separaciones\SeparacionResource;
+use App\Filament\Resources\PanelSeguimientoResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 
@@ -57,19 +58,15 @@ class CreateSeparacion extends CreateRecord
         $this->emit('refreshTable');
         $this->emit('tareaCreada');
         
-        // Forzar reload completo de la página
+        // Forzar reload completo de la página del panel de seguimientos
         $this->dispatchBrowserEvent('reload-page');
+        $this->dispatchBrowserEvent('refresh-panel-seguimiento');
     }
 
     protected function getRedirectUrl(): string
     {
-        // Si viene desde el panel de seguimientos, redirigir de vuelta
-        $numeroDocumento = request()->get('numero_documento');
-        if ($numeroDocumento) {
-            return route('filament.admin.resources.panel-seguimiento.index');
-        }
-
-        return SeparacionResource::getUrl('index');
+        // Agregar parámetro de reload para forzar actualización de datos
+        return PanelSeguimientoResource::getUrl('index') . '?reload=' . time();
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

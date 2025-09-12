@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Proforma\ProformaResource\Pages;
 
 use App\Filament\Resources\Proforma\ProformaResource;
+use App\Filament\Resources\PanelSeguimientoResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 use App\Models\Prospecto;
@@ -40,13 +41,15 @@ class CreateProforma extends CreateRecord
         $this->emit('refreshTable');
         $this->emit('tareaCreada');
 
-        // Forzar reload completo de la página
+        // Forzar reload completo de la página del panel de seguimientos
         $this->dispatchBrowserEvent('reload-page');
+        $this->dispatchBrowserEvent('refresh-panel-seguimiento');
     }
 
     protected function getRedirectUrl(): string
     {
-        return ProformaResource::getUrl('index');
+        // Agregar parámetro de reload para forzar actualización de datos
+        return PanelSeguimientoResource::getUrl('index') . '?reload=' . time();
     }
 
     protected function getFormMaxWidth(): string|null
