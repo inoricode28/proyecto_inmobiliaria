@@ -14,6 +14,7 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\{Grid, TextInput, Select, DatePicker, Textarea, FileUpload};
 use Filament\Forms\Components\Hidden;
 use App\Filament\Resources\Proforma\ProformaResource\Pages;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProformaResource extends Resource
 {
@@ -242,6 +243,38 @@ class ProformaResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('generar_pdf')
+                    ->label('Generar PDF')
+                    ->icon('heroicon-o-document-download')
+                    ->color('success')
+                    ->action(function (Proforma $record) {
+                        // Cargar las relaciones necesarias
+                        $proforma = $record->load([
+                            'tipoDocumento',
+                            'genero',
+                            'nacionalidad',
+                            'estadoCivil',
+                            'gradoEstudio',
+                            'ubigeoDepartamento',
+                            'ubigeoProvincia',
+                            'ubigeoDistrito',
+                            'proyecto',
+                            'departamento.edificio',
+                            'departamento.tipoInmueble'
+                        ]);
+
+                        // Generar el PDF
+                        $pdf = Pdf::loadView('pdf.proforma', compact('proforma'));
+
+                        // Configurar el PDF
+                        $pdf->setPaper('A4', 'portrait');
+
+                        // Descargar el PDF
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            "proforma_{$proforma->codigo_formateado}.pdf"
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

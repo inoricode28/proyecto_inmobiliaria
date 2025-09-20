@@ -30,6 +30,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Section;
+use App\Rules\ValidarNombresCompletos;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -91,7 +92,7 @@ public static function form(Form $form): Form
 
             TextInput::make('numero_documento')
                 ->label('N° Documento')
-
+                ->unique(table: 'prospectos', column: 'numero_documento', ignoreRecord: true)
                 ->disabled(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado)
                 ->placeholder(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado ? 'No aplica' : '')
                 ->extraAttributes(fn (Closure $get) => $get('tipo_documento_id') == $tipoIndocumentado
@@ -113,6 +114,11 @@ public static function form(Form $form): Form
             TextInput::make('nombres')
                 ->label('Nombres')
                 ->required()
+                ->rules([
+                    function (Closure $get) {
+                        return new ValidarNombresCompletos($get);
+                    }
+                ])
                 ->visible(fn (Closure $get) => in_array($get('tipo_documento_id'), [$tipoDni, $tipoIndocumentado]))
                 ->columnSpan(1),
 
@@ -132,6 +138,7 @@ public static function form(Form $form): Form
             TextInput::make('celular')
                 ->label('Celular')
                 ->required()
+                ->unique(table: 'prospectos', column: 'celular', ignoreRecord: true)
                 ->columnSpan(1),
 /*
              Select::make('tipo_gestion_id')
