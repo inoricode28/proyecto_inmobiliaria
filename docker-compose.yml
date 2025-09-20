@@ -6,7 +6,9 @@ volumes:
 services:
   sqldb:
     image: mysql:5.7
-    container_name: helper-mysql
+    container_name: helper1-mysql
+    ports:
+      - "3307:3306" # Exponer MySQL al VPS en el puerto 3307
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
@@ -22,9 +24,10 @@ services:
       start_period: 10s
       timeout: 10s
       retries: 3
+
   helper:
-    image: eloufirhatim/helper:latest
-    container_name: helper-server
+    image: raynorman/helper1:latest
+    container_name: helper1-server
     environment:
       - DB_CONNECTION=mysql
       - DB_HOST=sqldb
@@ -38,10 +41,35 @@ services:
       - MAIL_USERNAME=your_username
       - MAIL_PASSWORD=your_password
       - MAIL_ENCRYPTION=tls
+      - APP_URL=https://seikaze.net.pe
+      - ASSET_URL=https://seikaze.net.pe
+      - APP_ENV=production
     depends_on:
-      - sqldb
-    restart: "no"
+      sqldb:
+        condition: service_healthy
+    restart: unless-stopped
     ports:
-      - 8000:8000
+      - 8001:8000
     volumes:
-      - /etc/localtime:/etc/localtime
+      - /etc/localtime:/etc/localtime:ro
+      - ./src:/var/www/html
+      - ./uploads/comprobantes/abonos:/var/www/html/storage/app/public/comprobantes/abonos
+      - ./uploads/clientes/fotos:/var/www/html/storage/app/public/clientes/fotos
+      - ./uploads/comprobantes/yape:/var/www/html/storage/app/public/comprobantes/yape
+      - ./uploads/comprobantes/efectivo:/var/www/html/storage/app/public/comprobantes/efectivo
+      - ./uploads/departamentos:/var/www/html/storage/app/public/departamentos
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+
+  nginx:
+    image: nginx:alpine
+    container_name: helper1-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - helper
+    restart: unless-stopped

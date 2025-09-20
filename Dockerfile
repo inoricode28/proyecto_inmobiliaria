@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM node:20.17.0-bullseye-slim
 
 # Establecer directorio de trabajo
@@ -28,14 +26,24 @@ RUN composer install --no-dev --optimize-autoloader && \
     npm install && \
     npm run build
 
-# Generar clave de app de Laravel
+RUN mkdir -p storage/framework/cache/data && \
+    mkdir -p storage/framework/sessions && \
+    mkdir -p storage/framework/views && \
+    mkdir -p storage/logs && \
+    mkdir -p storage/app/public && \
+    mkdir -p storage/app/public/clientes/fotos && \
+    mkdir -p storage/app/public/comprobantes/yape && \
+    mkdir -p storage/app/public/comprobantes/efectivo && \
+    mkdir -p storage/app/public/departamentos
+
 RUN php artisan key:generate
 
-# Asegurar permisos correctos (opcional pero recomendado)
-RUN chown -R node:node /app
+RUN chown -R node:node /app && \
+    chmod -R 775 storage && \
+    chmod -R 775 bootstrap/cache
 
-# Usar usuario no root por seguridad
 USER node
 
-# Comando al iniciar el contenedor
+EXPOSE 8000
+
 CMD ["bash", "./run.sh"]
