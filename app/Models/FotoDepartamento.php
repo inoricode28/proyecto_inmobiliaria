@@ -13,6 +13,7 @@ class FotoDepartamento extends Model
         'edificio_id',
         'departamento_id',
         'imagen',
+        'imagen_adicional',
     ];
 
     public $timestamps = true;

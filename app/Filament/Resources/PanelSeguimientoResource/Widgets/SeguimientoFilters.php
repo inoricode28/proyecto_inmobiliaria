@@ -23,7 +23,17 @@ class SeguimientoFilters extends Widget implements HasForms
 
     protected static string $view = 'filament.resources.panel-seguimiento-resource.seguimiento-filters';
 
-    public array $data = [];
+    public array $data = [
+        'proyecto' => null,
+        'usuario_id' => 0,
+        'comoSeEntero' => 0,
+        'rangoAcciones' => 0,
+        'fechaInicio' => null,
+        'fechaFin' => null,
+        'NivelInteres' => 0,
+        'vencimiento' => 0,
+        'tipo_gestion_id' => null,
+    ];
 
     protected function getFormSchema(): array
     {

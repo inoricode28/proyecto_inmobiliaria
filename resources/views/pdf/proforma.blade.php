@@ -99,6 +99,19 @@
         margin: 15px 0;
     }
 
+    .imagen-departamento {
+        margin: 15px 0;
+        text-align: center;
+        page-break-before: always;
+    }
+
+    .imagen-departamento img {
+        max-width: 100%;
+        max-height: 50vh;
+        width: auto;
+        height: auto;
+    }
+
     .precio-row {
         display: flex;
         justify-content: space-between;
@@ -250,6 +263,8 @@
         </tbody>
     </table>
 
+
+
     <!-- Desglose de precios -->
     <div class="precio-section">
         <div class="precio-row">
@@ -340,6 +355,21 @@
     <div class="footer">
         CASTILLA 221, MAGDALENA DEL MAR
     </div>
+
+    <!-- Imagen del Departamento al final -->
+    @if($proforma->departamento && $proforma->departamento->fotoDepartamentos->isNotEmpty())
+        @php
+            $fotoProforma = $proforma->departamento->fotoDepartamentos->where('imagen_adicional', '!=', null)->first();
+            $fotoGeneral = $proforma->departamento->fotoDepartamentos->first();
+            $imagenMostrar = $fotoProforma ? $fotoProforma->imagen_adicional : ($fotoGeneral ? $fotoGeneral->imagen : null);
+        @endphp
+        
+        @if($imagenMostrar)
+            <div class="imagen-departamento">
+                <img src="{{ public_path('storage/' . $imagenMostrar) }}" alt="Imagen del Departamento">
+            </div>
+        @endif
+    @endif
 </body>
 
 </html>

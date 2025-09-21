@@ -15,6 +15,7 @@ use Filament\Forms\Components\{Grid, TextInput, Select, DatePicker, Textarea, Fi
 use Filament\Forms\Components\Hidden;
 use App\Filament\Resources\Proforma\ProformaResource\Pages;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Settings\GeneralSettings;
 
 class ProformaResource extends Resource
 {
@@ -26,12 +27,39 @@ class ProformaResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $settings = app(GeneralSettings::class);
+        
         return $form->schema([
             Tabs::make('Proforma')
                 -> columnSpan('full')
                 ->tabs([
                     Tab::make('Cliente')->schema([
-                        Grid::make(3)->schema([
+                        Grid::make(3)->schema(array_filter([
+
+                            $settings->enable_prospect_selection_in_proforma ? 
+                                Select::make('prospecto_id')
+                                    ->label('Seleccionar Prospecto')
+                                    ->relationship('prospecto', 'nombres')
+                                    ->searchable()
+                                    ->preload()
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set, $state) {
+                                        if ($state) {
+                                            $prospecto = \App\Models\Prospecto::find($state);
+                                            if ($prospecto) {
+                                                $set('nombres', $prospecto->nombres);
+                                                $set('ape_paterno', $prospecto->ape_paterno);
+                                                $set('ape_materno', $prospecto->ape_materno);
+                                                $set('razon_social', $prospecto->razon_social);
+                                                $set('celular', $prospecto->celular);
+                                                $set('numero_documento', $prospecto->numero_documento);
+                                                $set('tipo_documento_id', $prospecto->tipo_documento_id);
+                                                $set('correo', $prospecto->correo_electronico);
+                                                $set('email', $prospecto->correo_electronico);
+                                            }
+                                        }
+                                    })
+                                : null,
 
                             TextInput::make('correo')
                                 ->label('Correo Electrónico')
@@ -67,7 +95,8 @@ class ProformaResource extends Resource
                                 //     }
                                 // }),
 
-                            Hidden::make('prospecto_id'),
+                            !$settings->enable_prospect_selection_in_proforma ? 
+                                Hidden::make('prospecto_id') : null,
                             TextInput::make('nombres')->label('Nombres'),
                             TextInput::make('ape_paterno')->label('Apellido Paterno'),
                             TextInput::make('ape_materno')->label('Apellido Materno'),
@@ -117,7 +146,7 @@ class ProformaResource extends Resource
                             TextInput::make('direccion_adicional')->label('Dirección Adicional'),
                             Hidden::make('created_by'),
                             Hidden::make('updated_by'),
-                        ])
+                        ]))
                     ]),
 
                     Tab::make('Inmueble')->schema([
@@ -260,7 +289,8 @@ class ProformaResource extends Resource
                             'ubigeoDistrito',
                             'proyecto',
                             'departamento.edificio',
-                            'departamento.tipoInmueble'
+                            'departamento.tipoInmueble',
+                            'departamento.fotoDepartamentos'
                         ]);
 
                         // Generar el PDF

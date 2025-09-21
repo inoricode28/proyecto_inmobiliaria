@@ -7,6 +7,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use App\Http\Controllers\RoadMap\DataController;
 use App\Http\Controllers\Auth\OidcAuthController;
 use App\Filament\Resources\PanelSeguimientoResource\Pages\ViewProspectoInfo;
+use Maatwebsite\Excel\Facades\Excel;
 
 // Share ticket
 Route::get('/tickets/share/{ticket:code}', function (Ticket $ticket) {
@@ -58,4 +59,13 @@ Route::get('/download/temp/{filename}', function ($filename) {
     
     return response()->download($path, $filename)->deleteFileAfterSend(true);
 })->name('download.temp.file');
+
+// Rutas de exportación para seguimientos
+Route::get('/seguimientos/export/excel', [\App\Http\Controllers\SeguimientoExportController::class, 'exportExcel'])
+    ->middleware(['auth', 'verified'])
+    ->name('seguimientos.export.excel');
+
+Route::get('/seguimientos/export/pdf', [\App\Http\Controllers\SeguimientoExportController::class, 'exportPdf'])
+    ->middleware(['auth', 'verified'])
+    ->name('seguimientos.export.pdf');
     

@@ -88,6 +88,16 @@ class FotoDepartamentoResource extends Resource
                         ->enableDownload()
                         ->preserveFilenames()
                         ->columnSpanFull(),
+
+                    FileUpload::make('imagen_adicional')
+                        ->label('Imagen Proforma')
+                        ->directory('departamentos')
+                        ->image()
+                        ->maxSize(2048)
+                        ->enableOpen()
+                        ->enableDownload()
+                        ->preserveFilenames()
+                        ->columnSpanFull(),
                 ])->columns(1)
             ]);
     }

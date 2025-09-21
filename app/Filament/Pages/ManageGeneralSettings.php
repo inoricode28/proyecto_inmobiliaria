@@ -80,6 +80,10 @@ class ManageGeneralSettings extends SettingsPage
                                         ->label(__('Enable OIDC login?'))
                                         ->helperText(__('If enabled, an OIDC Connect button will be visible on the login page.')),
 
+                                    Toggle::make('enable_prospect_selection_in_proforma')
+                                        ->label(__('Enable prospect selection in proforma?'))
+                                        ->helperText(__('If enabled, a prospect selection field will be visible in proforma forms.')),
+
                                     Select::make('site_language')
                                         ->label(__('Site language'))
                                         ->helperText(__('The language used by the platform.'))
