@@ -36,17 +36,32 @@ class ProformaResource extends Resource
                     Tab::make('Cliente')->schema([
                         Grid::make(3)->schema(array_filter([
 
-                            $settings->enable_prospect_selection_in_proforma ? 
+                            ($settings->enable_prospect_selection_in_proforma && !request()->get('prospecto_id')) ? 
                                 Select::make('prospecto_id')
                                     ->label('Seleccionar Prospecto')
-                                    ->relationship('prospecto', 'nombres')
+                                    ->relationship('prospecto', 'nombres', function ($query, $livewire) {
+                                        // En modo edición, incluir el prospecto actual además de los no asignados
+                                        if (isset($livewire->record) && $livewire->record && $livewire->record->prospecto_id) {
+                                            return $query->where(function ($q) use ($livewire) {
+                                                $q->whereDoesntHave('proformas')
+                                                  ->orWhere('id', $livewire->record->prospecto_id);
+                                            });
+                                        }
+                                        // En modo creación, solo mostrar prospectos no asignados
+                                        return $query->whereDoesntHave('proformas');
+                                    })
+                                    ->getOptionLabelFromRecordUsing(function ($record) {
+                                        $nombreCompleto = trim($record->nombres . ' ' . $record->ape_paterno . ' ' . $record->ape_materno);
+                                        return 'PROSP: ' . $nombreCompleto;
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->reactive()
-                                    ->afterStateUpdated(function (callable $set, $state) {
+                                    ->afterStateUpdated(function (callable $set, $state, callable $get) {
                                         if ($state) {
                                             $prospecto = \App\Models\Prospecto::find($state);
                                             if ($prospecto) {
+                                                // Precargar datos del prospecto en el formulario
                                                 $set('nombres', $prospecto->nombres);
                                                 $set('ape_paterno', $prospecto->ape_paterno);
                                                 $set('ape_materno', $prospecto->ape_materno);
@@ -56,6 +71,34 @@ class ProformaResource extends Resource
                                                 $set('tipo_documento_id', $prospecto->tipo_documento_id);
                                                 $set('correo', $prospecto->correo_electronico);
                                                 $set('email', $prospecto->correo_electronico);
+                                                
+                                                // Actualizar estado del prospecto basado en el contenido de la proforma
+                                                // Solo si estamos editando una proforma existente (no en creación)
+                                                if (request()->route('record')) {
+                                                    $proformaId = request()->route('record');
+                                                    $proforma = \App\Models\Proforma::find($proformaId);
+                                                    
+                                                    if ($proforma) {
+                                                        // Verificar si la proforma tiene separación
+                                                        $tieneSeparacion = $proforma->separacion()->exists();
+                                                        
+                                                        if ($tieneSeparacion) {
+                                                            // Si tiene separación, cambiar estado a "Separación" (ID: 6)
+                                                            $prospecto->update(['tipo_gestion_id' => 6]);
+                                                        } else {
+                                                            // Si no tiene separación, cambiar estado a "Visitas" (ID: 5)
+                                                            $prospecto->update(['tipo_gestion_id' => 5]);
+                                                        }
+                                                        
+                                                        \Filament\Notifications\Notification::make()
+                                                            ->title('Estado actualizado')
+                                                            ->body($tieneSeparacion ? 
+                                                                'El prospecto ha sido actualizado a estado "Separación"' : 
+                                                                'El prospecto ha sido actualizado a estado "Visitas"')
+                                                            ->success()
+                                                            ->send();
+                                                    }
+                                                }
                                             }
                                         }
                                     })
@@ -63,7 +106,16 @@ class ProformaResource extends Resource
 
                             TextInput::make('correo')
                                 ->label('Correo Electrónico')
-                                ->disabled(), // Campo deshabilitado ya que se precarga desde el action
+                                ->disabled(function (callable $get) {
+                                    // Habilitar solo si no hay prospecto_id (proforma libre)
+                                    // y no viene desde seguimientos (sin parámetro en URL)
+                                    $prospectoId = $get('prospecto_id');
+                                    $prospectoIdFromUrl = request()->get('prospecto_id');
+                                    
+                                    // Deshabilitar si hay prospecto seleccionado O si viene desde seguimientos
+                                    return $prospectoId || $prospectoIdFromUrl;
+                                })
+                                ->reactive(), // Hacer reactivo para que se actualice cuando cambie prospecto_id
 
                             Select::make('tipo_documento_id')
                                 ->label('Tipo de Documento')

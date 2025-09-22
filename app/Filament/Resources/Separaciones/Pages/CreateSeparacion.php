@@ -32,8 +32,10 @@ class CreateSeparacion extends CreateRecord
     {
         $separacion = $this->record;
 
-        // Cambiar el estado del departamento a 'Separacion'
-        if ($separacion->proforma && $separacion->proforma->departamento) {
+        // Cambiar el estado del departamento a 'Separacion' solo si la proforma tiene prospecto
+        if ($separacion->proforma && 
+            $separacion->proforma->departamento && 
+            $separacion->proforma->prospecto_id) {
             $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
 
             if ($estadoSeparacion) {
@@ -43,7 +45,10 @@ class CreateSeparacion extends CreateRecord
             }
         }
 
-        if ($separacion->proforma && $separacion->proforma->prospecto) {
+        // Solo actualizar el estado del prospecto si la proforma tiene un prospecto asociado
+        if ($separacion->proforma && 
+            $separacion->proforma->prospecto && 
+            $separacion->proforma->prospecto_id) {
             $separacion->proforma->prospecto->update([
                 'tipo_gestion_id' => 6,
             ]);
