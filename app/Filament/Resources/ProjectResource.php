@@ -27,6 +27,7 @@ class ProjectResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-archive';
 
     protected static ?int $navigationSort = 5;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static function getNavigationLabel(): string
     {

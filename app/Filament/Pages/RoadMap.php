@@ -20,6 +20,7 @@ class RoadMap extends Page implements HasForms
     protected static string $view = 'filament.pages.road-map';
 
     protected static ?string $slug = 'road-map';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 8;
 

@@ -12,7 +12,6 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 class TimesheetExport implements FromCollection, WithHeadings
 {
     protected array $params;
-
     public function __construct(array $params)
     {
         $this->params = $params;

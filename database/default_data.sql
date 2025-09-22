@@ -152,10 +152,11 @@ INSERT INTO `settings` (`id`, `group`, `name`, `locked`, `payload`, `created_at`
 (2, 'general', 'site_logo', 0, 'null', '2022-11-14 18:11:50', '2022-11-14 18:11:50'),
 (3, 'general', 'enable_registration', 0, 'true', '2022-11-14 18:11:50', '2022-11-14 18:11:50'),
 (4, 'general', 'enable_social_login', 0, 'true', '2022-11-14 18:11:50', '2022-11-14 18:11:50'),
-(5, 'general', 'site_language', 0, 'en', '2022-11-14 18:11:50', '2022-11-14 18:11:50');
+(5, 'general', 'site_language', 0, 'en', '2022-11-14 18:11:50', '2022-11-14 18:11:50'),
+(6, 'general', 'enable_prospect_selection_in_proforma', 0, 'false', '2022-11-14 18:11:50', '2022-11-14 18:11:50');
 
 ALTER TABLE `settings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 ALTER TABLE `migrations`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;

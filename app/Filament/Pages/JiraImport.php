@@ -29,6 +29,7 @@ class JiraImport extends Page implements HasForms
     protected static ?string $slug = 'jira-import';
 
     protected static ?int $navigationSort = 2;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected $listeners = [
         'updateJiraProjects',

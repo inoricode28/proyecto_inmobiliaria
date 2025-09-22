@@ -22,6 +22,7 @@ class TimesheetResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-badge-check';
 
     protected static ?int $navigationSort = 4;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static function getNavigationLabel(): string
     {
