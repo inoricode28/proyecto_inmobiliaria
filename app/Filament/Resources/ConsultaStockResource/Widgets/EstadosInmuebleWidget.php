@@ -34,6 +34,7 @@ class EstadosInmuebleWidget extends Widget
     protected function getViewData(): array
     {
         $edificioId = request()->get('edificio_id') ?: Edificio::first()?->id;
+        $edificio = $edificioId ? Edificio::find($edificioId) : null;
         $estados = EstadoDepartamento::orderBy('nombre')->get();
         $tiposInmueble = TipoInmueble::all();
         $proyectos = Proyecto::orderBy('nombre')->get();
@@ -105,7 +106,7 @@ class EstadosInmuebleWidget extends Widget
         return [
             'rows' => $rowData,
             'estados' => $estados,
-            'edificio' => Edificio::find($edificioId),
+            'edificio' => $edificio,
             'tiposInmueble' => $tiposInmueble,
             'proyectos' => $proyectos,
             'selectedTipo' => $this->selectedTipoInmueble

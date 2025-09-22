@@ -174,7 +174,7 @@
 </div>
 
 <div class="p-4 bg-white rounded-lg shadow mb-6">
-    <h2 class="text-lg font-medium text-gray-900">Estado Inmueble: {{ $edificio->nombre }}</h2>
+    <h2 class="text-lg font-medium text-gray-900">Estado Inmueble: {{ $edificio?->nombre ?? 'Sin edificio seleccionado' }}</h2>
 
     <div class="overflow-x-auto mt-4 max-h-[80vh] overflow-y-auto"> <!-- Añade scroll vertical -->
         <table class="min-w-full divide-y divide-gray-200">

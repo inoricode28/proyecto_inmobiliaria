@@ -1,6 +1,6 @@
 
 <div class="p-4 bg-white rounded-lg shadow">
-    <h2 class="text-lg font-medium text-gray-900">Estado Financiamiento: {{ $edificio->nombre }}</h2>
+    <h2 class="text-lg font-medium text-gray-900">Estado Financiamiento: {{ $edificio?->nombre ?? 'Sin edificio seleccionado' }}</h2>
     <div class="overflow-x-auto mt-4">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">

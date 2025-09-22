@@ -22,6 +22,7 @@ protected function getViewData(): array
     public function getFinanciamientosData(): array
     {
         $edificioId = request()->get('edificio_id') ?: Edificio::first()?->id;
+        $edificio = $edificioId ? Edificio::find($edificioId) : null;
         $financingTypes = TipoFinanciamiento::orderBy('nombre')->get();
         $propertyTypes = TipoInmueble::all()->keyBy('id');
 
@@ -71,7 +72,7 @@ protected function getViewData(): array
         return [
             'rows' => $rowData,
             'financingTypes' => $financingTypes,
-            'edificio' => Edificio::find($edificioId),
+            'edificio' => $edificio,
         ];
     }
 }

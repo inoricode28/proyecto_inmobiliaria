@@ -48,6 +48,33 @@
     }
 }
 
+/* Dark mode enhancements */
+.dark {
+    /* Custom dark mode styles for better contrast */
+    .social-icon {
+        @apply bg-gray-800;
+    }
+    
+    /* Ensure proper contrast for text in dark mode */
+    .filament-header-heading {
+        @apply text-gray-100;
+    }
+    
+    /* Dark mode improvements for ticket comments */
+    .ticket-comment {
+        @apply bg-gray-800 border-gray-700;
+        
+        .actions {
+            @apply text-gray-300;
+        }
+    }
+    
+    /* Dark mode for forms and inputs */
+    .filament-forms-repeater-component {
+        @apply bg-gray-800 border-gray-700;
+    }
+}
+
 label:has(.sprint-checkboxes) > span {
     width: 100%;
 }
