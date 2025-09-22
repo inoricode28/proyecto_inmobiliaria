@@ -128,7 +128,7 @@ class CreateVenta extends CreateRecord
                 'carta_fianza_nombre' => optional($separacion->cartaFianza)->nombre,
                 'proyecto_nombre' => optional($proforma->proyecto)->nombre,
                  'departamento_nombre' => optional($proforma->departamento)->num_departamento,
-                'precio_lista' => $proforma->departamento->precio ?? 0,
+                'precio_lista' => $proforma->departamento->Precio_lista ?? 0,
                  'precio_venta' => $proforma->departamento->Precio_venta ?? 0,
                  'descuento' => $proforma->departamento->descuento ?? 0,
                  'monto_separacion' => $proforma->monto_separacion,

@@ -90,7 +90,14 @@ class PanelSeguimientoResource extends Resource
                 TextColumn::make('prospecto.proyecto.nombre')->label('Proyecto'),
                 TextColumn::make('prospecto.comoSeEntero.nombre')->label('Cómo se enteró'),
                 TextColumn::make('prospecto.fecha_registro')->label('Fec. Registro')->date('d/m/Y'),
-                TextColumn::make('fecha_contacto')->label('Fec. Últ. Contacto')->dateTime('d/m/Y H:i'),
+                TextColumn::make('fecha_contacto')
+                    ->label('Fec. Últ. Contacto')
+                    ->dateTime('d/m/Y H:i')
+                    ->formatStateUsing(function ($record) {
+                        // Obtener la fecha de la última tarea efectiva del prospecto
+                        $fechaContacto = \App\Models\Tarea::getFechaContactoProspecto($record->prospecto_id);
+                        return $fechaContacto ? $fechaContacto->format('d/m/Y H:i') : '-';
+                    }),
                 TextColumn::make('fecha_realizar')->label('Fec. Tarea')->dateTime('d/m/Y'),
                 TextColumn::make('usuarioAsignado.name')->label('Responsable'),
             ])
@@ -251,6 +258,7 @@ class PanelSeguimientoResource extends Resource
                                 'fecha_realizar' => $data['fecha_realizar'],
                                 'hora' => $data['hora'],
                                 'nota' => $data['comentario'] ?? null,
+                                'respuesta' => $data['respuesta'], // Guardar la respuesta
                                 'nivel_interes_id' => $data['nivel_interes_id'],
                                 'usuario_asignado_id' => auth()->id(),
                                 'created_by' => auth()->id(),

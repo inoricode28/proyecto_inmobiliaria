@@ -122,6 +122,7 @@ class ViewProspectoInfo extends Page
                 'fecha_realizar' => $this->fecha_realizar,
                 'hora' => $this->hora,
                 'nota' => $this->comentario ?? null,
+                'respuesta' => $this->respuesta, // Guardar la respuesta
                 'nivel_interes_id' => $this->nivel_interes_id,
                 'usuario_asignado_id' => auth()->id(),
                 'created_by' => auth()->id(),

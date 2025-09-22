@@ -10,79 +10,56 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SeguimientoExportController extends Controller
 {
     public function exportExcel(Request $request)
     {
-        // Debug: Log todos los parámetros recibidos
-        Log::info('Parámetros de exportación Excel:', $request->all());
+        $query = $this->buildTableQuery($request);
         
-        $query = $this->buildFilteredQuery($request);
-        
-        // Solo aplicar paginación si se reciben parámetros específicos de paginación
-        $page = $request->get('page');
-        $perPage = $request->get('per_page');
-        
-        Log::info('Paginación recibida:', ['page' => $page, 'per_page' => $perPage]);
-        
-        // Solo paginar si ambos parámetros están presentes y son válidos
-        if ($page && $perPage && $page > 0 && $perPage > 0) {
-            $query = $query->skip(($page - 1) * $perPage)->take($perPage);
-            Log::info('Aplicando paginación:', ['page' => $page, 'per_page' => $perPage, 'skip' => ($page - 1) * $perPage, 'take' => $perPage]);
-        } else {
-            Log::info('No se aplicará paginación - exportando todos los registros filtrados');
-        }
-        
-        // Debug: Contar registros antes de exportar
-        $totalRecords = $query->count();
-        Log::info('Total de registros a exportar:', ['count' => $totalRecords]);
-        
-        return Excel::download(new SeguimientosExport($query), 'seguimientos_' . date('Y-m-d_H-i-s') . '.xlsx');
+        return Excel::download(new SeguimientosExport($query->get()), 'seguimientos.xlsx');
     }
 
     public function exportPdf(Request $request)
     {
-        // Debug: Log todos los parámetros recibidos
-        Log::info('Parámetros de exportación PDF:', $request->all());
+        $query = $this->buildTableQuery($request);
         
-        $query = $this->buildFilteredQuery($request);
-        
-        // Aplicar paginación si se especifica
-        $page = $request->get('page', 1);
-        $perPage = $request->get('per_page', 10); // Filament usa 10 por defecto
-        
-        Log::info('Paginación aplicada PDF:', ['page' => $page, 'per_page' => $perPage]);
-        
-        if ($page && $perPage) {
-            $query = $query->skip(($page - 1) * $perPage)->take($perPage);
-        }
-        
-        // Debug: Contar registros antes de exportar
-        $totalRecords = $query->count();
-        Log::info('Total de registros PDF a exportar:', ['count' => $totalRecords]);
-        
-        return (new SeguimientosPdfExport($query))->export();
+        $seguimientos = $query->get()->map(function ($tarea) {
+            return [
+                'id' => $tarea->prospecto->id,
+                'nombres' => $this->formatNombres($tarea->prospecto),
+                'telefono' => $tarea->prospecto->celular,
+                'documento' => $tarea->prospecto->numero_documento,
+                'proyecto' => $tarea->prospecto->proyecto->nombre ?? '',
+                'fuente_referencia' => $tarea->prospecto->comoSeEntero->nombre ?? '',
+                'fecha_registro' => $tarea->prospecto->fecha_registro ? Carbon::parse($tarea->prospecto->fecha_registro)->format('d/m/Y') : '',
+                'fecha_ultimo_contacto' => $this->getFechaUltimoContacto($tarea->prospecto_id),
+                'fecha_tarea' => $tarea->fecha_realizar ? Carbon::parse($tarea->fecha_realizar)->format('d/m/Y') : '',
+                'responsable' => $tarea->usuarioAsignado->name ?? '',
+            ];
+        });
+
+        $pdf = PDF::loadView('pdf.seguimientos', compact('seguimientos'));
+        return $pdf->download('seguimientos.pdf');
     }
 
-    private function buildFilteredQuery(Request $request)
+    private function buildTableQuery(Request $request)
     {
-        // Obtener filtros del request - exactamente como en la tabla
+        // Replicar exactamente la lógica de ListPanelSeguimientos::getTableQuery()
         $filtros = [
-            'proyecto_id' => $request->get('proyecto'),
-            'usuario_id' => ($request->get('usuario_id', 0) != 0) ? $request->get('usuario_id') : null,
-            'como_se_entero_id' => ($request->get('comoSeEntero', 0) != 0) ? $request->get('comoSeEntero') : null,
+            'proyecto_id' => $request->get('proyecto_id'),
+            'usuario_id' => $request->get('usuario_id'),
+            'como_se_entero_id' => $request->get('como_se_entero_id'),
             'tipo_gestion_id' => $request->get('tipo_gestion_id'),
-            'fecha_inicio' => $request->get('fechaInicio'),
-            'fecha_fin' => $request->get('fechaFin'),
-            'nivel_interes_id' => ($request->get('NivelInteres', 0) != 0) ? $request->get('NivelInteres') : null,
-            'rango_acciones' => ($request->get('rangoAcciones', 0) != 0) ? $request->get('rangoAcciones') : null,
-            'vencimiento' => ($request->get('vencimiento', 0) != 0) ? $request->get('vencimiento') : null,
-            'filtro_tipo_gestion_aplicado' => !empty($request->get('tipo_gestion_id'))
+            'fecha_inicio' => $request->get('fecha_inicio'),
+            'fecha_fin' => $request->get('fecha_fin'),
+            'nivel_interes_id' => $request->get('nivel_interes_id'),
+            'rango_acciones' => $request->get('rango_acciones'),
+            'vencimiento' => $request->get('vencimiento'),
+            'filtro_tipo_gestion_aplicado' => true // Por defecto aplicamos filtros
         ];
 
-        // REPLICAR EXACTAMENTE LA LÓGICA DE LA TABLA
-        // Paso 1: Construir la subconsulta de las últimas tareas (igual que en la tabla)
         $latestTareas = DB::table('tareas as t1')
             ->selectRaw('MAX(t1.id) as id')
             ->join('prospectos as p', 'p.id', '=', 't1.prospecto_id')
@@ -131,9 +108,8 @@ class SeguimientoExportController extends Controller
             ->whereNull('t1.deleted_at')
             ->groupBy('t1.prospecto_id');
 
-        // Paso 2: Construir la consulta principal (igual que en la tabla)
-        $query = \App\Models\Tarea::query()
-            ->with(['prospecto.proyecto', 'prospecto.comoSeEntero', 'prospecto.tipoGestion', 'usuarioAsignado', 'nivelInteres'])
+        $query = Tarea::query()
+            ->with(['prospecto.proyecto', 'prospecto.comoSeEntero', 'usuarioAsignado'])
             ->whereIn('id', $latestTareas)
             ->when($filtros['usuario_id'], fn ($q) =>
                 $q->where('usuario_asignado_id', $filtros['usuario_id'])
@@ -158,8 +134,23 @@ class SeguimientoExportController extends Controller
                 }
             });
 
-        // Paso 3: CAMBIAR LA LÓGICA - NO DEVOLVER CONSULTA VACÍA
-        // La tabla muestra datos incluso sin filtro de tipo gestión, así que las exportaciones también deben hacerlo
         return $query;
+    }
+
+    private function formatNombres($prospecto)
+    {
+        if (!$prospecto) {
+            return '-';
+        }
+        $tieneNombre = $prospecto->nombres && $prospecto->ape_paterno;
+        return $tieneNombre
+            ? $prospecto->nombres . ' ' . $prospecto->ape_paterno . ' ' . ($prospecto->ape_materno ?? '')
+            : ($prospecto->razon_social ?? '-');
+    }
+
+    private function getFechaUltimoContacto($prospectoId)
+    {
+        $fechaContacto = \App\Models\Tarea::getFechaContactoProspecto($prospectoId);
+        return $fechaContacto ? $fechaContacto->format('d/m/Y H:i') : '-';
     }
 }

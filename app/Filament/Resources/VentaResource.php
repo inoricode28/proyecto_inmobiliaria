@@ -29,7 +29,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 
-class VentaResource extends Resource                 
+class VentaResource extends Resource
 {
     protected static ?string $model = Venta::class;
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
@@ -55,7 +55,7 @@ class VentaResource extends Resource
                             ->nullable()
                             ->default(now())
                             ->columnSpan(1),
-                        
+
                             DatePicker::make('fecha_venta')
                             ->label('Fecha de Venta')
                             ->displayFormat('d/m/Y')
@@ -66,7 +66,7 @@ class VentaResource extends Resource
 
                             View::make('filament.components.boton-vendido')
                     ]),
-                    
+
                     Grid::make(3)->schema([
 
                         DatePicker::make('fecha_minuta')
@@ -76,7 +76,7 @@ class VentaResource extends Resource
                             ->nullable()
                             ->default(now())
                             ->columnSpan(1),
-                            
+
                         DatePicker::make('fecha_preminuta')
                             ->label('Fecha Pre-minuta')
                             ->displayFormat('d/m/Y')
@@ -88,10 +88,10 @@ class VentaResource extends Resource
                         View::make('filament.components.boton-opciones'),
 
                     ]),
-        
-        
+
+
         // Botón Vendido usando View
-       
+
     ])
     ->columnSpan('full'),
 
@@ -99,8 +99,8 @@ class VentaResource extends Resource
 
        //     View::make('filament.components.venta-header')
             //    ->columnSpan('full'),
-    
-                
+
+
                 // Campo oculto para separacion_id
                 Hidden::make('separacion_id')
                     ->required()
@@ -456,4 +456,3 @@ class VentaResource extends Resource
         ];
     }
 }
-   

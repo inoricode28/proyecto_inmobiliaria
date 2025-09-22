@@ -96,7 +96,7 @@ class SeparacionResource extends Resource
 
                                     $set('proyecto_nombre', optional($proforma->proyecto)->nombre);
                                     $set('departamento_nombre', optional($proforma->departamento)->num_departamento);
-                                    $set('precio_lista', $proforma->departamento->precio);
+                                    $set('precio_lista', $proforma->departamento->Precio_lista);
                                     $set('precio_venta', $proforma->departamento->Precio_venta);
                                     $set('descuento', $proforma->departamento->descuento);
                                 }

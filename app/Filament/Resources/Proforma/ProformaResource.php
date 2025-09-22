@@ -189,7 +189,7 @@ class ProformaResource extends Resource
                                         $departamento = \App\Models\Departamento::find($state);
                                         if ($departamento) {
                                             $set('precio_lista', $departamento->Precio_lista);
-                                            $set('precio_venta', $departamento->precio);
+                                            $set('precio_venta', $departamento->Precio_venta);
                                             $set('descuento', $departamento->descuento);
                                         }
                                     }

@@ -20,6 +20,7 @@ class Tarea extends Model
         'fecha_realizar',
         'hora',
         'nota',
+        'respuesta',
         'created_by',
         'updated_by'
     ];
@@ -63,5 +64,32 @@ class Tarea extends Model
         return $this->hasOne(Cita::class);
     }
 
-}
+    // Accessor para fecha_contacto - obtiene la fecha del último contacto efectivo
+    public function getFechaContactoAttribute()
+    {
+        // Buscar la última tarea efectiva del prospecto
+        $ultimaTareaEfectiva = $this->prospecto->tareas()
+            ->where('respuesta', 'efectiva')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        // Si existe una tarea efectiva, devolver su fecha de creación
+        if ($ultimaTareaEfectiva) {
+            return $ultimaTareaEfectiva->created_at;
+        }
+        
+        return null;
+    }
 
+    // Método estático para obtener la fecha de contacto de un prospecto específico
+    public static function getFechaContactoProspecto($prospectoId)
+    {
+        $ultimaTareaEfectiva = static::where('prospecto_id', $prospectoId)
+            ->where('respuesta', 'efectiva')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        return $ultimaTareaEfectiva ? $ultimaTareaEfectiva->created_at : null;
+    }
+
+}
