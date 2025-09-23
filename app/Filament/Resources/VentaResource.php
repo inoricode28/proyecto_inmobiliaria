@@ -182,7 +182,7 @@ class VentaResource extends Resource
                                                 $set('carta_monto', $carta->monto);
                                                 $set('carta_numero', $carta->numero_carta);
                                             }
-                                            $set('precio_lista', $proforma->departamento->precio ?? 0);
+                                            $set('Precio_lista', $proforma->departamento->precio ?? 0);
                                             $set('precio_venta', $proforma->departamento->Precio_venta ?? 0);
                                             $set('descuento', $proforma->departamento->descuento ?? 0);
                                             $set('monto_separacion', $proforma->monto_separacion);

@@ -98,7 +98,7 @@ class SeparacionResource extends Resource
                                     $set('departamento_nombre', optional($proforma->departamento)->num_departamento);
                                     $set('precio_lista', $proforma->departamento->Precio_lista);
                                     $set('precio_venta', $proforma->departamento->Precio_venta);
-                                    $set('descuento', $proforma->departamento->descuento);
+                                    $set('descuento', $proforma->descuento); // Obtener descuento de la proforma, no del departamento
                                 }
                             }),
 

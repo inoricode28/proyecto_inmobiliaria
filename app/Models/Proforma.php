@@ -32,6 +32,8 @@ class Proforma extends Model
         'direccion_adicional',
         'proyecto_id',
         'departamento_id',
+        'precio_venta',
+        'descuento',
         'monto_separacion',
         'monto_cuota_inicial',
         'fecha_vencimiento',

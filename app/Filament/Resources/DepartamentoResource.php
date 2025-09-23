@@ -64,8 +64,8 @@ class DepartamentoResource extends Resource
                 TextInput::make('num_bono_tp')->label('Número Bono TP')->maxLength(50)->regex('/^[A-Za-z0-9\-]+$/')->columnSpan(1)->visible(fn (Closure $get) => $get('bono_techo_propio')),
                 Select::make('moneda_id')->label('Moneda')->options(fn () => Moneda::pluck('nombre', 'id'))->searchable()->required()->columnSpan(1),
                 TextInput::make('precio')->label('Precio')->required()->numeric()->columnSpan(1),
-                TextInput::make('Precio_lista')->label('Precio de Lista')->numeric()->columnSpan(1),
-                TextInput::make('Precio_venta')->label('Precio de Venta')->numeric()->columnSpan(1),
+                TextInput::make('Precio_lista')->label('Precio de Lista')->required()->numeric()->columnSpan(1),
+                TextInput::make('Precio_venta')->label('Precio de Venta')->required()->numeric()->columnSpan(1),
                 TextInput::make('descuento')->label('Descuento (%)')->numeric()->suffix('%')->columnSpan(1),
                 TextInput::make('predio_m2')->label('Área Predio (m²)')->numeric()->suffix('m²')->columnSpan(1),
                 TextInput::make('terreno')->label('Terreno (m²)')->numeric()->suffix('m²')->columnSpan(1),
@@ -91,14 +91,15 @@ class DepartamentoResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('numero_inicial')->label('Número')->sortable()->searchable(),
-                TextColumn::make('num_departamento')->label('Núm. Departamento')->sortable()->searchable(),
+             //   TextColumn::make('numero_inicial')->label('Número')->sortable()->searchable(),
+                TextColumn::make('num_departamento')->label('Núm. Dep.')->sortable()->searchable(),
                 TextColumn::make('edificio.nombre')->label('Edificio')->sortable()->searchable(),
                 TextColumn::make('num_piso')->label('Piso')->sortable(),
                 TextColumn::make('tipoDepartamento.nombre')->label('Tipo')->sortable(),
                 TextColumn::make('estadoDepartamento.nombre')->label('Estado Dep.')->sortable(),
                 TextColumn::make('moneda.nombre')->label('Moneda')->sortable(),
                 TextColumn::make('precio')->label('Precio')->formatStateUsing(fn ($state) => '$' . number_format($state, 2, '.', ','))->sortable(),
+                TextColumn::make('Precio_lista')->label('Precio de Lista')->formatStateUsing(fn ($state) => '$' . number_format($state, 2, '.', ','))->sortable(),
                 TextColumn::make('predio_m2')->suffix(' m²')->label('Área Predio')->sortable(),
                 TextColumn::make('tipoFinanciamiento.nombre')->label('Financiamiento')->sortable(),
                 BooleanColumn::make('bono_techo_propio')->label('Bono TP')->sortable(),
@@ -123,7 +124,7 @@ class DepartamentoResource extends Resource
                 Tables\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+               // Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

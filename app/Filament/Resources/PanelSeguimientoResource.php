@@ -91,12 +91,12 @@ class PanelSeguimientoResource extends Resource
                 TextColumn::make('prospecto.comoSeEntero.nombre')->label('Cómo se enteró'),
                 TextColumn::make('prospecto.fecha_registro')->label('Fec. Registro')->date('d/m/Y'),
                 TextColumn::make('fecha_contacto')
-                    ->label('Fec. Últ. Contacto')
-                    ->dateTime('d/m/Y H:i')
+                    ->label('Fec. Últ. Visita')
+                    ->dateTime('d/m/Y')
                     ->formatStateUsing(function ($record) {
                         // Obtener la fecha de la última tarea efectiva del prospecto
                         $fechaContacto = \App\Models\Tarea::getFechaContactoProspecto($record->prospecto_id);
-                        return $fechaContacto ? $fechaContacto->format('d/m/Y H:i') : '-';
+                        return $fechaContacto ? $fechaContacto->format('d/m/Y') : '-';
                     }),
                 TextColumn::make('fecha_realizar')->label('Fec. Tarea')->dateTime('d/m/Y'),
                 TextColumn::make('usuarioAsignado.name')->label('Responsable'),

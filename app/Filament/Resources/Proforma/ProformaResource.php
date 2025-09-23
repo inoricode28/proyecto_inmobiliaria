@@ -242,7 +242,9 @@ class ProformaResource extends Resource
                                         if ($departamento) {
                                             $set('precio_lista', $departamento->Precio_lista);
                                             $set('precio_venta', $departamento->Precio_venta);
-                                            $set('descuento', $departamento->descuento);
+                                            $set('descuento', 0); // Resetear descuento al cambiar departamento
+                                            // Establecer monto_cuota_inicial por defecto como precio_venta
+                                            $set('monto_cuota_inicial', $departamento->Precio_venta);
                                         }
                                     }
                                 }),
@@ -254,7 +256,10 @@ class ProformaResource extends Resource
 
                             TextInput::make('precio_venta')
                                 ->label('Precio Venta')
-                                ->disabled()->dehydrated(false),
+                                ->numeric()
+                                ->disabled()
+                                ->dehydrated()
+                                ->helperText('Se calcula automáticamente: Precio Lista - Descuento'),
 
                             TextInput::make('descuento')
                                 ->label('Descuento')
@@ -263,7 +268,46 @@ class ProformaResource extends Resource
                                 ->nullable()
                                 ->minValue(0)
                                 ->maxValue(5)
-                                ->helperText('Ingrese un descuento entre 0% y 5% (opcional)'),
+                                ->helperText('Ingrese un descuento entre 0% y 5% (opcional)')
+                                ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $precioLista = $get('precio_lista');
+                                $departamentoId = $get('departamento_id');
+                                
+                                if ($departamentoId) {
+                                    $departamento = \App\Models\Departamento::find($departamentoId);
+                                    if ($departamento) {
+                                        $precioVentaOriginal = $departamento->Precio_venta;
+                                        
+                                        // Si no hay descuento o es 0, usar el precio venta original
+                                        if (!$state || $state == 0) {
+                                            $set('precio_venta', $precioVentaOriginal);
+                                        } else {
+                                            // Aplicar descuento correctamente (el valor ingresado ya es el porcentaje)
+                                            $descuento = floatval($state);
+                                            if ($precioLista && is_numeric($precioLista)) {
+                                                // Calcular precio lista con descuento aplicado
+                                                $precioListaConDescuento = $precioLista - ($precioLista * $descuento / 100);
+                                                // Restar el precio lista con descuento del precio venta original
+                                                $nuevoPrecioVenta = $precioVentaOriginal - $precioListaConDescuento;
+                                                $set('precio_venta', $nuevoPrecioVenta);
+                                            }
+                                        }
+                                        
+                                        // Recalcular monto_cuota_inicial
+                                        $precioVentaActual = $get('precio_venta');
+                                        $montoSeparacion = $get('monto_separacion');
+                                        
+                                        if ($montoSeparacion && is_numeric($montoSeparacion)) {
+                                            $montoCuotaInicial = $precioVentaActual - $montoSeparacion;
+                                            $set('monto_cuota_inicial', $montoCuotaInicial);
+                                        } else {
+                                            // Si no hay monto de separación, mostrar el precio venta como cuota inicial por defecto
+                                            $set('monto_cuota_inicial', $precioVentaActual);
+                                        }
+                                    }
+                                }
+                            }),
 
                             // CAMPOS MANUALES
                             TextInput::make('monto_separacion')
@@ -272,8 +316,21 @@ class ProformaResource extends Resource
                                 ->numeric()
                                 ->minValue(500)
                                 ->maxValue(2000)
-                                ->helperText('Debe estar entre 500 y 2000'),
-                            TextInput::make('monto_cuota_inicial')->label('Monto de Cuota Inicial'),
+                                ->helperText('Debe estar entre 500 y 2000')
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, $set, $get) {
+                                    $precioVenta = $get('precio_venta');
+                                    if ($precioVenta && $state) {
+                                        $montoCuotaInicial = $precioVenta - $state;
+                                        $set('monto_cuota_inicial', $montoCuotaInicial);
+                                    }
+                                }),
+                            TextInput::make('monto_cuota_inicial')
+                                ->label('Monto de Cuota Inicial')
+                                ->numeric()
+                                ->disabled()
+                                ->dehydrated()
+                                ->helperText('Se calcula automáticamente: Precio Venta - Monto de Separación'),
                             DatePicker::make('fecha_vencimiento')
                                 ->label('Fecha de Vencimiento')
                                 ->displayFormat('d/m/Y')
