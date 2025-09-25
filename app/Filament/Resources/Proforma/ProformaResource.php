@@ -241,10 +241,12 @@ class ProformaResource extends Resource
                                         $departamento = \App\Models\Departamento::find($state);
                                         if ($departamento) {
                                             $set('precio_lista', $departamento->Precio_lista);
+                                            // Mostrar el precio_venta real del inmueble por defecto
                                             $set('precio_venta', $departamento->Precio_venta);
-                                            $set('descuento', 0); // Resetear descuento al cambiar departamento
-                                            // Establecer monto_cuota_inicial por defecto como precio_venta
-                                            $set('monto_cuota_inicial', $departamento->Precio_venta);
+                                            $set('descuento', null); // Campo vacío por defecto
+                                            // Establecer monto_cuota_inicial como 10% del precio_venta del inmueble
+                                            $montoCuotaInicial = $departamento->Precio_venta * 0.10;
+                                            $set('monto_cuota_inicial', $montoCuotaInicial);
                                         }
                                     }
                                 }),
@@ -252,7 +254,31 @@ class ProformaResource extends Resource
                             // CAMPOS AUTOCOMPLETADOS
                             TextInput::make('precio_lista')
                                 ->label('Precio Lista')
-                                ->disabled()->dehydrated(false),
+                                ->disabled()->dehydrated(false)
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    $descuento = $get('descuento');
+                                    
+                                    if ($state && is_numeric($state)) {
+                                        // Solo calcular si hay descuento ingresado
+                                        if ($descuento && $descuento > 0) {
+                                            // Aplicar la fórmula: Precio Lista - (Precio Lista * descuento%)
+                                            $descuentoFloat = floatval($descuento);
+                                            $montoDescuento = $state * ($descuentoFloat / 100);
+                                            $nuevoPrecioVenta = $state - $montoDescuento;
+                                            
+                                            $set('precio_venta', $nuevoPrecioVenta);
+                                            
+                                            // Calcular monto_cuota_inicial como 10% del precio venta
+                                            $montoCuotaInicial = $nuevoPrecioVenta * 0.10;
+                                            $set('monto_cuota_inicial', $montoCuotaInicial);
+                                        } else {
+                                            // Si no hay descuento, limpiar precio_venta y monto_cuota_inicial
+                                            $set('precio_venta', null);
+                                            $set('monto_cuota_inicial', null);
+                                        }
+                                    }
+                                }),
 
                             TextInput::make('precio_venta')
                                 ->label('Precio Venta')
@@ -268,42 +294,40 @@ class ProformaResource extends Resource
                                 ->nullable()
                                 ->minValue(0)
                                 ->maxValue(5)
-                                ->helperText('Ingrese un descuento entre 0% y 5% (opcional)')
+                                ->helperText('Ingrese un descuento en porcentaje (0% - 5% máximo)')
                                 ->reactive()
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 $precioLista = $get('precio_lista');
                                 $departamentoId = $get('departamento_id');
                                 
-                                if ($departamentoId) {
+                                if ($precioLista && is_numeric($precioLista) && $departamentoId) {
                                     $departamento = \App\Models\Departamento::find($departamentoId);
-                                    if ($departamento) {
-                                        $precioVentaOriginal = $departamento->Precio_venta;
+                                    
+                                    if ($state !== null && is_numeric($state)) {
+                                        $descuento = floatval($state);
                                         
-                                        // Si no hay descuento o es 0, usar el precio venta original
-                                        if (!$state || $state == 0) {
-                                            $set('precio_venta', $precioVentaOriginal);
+                                        // Si descuento es 0%, mostrar el precio lista (igual al precio lista)
+                                        if ($descuento == 0) {
+                                            $set('precio_venta', $precioLista);
                                         } else {
-                                            // Aplicar descuento correctamente (el valor ingresado ya es el porcentaje)
-                                            $descuento = floatval($state);
-                                            if ($precioLista && is_numeric($precioLista)) {
-                                                // Calcular precio lista con descuento aplicado
-                                                $precioListaConDescuento = $precioLista - ($precioLista * $descuento / 100);
-                                                // Restar el precio lista con descuento del precio venta original
-                                                $nuevoPrecioVenta = $precioVentaOriginal - $precioListaConDescuento;
-                                                $set('precio_venta', $nuevoPrecioVenta);
-                                            }
+                                            // Aplicar la fórmula: Precio Lista - (Precio Lista * descuento%)
+                                            $montoDescuento = $precioLista * ($descuento / 100);
+                                            $nuevoPrecioVenta = $precioLista - $montoDescuento;
+                                            $set('precio_venta', $nuevoPrecioVenta);
                                         }
                                         
-                                        // Recalcular monto_cuota_inicial
-                                        $precioVentaActual = $get('precio_venta');
-                                        $montoSeparacion = $get('monto_separacion');
-                                        
-                                        if ($montoSeparacion && is_numeric($montoSeparacion)) {
-                                            $montoCuotaInicial = $precioVentaActual - $montoSeparacion;
+                                        // Calcular monto cuota inicial (10% del precio venta)
+                                        $precioVenta = $get('precio_venta');
+                                        if ($precioVenta) {
+                                            $montoCuotaInicial = $precioVenta * 0.10;
                                             $set('monto_cuota_inicial', $montoCuotaInicial);
-                                        } else {
-                                            // Si no hay monto de separación, mostrar el precio venta como cuota inicial por defecto
-                                            $set('monto_cuota_inicial', $precioVentaActual);
+                                        }
+                                    } else {
+                                        // Si no hay descuento o se borra, volver al precio venta original del inmueble
+                                        if ($departamento) {
+                                            $set('precio_venta', $departamento->Precio_venta);
+                                            $montoCuotaInicial = $departamento->Precio_venta * 0.10;
+                                            $set('monto_cuota_inicial', $montoCuotaInicial);
                                         }
                                     }
                                 }
@@ -319,18 +343,15 @@ class ProformaResource extends Resource
                                 ->helperText('Debe estar entre 500 y 2000')
                                 ->reactive()
                                 ->afterStateUpdated(function ($state, $set, $get) {
-                                    $precioVenta = $get('precio_venta');
-                                    if ($precioVenta && $state) {
-                                        $montoCuotaInicial = $precioVenta - $state;
-                                        $set('monto_cuota_inicial', $montoCuotaInicial);
-                                    }
+                                    // Ya no necesitamos recalcular aquí porque monto_cuota_inicial 
+                                    // se calcula como 10% del precio_venta automáticamente
                                 }),
                             TextInput::make('monto_cuota_inicial')
                                 ->label('Monto de Cuota Inicial')
                                 ->numeric()
                                 ->disabled()
                                 ->dehydrated()
-                                ->helperText('Se calcula automáticamente: Precio Venta - Monto de Separación'),
+                                ->helperText('Se calcula automáticamente como 10% del Precio Venta'),
                             DatePicker::make('fecha_vencimiento')
                                 ->label('Fecha de Vencimiento')
                                 ->displayFormat('d/m/Y')

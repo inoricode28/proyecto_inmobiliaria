@@ -66,21 +66,28 @@ class CreateProforma extends CreateRecord
             }
         }
 
-        // Calcular precio_venta con la nueva fórmula correcta
-        if (isset($data['departamento_id']) && isset($data['precio_lista']) && isset($data['descuento'])) {
+        // Calcular precio_venta según la lógica implementada en el formulario
+        if (isset($data['departamento_id'])) {
             $departamento = \App\Models\Departamento::find($data['departamento_id']);
             if ($departamento) {
-                $precioVentaOriginal = $departamento->Precio_venta;
-                // Calcular precio lista con descuento aplicado
-                $precioListaConDescuento = $data['precio_lista'] - ($data['precio_lista'] * $data['descuento'] / 100);
-                // Restar el precio lista con descuento del precio venta original
-                $data['precio_venta'] = $precioVentaOriginal - $precioListaConDescuento;
+                // Si hay descuento y es mayor a 0, calcular precio con descuento
+                if (isset($data['descuento']) && $data['descuento'] > 0) {
+                    $descuento = floatval($data['descuento']);
+                    $montoDescuento = $departamento->Precio_lista * ($descuento / 100);
+                    $data['precio_venta'] = $departamento->Precio_lista - $montoDescuento;
+                } else {
+                    // Si no hay descuento o es 0%, usar el precio_venta original del inmueble
+                    $data['precio_venta'] = $departamento->Precio_venta;
+                }
+                
+                // Asegurar que precio_lista esté establecido
+                $data['precio_lista'] = $departamento->Precio_lista;
             }
         }
 
-        // Calcular monto_cuota_inicial automáticamente
-        if (isset($data['precio_venta']) && isset($data['monto_separacion'])) {
-            $data['monto_cuota_inicial'] = $data['precio_venta'] - $data['monto_separacion'];
+        // Calcular monto_cuota_inicial como 10% del precio_venta
+        if (isset($data['precio_venta'])) {
+            $data['monto_cuota_inicial'] = $data['precio_venta'] * 0.10;
         }
 
         $data['created_by'] = 1;
