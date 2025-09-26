@@ -431,7 +431,7 @@ class PanelSeguimientoResource extends Resource
                         ->color('warning')
                         ->button()
                         ->size('sm')
-                        ->visible(fn ($record) =>in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3, 4, 5]))
+                        ->visible(fn ($record) => in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3, 4, 5]))
                         ->url(fn ($record) =>
                             ProformaResource::getUrl('create', ['prospecto_id' => $record->prospecto->id])
                         )
@@ -444,7 +444,7 @@ class PanelSeguimientoResource extends Resource
                         ->size('sm')
                         ->visible(fn ($record) => $record->prospecto?->tipo_gestion_id === 5)
                         ->url(fn ($record) =>
-                            SeparacionResource::getUrl('create', ['numero_documento' => $record->prospecto->numero_documento])
+                            SeparacionResource::getUrl('create', ['prospecto_id' => $record->prospecto->id])
                         )
                         ->openUrlInNewTab(),
                     ],

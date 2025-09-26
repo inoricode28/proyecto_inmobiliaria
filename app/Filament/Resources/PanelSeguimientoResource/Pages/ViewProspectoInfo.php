@@ -26,7 +26,8 @@ class ViewProspectoInfo extends Page
     public function mount($record)
     {
         $this->prospecto = Prospecto::with([
-            'tareas' => fn ($q) => $q->latest()
+            'tareas' => fn ($q) => $q->latest(),
+            'proformas' => fn ($q) => $q->latest()
         ])->findOrFail($record);
 
         $this->ultimaTareaPendiente = Tarea::where('prospecto_id', $record)

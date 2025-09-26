@@ -19,4 +19,13 @@ class EditSeparacion extends EditRecord
     {
         return 'Separación actualizada exitosamente';
     }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Resources\Separaciones\Widgets\CronogramaModalWidget::class,
+            \App\Filament\Resources\Separaciones\Widgets\CronogramaSFModalWidget::class,
+            \App\Filament\Resources\Separaciones\Widgets\PagoSeparacionModalWidget::class,
+        ];
+    }
 }

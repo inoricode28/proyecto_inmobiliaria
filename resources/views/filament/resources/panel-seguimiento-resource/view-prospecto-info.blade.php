@@ -76,7 +76,21 @@ use App\Filament\Resources\Proforma\ProformaResource; // <- Ajusta el namespace 
             Realizar Accion
         </button>
 
+        @php
+            $proforma = $prospecto->proformas->first();
+        @endphp
 
+        @if($proforma)
+            <a href="{{ route('separacion-definitiva.create', ['proforma_id' => $proforma->id]) }}"
+                class="inline-flex items-center px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition">
+                Separación Definitiva
+            </a>
+        @else
+            <a href="{{ route('separacion-definitiva.create', ['numero_documento' => $prospecto->numero_documento]) }}"
+                class="inline-flex items-center px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition">
+                Separación Definitiva
+            </a>
+        @endif
 
     </div>
 

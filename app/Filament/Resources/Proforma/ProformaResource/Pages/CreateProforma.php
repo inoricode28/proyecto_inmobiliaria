@@ -76,8 +76,8 @@ class CreateProforma extends CreateRecord
                     $montoDescuento = $departamento->Precio_lista * ($descuento / 100);
                     $data['precio_venta'] = $departamento->Precio_lista - $montoDescuento;
                 } else {
-                    // Si no hay descuento o es 0%, usar el precio_venta original del inmueble
-                    $data['precio_venta'] = $departamento->Precio_venta;
+                    // Si no hay descuento o es 0%, usar el precio_lista (igual comportamiento que el formulario)
+                    $data['precio_venta'] = $departamento->Precio_lista;
                 }
                 
                 // Asegurar que precio_lista esté establecido

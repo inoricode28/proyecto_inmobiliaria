@@ -24,6 +24,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Resources\Form;
 
 use Filament\Resources\Table;
@@ -50,6 +51,10 @@ class SeparacionResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
+            // Campo oculto para detectar si viene desde separación definitiva
+            Forms\Components\Hidden::make('from_separacion_definitiva')
+                ->default(false),
+                
             Tabs::make('Separación')
                 ->columnSpan('full')
             ->tabs([
@@ -60,7 +65,8 @@ class SeparacionResource extends Resource
                             ->options(function () {
                                 return Proforma::all()->mapWithKeys(function ($proforma) {
                                     $codigo = 'PRO' . str_pad($proforma->id, 5, '0', STR_PAD_LEFT);
-                                    return [$proforma->id => "$codigo - $proforma->numero_documento"];
+                                    $identificador = $proforma->numero_documento ?: $proforma->razon_social;
+                                    return [$proforma->id => "$codigo - $identificador"];
                                 });
                             })
                             ->required()
@@ -96,9 +102,15 @@ class SeparacionResource extends Resource
 
                                     $set('proyecto_nombre', optional($proforma->proyecto)->nombre);
                                     $set('departamento_nombre', optional($proforma->departamento)->num_departamento);
+                                    // precio_lista debe obtener el valor del inmueble (departamento)
                                     $set('precio_lista', $proforma->departamento->Precio_lista);
-                                    $set('precio_venta', $proforma->departamento->Precio_venta);
+                                    // precio_venta debe obtener el valor de la proforma asociada (precio con descuento aplicado)
+                                    $precioLista = $proforma->departamento->Precio_lista ?? 0;
+                                    $descuento = $proforma->descuento ?? 0;
+                                    $precioVenta = $precioLista - (($descuento * $precioLista) / 100);
+                                    $set('precio_venta', $precioVenta);
                                     $set('descuento', $proforma->descuento); // Obtener descuento de la proforma, no del departamento
+                                    $set('departamento_id', $proforma->departamento_id); // Cargar departamento_id
                                 }
                             }),
 
@@ -157,9 +169,76 @@ class SeparacionResource extends Resource
 
                 Tab::make('Inmueble')->schema([
                     Grid::make(3)->schema([
+                        // Select de inmuebles basado en la proforma seleccionada
+                        Select::make('departamento_id')
+                            ->label('Inmuebles')
+                            ->options(function (callable $get) {
+                                $proformaId = $get('proforma_id');
+                                if (!$proformaId) return [];
+
+                                $proforma = \App\Models\Proforma::find($proformaId);
+                                if (!$proforma || !$proforma->departamento_id) return [];
+
+                                // Solo mostrar el departamento específico de la proforma
+                                $departamento = \App\Models\Departamento::with(['edificio', 'tipoInmueble', 'estadoDepartamento'])
+                                    ->where('id', $proforma->departamento_id)
+                                    ->first();
+
+                                if (!$departamento) return [];
+
+                                $label = "EDIFICIO: {$departamento->edificio->nombre} - " .
+                                        "TIPO: {$departamento->tipoInmueble->nombre} - " .
+                                        "NRO: {$departamento->num_departamento} - " .
+                                        "CANT. HAB.: {$departamento->num_dormitorios}";
+                                
+                                return [$departamento->id => $label];
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                if ($state) {
+                                    $departamento = \App\Models\Departamento::with(['proyecto', 'tipoInmueble'])->find($state);
+                                    if ($departamento) {
+                                        $set('proyecto_nombre', $departamento->proyecto->nombre ?? '');
+                                        $set('departamento_nombre', $departamento->num_departamento ?? '');
+                                        $set('precio_lista', $departamento->Precio_lista ?? 0);
+                                        
+                                        // Obtener la proforma para calcular el precio de venta con descuento
+                                        $proformaId = $get('proforma_id');
+                                        if ($proformaId) {
+                                            $proforma = \App\Models\Proforma::find($proformaId);
+                                            if ($proforma) {
+                                                $set('descuento', $proforma->descuento ?? 0);
+                                                // Calcular precio de venta con descuento de la proforma
+                                                $precioLista = $departamento->Precio_lista ?? 0;
+                                                $descuento = $proforma->descuento ?? 0;
+                                                $precioVenta = $precioLista - (($descuento * $precioLista) / 100);
+                                                $set('precio_venta', $precioVenta);
+                                                $set('monto_separacion', $proforma->monto_separacion ?? 0);
+                                                $set('cuota_inicial', $proforma->monto_cuota_inicial ?? 0);
+                                            }
+                                        } else {
+                                            // Si no hay proforma, usar valores por defecto del departamento
+                                            $set('descuento', $departamento->descuento ?? 0);
+                                            $set('precio_venta', $departamento->Precio_venta ?? 0);
+                                            $set('monto_separacion', 0);
+                                            $set('cuota_inicial', ($departamento->Precio_venta ?? 0) * 0.2);
+                                        }
+                                    }
+                                }
+                            })
+                            ->columnSpan(3),
+
                         TextInput::make('proyecto_nombre')->label('Proyecto')->disabled()->dehydrated(false),
                         TextInput::make('departamento_nombre')->label('Inmueble')->disabled()->dehydrated(false),
-                        TextInput::make('precio_lista')->label('Precio Lista')->disabled()->dehydrated(false),
+                        TextInput::make('precio_lista')
+                            ->label('Precio Lista')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->formatStateUsing(function ($state) {
+                                return $state ? number_format($state, 2) : '0.00';
+                            }),
                         TextInput::make('descuento')->label('Descuento')->disabled()->dehydrated(false),
                         TextInput::make('precio_venta')
                             ->label('Precio Venta')
@@ -203,6 +282,53 @@ class SeparacionResource extends Resource
                             ->nullable()
                             ->default(now()),
                     ]),
+                    
+                    // Botones de Cronograma - Visibles cuando hay una proforma seleccionada Y NO viene desde separación definitiva
+                    Forms\Components\Placeholder::make('cronograma_actions')
+                        ->label('')
+                        ->content(function (callable $get) {
+                            $proformaId = $get('proforma_id');
+                            $display = $proformaId ? 'inline-flex' : 'none';
+                            
+                            return new \Illuminate\Support\HtmlString('
+                                <div class="flex gap-2">
+                                    <button type="button" 
+                                            onclick="window.dispatchEvent(new CustomEvent(\'open-modal\', { detail: { id: \'cronograma-modal\' } }))"
+                                            class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                            style="display: ' . $display . ';">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        Cronograma C.I.
+                                    </button>
+                                    <button type="button" 
+                                            onclick="window.dispatchEvent(new CustomEvent(\'open-modal\', { detail: { id: \'cronograma-sf-modal\' } }))"
+                                            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                            style="display: ' . $display . ';">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                        Cronograma S.F.
+                                    </button>
+                                    <button type="button" 
+                                            onclick="window.dispatchEvent(new CustomEvent(\'open-modal\', { detail: { id: \'pago-separacion-modal\' } }))"
+                                            class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                            style="display: ' . $display . ';">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                        Registro de Pago Sep.
+                                    </button>
+                                </div>
+                            ');
+                        })
+                        ->columnSpanFull()
+                        ->reactive()
+                        ->visible(function (callable $get) {
+                            $fromSeparacionDefinitiva = $get('from_separacion_definitiva') ?? false;
+                            // Mostrar botones SOLO cuando viene desde separación definitiva
+                            return $get('proforma_id') !== null && $fromSeparacionDefinitiva;
+                        }),
                 ]),
 
                 Tab::make('Observaciones')->schema([

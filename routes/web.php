@@ -41,6 +41,18 @@ Route::name('oidc.')
 Route::get('/admin/panel-seguimiento/prospecto/{record}', ViewProspectoInfo::class)
     ->name('filament.resources.panel-seguimiento.view-prospecto-info');
 
+// Ruta para separación definitiva que redirige al recurso de Separaciones
+Route::get('/separacion-definitiva/create', function () {
+    $numeroDocumento = request('numero_documento');
+    $proformaId = request('proforma_id');
+    
+    if ($proformaId) {
+        return redirect()->to('/separacions/create?proforma_id=' . $proformaId . '&from=separacion_definitiva');
+    } else {
+        return redirect()->to('/separacions/create?numero_documento=' . $numeroDocumento . '&from=separacion_definitiva');
+    }
+})->name('separacion-definitiva.create');
+
 // Ruta para detalle de separación en Filament
 Route::get('/Proforma/DetalleProforma/{proforma_id}', \App\Filament\Pages\DetalleSeparacion::class)
     ->middleware(['auth', 'verified'])
@@ -68,4 +80,22 @@ Route::get('/seguimientos/export/excel', [\App\Http\Controllers\SeguimientoExpor
 Route::get('/seguimientos/export/pdf', [\App\Http\Controllers\SeguimientoExportController::class, 'exportPdf'])
     ->middleware(['auth', 'verified'])
     ->name('seguimientos.export.pdf');
+
+// Rutas para cronograma
+Route::post('/cronograma/guardar', [\App\Http\Controllers\CronogramaController::class, 'guardarCronograma'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma.guardar');
+
+Route::get('/cronograma/{separacion_id}', [\App\Http\Controllers\CronogramaController::class, 'obtenerCronograma'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma.obtener');
+
+Route::get('/cronograma/temporales/{proforma_id}', [\App\Http\Controllers\CronogramaController::class, 'obtenerCuotasTemporales'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma.temporales');
+
+// Ruta para cronograma de saldo a financiar
+Route::post('/cronograma-sf/guardar', [\App\Http\Controllers\CronogramaController::class, 'guardarCronogramaSF'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma-sf.guardar');
     
