@@ -40,6 +40,36 @@
                         </div>
                     </div>
 
+                    {{-- Cuotas existentes --}}
+                    <div id="sf-cuotasExistentesSection" class="hidden mb-6">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3">📋 Cuotas de Saldo a Financiar Existentes</h4>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <p class="text-sm text-blue-700">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Se encontraron cuotas de saldo a financiar existentes. Puede modificarlas o agregar nuevas cuotas.
+                            </p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse border border-gray-300">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">N°</th>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">Fecha Pago</th>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">Monto</th>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">Motivo</th>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">Estado</th>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">Entidad</th>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">Tipo</th>
+                                        <th class="border border-gray-300 px-4 py-2 text-left">Comprobante</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sf-cuotasExistentesTableBody">
+                                    {{-- Las cuotas existentes se cargarán dinámicamente --}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     {{-- Formulario de Cronograma SF --}}
                     <div class="space-y-4 mb-6">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -184,12 +214,14 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.classList.remove('hidden');
             
             // Cargar datos de la proforma
-            setTimeout(() => {
-                loadProformaSFData();
-                setDefaultSFDate();
-                loadBancos();
-                loadTiposFinanciamiento();
-            }, 100);
+        setTimeout(() => {
+            loadProformaSFData();
+            loadExistingCuotasSF(); // Cargar cuotas existentes
+            setDefaultSFDate();
+            loadBancos();
+            loadTiposFinanciamiento();
+            loadTiposComprobante();
+        }, 100);
         }
     };
 
@@ -489,10 +521,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Guardar IDs para uso posterior
                         window.currentProformaId = proformaId;
                         
-                        // Generar cuotas automáticamente por defecto
-                        setTimeout(() => {
-                            generateDefaultCuotas(saldoFinanciar);
-                        }, 100);
+                        // Cargar cuotas existentes primero
+                        loadExistingCuotasSF();
                     } else {
                         console.error('❌ Error en respuesta SF:', data.message || 'Sin mensaje de error');
                         setDefaultSFData();
@@ -571,6 +601,216 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    // Función para cargar tipos de comprobante
+    function loadTiposComprobante() {
+        fetch('/api/tipos-comprobante')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const select = document.getElementById('sf-tipoComprobante');
+                    select.innerHTML = '<option value="">Seleccionar...</option>';
+                    
+                    data.data.forEach(tipo => {
+                        const option = document.createElement('option');
+                        option.value = tipo.id;
+                        option.textContent = tipo.nombre;
+                        select.appendChild(option);
+                    });
+                } else {
+                    console.error('Error al cargar tipos de comprobante:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar tipos de comprobante:', error);
+            });
+    }
+
+    // Función para cargar cuotas existentes de saldo a financiar
+    function loadExistingCuotasSF() {
+        console.log('=== CARGANDO CUOTAS EXISTENTES SF ===');
+        
+        const separacionId = getCurrentSeparacionId();
+        const proformaId = window.currentProformaId;
+        
+        if (!proformaId) {
+            console.log('⚠️ No hay proforma_id disponible para cargar cuotas SF');
+            return;
+        }
+
+        // Primero intentar cargar cuotas definitivas (con separacion_id)
+        if (separacionId) {
+            console.log('🔍 Cargando cuotas SF definitivas para separacion_id:', separacionId);
+            fetch(`/cronograma-sf/${separacionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        console.log('✅ Cuotas SF definitivas encontradas:', data.data.length);
+                        displayExistingCuotasSF(data.data, 'Definitivas');
+                    } else {
+                        console.log('ℹ️ No hay cuotas SF definitivas, buscando temporales...');
+                        loadTemporaryCuotasSF(proformaId);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error al cargar cuotas SF definitivas:', error);
+                    loadTemporaryCuotasSF(proformaId);
+                });
+        } else {
+            // Si no hay separacion_id, buscar cuotas definitivas por proforma_id primero
+            console.log('🔍 No hay separacion_id, buscando cuotas SF definitivas por proforma_id:', proformaId);
+            fetch(`/cronograma-sf/definitivas/${proformaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        console.log('✅ Cuotas SF definitivas encontradas por proforma_id:', data.data.length);
+                        displayExistingCuotasSF(data.data, 'Definitivas');
+                    } else {
+                        console.log('ℹ️ No hay cuotas SF definitivas, buscando temporales...');
+                        loadTemporaryCuotasSF(proformaId);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error al cargar cuotas SF definitivas por proforma:', error);
+                    loadTemporaryCuotasSF(proformaId);
+                });
+        }
+    }
+
+    // Función para cargar cuotas temporales SF
+    function loadTemporaryCuotasSF(proformaId) {
+        console.log('🔍 Cargando cuotas SF temporales para proforma_id:', proformaId);
+        fetch(`/cronograma-sf/temporales/${proformaId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data.length > 0) {
+                    console.log('✅ Cuotas SF temporales encontradas:', data.data.length);
+                    displayExistingCuotasSF(data.data, 'Temporales');
+                } else {
+                    console.log('ℹ️ No hay cuotas SF existentes, generando cuota por defecto...');
+                    hideExistingCuotasSFSection();
+                    // Solo generar cuota por defecto si no hay cuotas existentes
+                    const saldoFinanciar = parseFloat(document.getElementById('sf-montoTotal').value) || 0;
+                    if (saldoFinanciar > 0) {
+                        generateDefaultCuotas(saldoFinanciar);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error al cargar cuotas SF temporales:', error);
+                hideExistingCuotasSFSection();
+                // En caso de error, también generar cuota por defecto
+                const saldoFinanciar = parseFloat(document.getElementById('sf-montoTotal').value) || 0;
+                if (saldoFinanciar > 0) {
+                    generateDefaultCuotas(saldoFinanciar);
+                }
+            });
+    }
+
+    // Función para mostrar cuotas existentes SF
+    function displayExistingCuotasSF(cuotas, tipo) {
+        const section = document.getElementById('sf-cuotasExistentesSection');
+        const tableBody = document.getElementById('sf-cuotasExistentesTableBody');
+        
+        if (!section || !tableBody) {
+            console.error('❌ No se encontraron elementos de cuotas existentes SF');
+            return;
+        }
+
+        // Limpiar tabla
+        tableBody.innerHTML = '';
+
+        // Obtener datos de la primera cuota para preseleccionar campos del formulario
+        if (cuotas.length > 0) {
+            const primeraCuota = cuotas[0];
+            
+            // Preseleccionar campos del formulario con los datos existentes
+            if (primeraCuota.tipo_comprobante_id) {
+                const tipoComprobanteSelect = document.getElementById('sf-tipoComprobante');
+                if (tipoComprobanteSelect) {
+                    // Buscar la opción que coincida con el ID
+                    for (let option of tipoComprobanteSelect.options) {
+                        if (option.value == primeraCuota.tipo_comprobante_id) {
+                            option.selected = true;
+                            console.log('✅ Tipo comprobante preseleccionado:', primeraCuota.tipo_comprobante);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (primeraCuota.entidad_financiera) {
+                const entidadFinancieraSelect = document.getElementById('sf-entidadFinanciera');
+                if (entidadFinancieraSelect) {
+                    // Buscar la opción que coincida con el texto
+                    for (let option of entidadFinancieraSelect.options) {
+                        if (option.text === primeraCuota.entidad_financiera) {
+                            option.selected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (primeraCuota.tipo_financiamiento) {
+                const tipoFinanciamientoSelect = document.getElementById('sf-tipoFinanciamiento');
+                if (tipoFinanciamientoSelect) {
+                    // Buscar la opción que coincida con el texto
+                    for (let option of tipoFinanciamientoSelect.options) {
+                        if (option.text === primeraCuota.tipo_financiamiento) {
+                            option.selected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Agregar cuotas a la tabla
+        cuotas.forEach(cuota => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-200 hover:bg-gray-50';
+            
+            const estadoClass = cuota.estado === 'Pagado' ? 'bg-green-100 text-green-800' : 
+                               cuota.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
+                               'bg-red-100 text-red-800';
+
+            row.innerHTML = `
+                <td class="px-4 py-2 text-sm">${cuota.numero_cuota}</td>
+                <td class="px-4 py-2 text-sm">${new Date(cuota.fecha_pago).toLocaleDateString('es-PE')}</td>
+                <td class="px-4 py-2 text-sm font-medium">S/ ${parseFloat(cuota.monto).toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+                <td class="px-4 py-2 text-sm">${cuota.motivo || '-'}</td>
+                <td class="px-4 py-2">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${estadoClass}">
+                        ${cuota.estado}
+                    </span>
+                </td>
+                <td class="px-4 py-2 text-sm">${cuota.entidad_financiera || '-'}</td>
+                <td class="px-4 py-2 text-sm">${cuota.tipo_financiamiento || '-'}</td>
+                <td class="px-4 py-2 text-sm">${cuota.tipo_comprobante || '-'}</td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+
+        // Actualizar título de la sección
+        const sectionTitle = section.querySelector('h3');
+        if (sectionTitle) {
+            sectionTitle.textContent = `Cuotas de Saldo a Financiar Existentes (${tipo})`;
+        }
+
+        // Mostrar la sección
+        section.classList.remove('hidden');
+        console.log('✅ Cuotas SF existentes mostradas y campos preseleccionados');
+    }
+
+    // Función para ocultar sección de cuotas existentes SF
+    function hideExistingCuotasSFSection() {
+        const section = document.getElementById('sf-cuotasExistentesSection');
+        if (section) {
+            section.classList.add('hidden');
+        }
+    }
+
     // Función para resetear el formulario
     function resetSFForm() {
         document.getElementById('sf-fechaInicio').value = '';
@@ -640,6 +880,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Verificar si hay cuotas existentes y ocultarlas al generar nuevas
+        const existingCuotasSection = document.getElementById('sf-cuotasExistentesSection');
+        if (existingCuotasSection && !existingCuotasSection.classList.contains('hidden')) {
+            existingCuotasSection.classList.add('hidden');
+            console.log('🔄 Ocultando cuotas existentes para mostrar nuevas cuotas generadas');
+        }
+
         const montoPorCuota = montoTotal / numeroCuotas;
         const tableBody = document.getElementById('sf-cuotasTableBody');
         tableBody.innerHTML = '';
@@ -674,6 +921,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Actualizar totales
         document.getElementById('sf-totalSaldoFinanciar').value = montoTotal.toFixed(2);
         document.getElementById('sf-diferencia').value = '0.00';
+        
+        console.log('✅ Nuevas cuotas SF generadas, tabla existente oculta');
     });
 
     // Event listener para aceptar saldo financiar
@@ -717,17 +966,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Preparar datos para enviar
+        const separacionId = getCurrentSeparacionId();
+        const fechaInicio = document.getElementById('sf-fechaInicio').value;
+        const montoTotal = parseFloat(document.getElementById('sf-montoTotal').value) || 0;
+        const numeroCuotas = parseInt(document.getElementById('sf-numeroCuotas').value) || 1;
+        
+        // Validar campos requeridos
+        if (!fechaInicio) {
+            alert('La fecha de inicio es requerida');
+            return;
+        }
+        
         const cronogramaSFData = {
             proforma_id: window.currentProformaId,
-            separacion_id: getCurrentSeparacionId(),
-            entidad_financiera_id: entidadFinanciera,
+            fecha_inicio: fechaInicio,
+            monto_total: montoTotal,
+            saldo_financiar: montoTotal, // Usar el mismo valor por ahora
+            numero_cuotas: numeroCuotas,
+            banco_id: entidadFinanciera, // Corregido: era entidad_financiera_id
             tipo_financiamiento_id: tipoFinanciamiento,
-            tipo_comprobante: document.getElementById('sf-tipoComprobante').value,
-            bono_mi_vivienda: document.getElementById('sf-bonoMiVivienda').checked,
+            tipo_comprobante_id: document.getElementById('sf-tipoComprobante').value,
+            bono_mivivienda: document.getElementById('sf-bonoMiVivienda').checked, // Corregido: era bono_mi_vivienda
             bono_verde: document.getElementById('sf-bonoVerde').checked,
             bono_integrador: document.getElementById('sf-bonoIntegrador').checked,
             cuotas: cuotas
         };
+
+        // Solo incluir separacion_id si existe (no es null)
+        if (separacionId) {
+            cronogramaSFData.separacion_id = separacionId;
+        }
 
         // Deshabilitar botón para evitar doble envío
         const button = document.getElementById('sf-aceptarSaldoFinanciar');

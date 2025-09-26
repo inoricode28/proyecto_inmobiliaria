@@ -244,6 +244,11 @@ class SeparacionResource extends Resource
                             ->label('Precio Venta')
                             ->disabled()
                             ->dehydrated(false)
+                            /*
+                            ->formatStateUsing(function ($state) {
+                                return $state ? number_format($state, 2) : '0.00';
+                            })
+                                */
                             ->reactive()
                             ->afterStateUpdated(function (callable $set, callable $get) {
     \App\Filament\Resources\Separaciones\SeparacionResource::actualizarSaldoFinanciar($set, $get);

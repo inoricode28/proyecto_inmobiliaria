@@ -94,8 +94,24 @@ Route::get('/cronograma/temporales/{proforma_id}', [\App\Http\Controllers\Cronog
     ->middleware(['auth', 'verified'])
     ->name('cronograma.temporales');
 
+Route::get('/cronograma/definitivas/{proforma_id}', [\App\Http\Controllers\CronogramaController::class, 'obtenerCuotasDefinitivasPorProforma'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma.definitivas');
+
 // Ruta para cronograma de saldo a financiar
 Route::post('/cronograma-sf/guardar', [\App\Http\Controllers\CronogramaController::class, 'guardarCronogramaSF'])
     ->middleware(['auth', 'verified'])
     ->name('cronograma-sf.guardar');
+
+Route::get('/cronograma-sf/{separacion_id}', [\App\Http\Controllers\CronogramaController::class, 'obtenerCronogramaSF'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma-sf.obtener');
+
+Route::get('/cronograma-sf/temporales/{proforma_id}', [\App\Http\Controllers\CronogramaController::class, 'obtenerCuotasSFTemporales'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma-sf.temporales');
+
+Route::get('/cronograma-sf/definitivas/{proforma_id}', [\App\Http\Controllers\CronogramaController::class, 'obtenerCuotasSFDefinitivasPorProforma'])
+    ->middleware(['auth', 'verified'])
+    ->name('cronograma-sf.definitivas');
     

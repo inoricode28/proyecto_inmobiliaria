@@ -144,44 +144,122 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadExistingCuotas() {
         console.log('=== CARGANDO CUOTAS EXISTENTES ===');
         
-        // Intentar cargar cuotas desde múltiples fuentes
         const proformaId = getCurrentProformaId();
-        let cuotasEncontradas = false;
         
-        if (proformaId) {
-            console.log('🔍 Cargando cuotas temporales para proforma ID:', proformaId);
-            
-            // Hacer petición para obtener las cuotas temporales
-            fetch(`/cronograma/temporales/${proformaId}`)
-                .then(response => {
+        if (!proformaId) {
+            console.log('⚠️ No se encontró proforma_id');
+            // Mostrar sección vacía
+            const cuotasSection = document.getElementById('cuotasSection');
+            if (cuotasSection) {
+                cuotasSection.classList.remove('hidden');
+                console.log('👁️ Sección de cuotas mostrada (vacía)');
+            }
+            return;
+        }
+        
+        console.log('🔍 Proforma ID encontrado:', proformaId);
+        
+        // PRIMERO: Intentar cargar cuotas definitivas (cuotas que ya tienen separacion_id)
+        console.log('🔍 Buscando cuotas definitivas para proforma ID:', proformaId);
+        
+        fetch(`/cronograma/definitivas/${proformaId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Cuotas definitivas recibidas:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    console.log('✅ Mostrando', data.data.length, 'cuotas definitivas');
+                    displayExistingCuotas(data.data);
+                    return; // Salir aquí si encontramos cuotas definitivas
+                } else {
+                    console.log('ℹ️ No hay cuotas definitivas, buscando cuotas temporales...');
+                    
+                    // SEGUNDO: Si no hay cuotas definitivas, buscar cuotas temporales
+                    return fetch(`/cronograma/temporales/${proformaId}`);
+                }
+            })
+            .then(response => {
+                // Solo ejecutar si no se encontraron cuotas definitivas
+                if (response) {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
-                })
-                .then(data => {
+                } else {
+                    return null; // Ya se encontraron cuotas definitivas
+                }
+            })
+            .then(data => {
+                if (data) {
                     console.log('📦 Cuotas temporales recibidas:', data);
                     
                     if (data.success && data.data && data.data.length > 0) {
                         console.log('✅ Mostrando', data.data.length, 'cuotas temporales');
                         displayExistingCuotas(data.data);
-                        cuotasEncontradas = true;
                     } else {
                         console.log('ℹ️ No hay cuotas temporales');
+                        // Mostrar sección vacía
+                        const cuotasSection = document.getElementById('cuotasSection');
+                        if (cuotasSection) {
+                            cuotasSection.classList.remove('hidden');
+                            console.log('👁️ Sección de cuotas mostrada (vacía)');
+                        }
                     }
-                    
-                    // SIEMPRE intentar cargar también por separación (para casos de separación definitiva)
-                    loadCuotasBySeparacion(cuotasEncontradas);
-                })
-                .catch(error => {
-                    console.error('❌ Error al cargar cuotas temporales:', error);
-                    // Si falla, intentar cargar por separación
-                    loadCuotasBySeparacion(false);
-                });
-        } else {
-            console.log('⚠️ No se encontró proforma_id, intentando cargar por separación...');
-            loadCuotasBySeparacion(false);
-        }
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error al cargar cuotas:', error);
+                // Si falla, mostrar sección vacía
+                const cuotasSection = document.getElementById('cuotasSection');
+                if (cuotasSection) {
+                    cuotasSection.classList.remove('hidden');
+                    console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
+                }
+            });
+    }
+    
+    // Nueva función específica para cargar cuotas definitivas de una separación existente
+    function loadCuotasDefinitivas(separacionId) {
+        console.log('🔍 Cargando cuotas definitivas para separación ID:', separacionId);
+        
+        // Hacer petición para obtener las cuotas definitivas
+        fetch(`/cronograma/${separacionId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Cuotas definitivas recibidas:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    console.log('✅ Mostrando', data.data.length, 'cuotas definitivas');
+                    displayExistingCuotas(data.data);
+                } else {
+                    console.log('ℹ️ No hay cuotas definitivas para esta separación');
+                    // Mostrar sección vacía para permitir agregar cuotas
+                    const cuotasSection = document.getElementById('cuotasSection');
+                    if (cuotasSection) {
+                        cuotasSection.classList.remove('hidden');
+                        console.log('👁️ Sección de cuotas mostrada (vacía) para agregar cuotas');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error al cargar cuotas definitivas:', error);
+                // Mostrar sección vacía en caso de error
+                const cuotasSection = document.getElementById('cuotasSection');
+                if (cuotasSection) {
+                    cuotasSection.classList.remove('hidden');
+                    console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
+                }
+            });
     }
     
     // Función auxiliar para cargar cuotas por separación
@@ -192,10 +270,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!separacionId) {
             console.log('⚠️ No se encontró ID de separación');
             
-            // Si no hay cuotas temporales ni de separación, generar cuota por defecto
+            // Si no hay cuotas temporales, mostrar la sección vacía
             if (!yaHayCuotasTemporales) {
-                console.log('🔄 No hay cuotas de ningún tipo, verificando si generar cuota por defecto...');
-                checkAndGenerateDefaultCuota();
+                console.log('ℹ️ No hay cuotas temporales, mostrando sección vacía');
+                const cuotasSection = document.getElementById('cuotasSection');
+                if (cuotasSection) {
+                    cuotasSection.classList.remove('hidden');
+                    console.log('👁️ Sección de cuotas mostrada (vacía)');
+                }
             }
             return;
         }
@@ -224,22 +306,33 @@ document.addEventListener('DOMContentLoaded', function() {
                         displayExistingCuotas(data.data);
                     }
                 } else {
-                    console.log('ℹ️ No hay cuotas de separación');
+                    console.log('ℹ️ No hay cuotas de separación para mostrar');
                     
-                    // Si no hay cuotas temporales ni de separación, generar cuota por defecto
+                    // CAMBIO: No generar cuota por defecto automáticamente
+                    // Solo mostrar mensaje informativo
+                    console.log('ℹ️ No se encontraron cuotas para esta separación');
+                    
+                    // Si no hay cuotas temporales, mostrar la sección vacía
                     if (!yaHayCuotasTemporales) {
-                        console.log('🔄 No hay cuotas de ningún tipo, verificando si generar cuota por defecto...');
-                        checkAndGenerateDefaultCuota();
+                        const cuotasSection = document.getElementById('cuotasSection');
+                        if (cuotasSection) {
+                            cuotasSection.classList.remove('hidden');
+                            console.log('👁️ Sección de cuotas mostrada (vacía)');
+                        }
                     }
                 }
             })
             .catch(error => {
                 console.error('❌ Error al cargar cuotas de separación:', error);
                 
-                // Si no hay cuotas temporales y falla la carga de separación, generar cuota por defecto
+                // Si no hay cuotas temporales y falla la carga de separación, mostrar sección vacía
                 if (!yaHayCuotasTemporales) {
-                    console.log('🔄 Error al cargar cuotas, verificando si generar cuota por defecto...');
-                    checkAndGenerateDefaultCuota();
+                    console.log('ℹ️ Error al cargar cuotas, mostrando sección vacía');
+                    const cuotasSection = document.getElementById('cuotasSection');
+                    if (cuotasSection) {
+                        cuotasSection.classList.remove('hidden');
+                        console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
+                    }
                 }
             });
     }
@@ -690,10 +783,14 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.log('ℹ️ No se genera cuota por defecto - condiciones no cumplidas');
             
-            // Si no se cumplieron las condiciones pero no hay cuotas, verificar si generar por defecto
+            // Si no se cumplieron las condiciones pero no hay cuotas, mostrar sección vacía
             if (!hasExistingCuotas && data.monto_cuota_inicial && data.monto_cuota_inicial > 0) {
-                console.log('🔄 Verificando generación de cuota por defecto alternativa...');
-                setTimeout(() => checkAndGenerateDefaultCuota(), 1000); // Esperar un poco para que se carguen las cuotas existentes
+                console.log('ℹ️ No se genera cuota por defecto porque hay proforma_id válido:', getCurrentProformaId());
+                const cuotasSection = document.getElementById('cuotasSection');
+                if (cuotasSection) {
+                    cuotasSection.classList.remove('hidden');
+                    console.log('👁️ Sección de cuotas mostrada (vacía) para permitir agregar manualmente');
+                }
             }
         }
         
@@ -1144,69 +1241,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para obtener el ID de la separación actual (definida globalmente)
     function getCurrentSeparacionId() {
-        // Estrategia especial para separación definitiva en proceso de creación
+        console.log('🔍 getCurrentSeparacionId: Iniciando búsqueda...');
+        
         const urlParams = new URLSearchParams(window.location.search);
-        const fromSeparacionDefinitiva = urlParams.get('from') === 'separacion_definitiva';
         
-        if (fromSeparacionDefinitiva) {
-            console.log('🔄 Detectado flujo de separación definitiva en creación');
-            
-            // Buscar en el formulario de Filament el ID de la separación recién creada
-            const separacionIdInput = document.querySelector('input[name="separacion_id"]');
-            if (separacionIdInput && separacionIdInput.value) {
-                console.log('🔍 Separación ID encontrado en input del formulario:', separacionIdInput.value);
-                return separacionIdInput.value;
-            }
-            
-            // Buscar en datos de Livewire para separación recién creada
-            if (typeof Livewire !== 'undefined' && Livewire.components) {
-                try {
-                    for (let component of Object.values(Livewire.components)) {
-                        if (component && 
-                            typeof component === 'object' && 
-                            component.data && 
-                            typeof component.data === 'object') {
-                            
-                            // Buscar separacion_id en los datos del componente
-                            if (component.data.separacion_id) {
-                                console.log('🔍 Separación ID encontrado en Livewire data:', component.data.separacion_id);
-                                return component.data.separacion_id;
-                            }
-                            
-                            // Buscar en record si existe
-                            if (component.data.record && 
-                                typeof component.data.record === 'object' && 
-                                component.data.record.id) {
-                                console.log('🔍 Separación ID encontrado en Livewire record:', component.data.record.id);
-                                return component.data.record.id;
-                            }
-                            
-                            // También buscar en data directamente
-                            if (component.data.id) {
-                                console.log('🔍 Separación ID encontrado en data de Livewire:', component.data.id);
-                                return component.data.id;
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.warn('⚠️ Error al buscar en componentes Livewire:', error);
-                }
-            }
-            
-            // Buscar en elementos del DOM que puedan contener el ID recién creado
-            const createdRecordElement = document.querySelector('[data-record-id]');
-            if (createdRecordElement) {
-                const recordId = createdRecordElement.getAttribute('data-record-id');
-                console.log('🔍 Separación ID encontrado en elemento creado:', recordId);
-                return recordId;
-            }
-            
-            // Si estamos en proceso de creación, devolver null para indicar que aún no hay ID
-            console.log('⏳ Separación en proceso de creación, ID aún no disponible');
-            return null;
-        }
-        
-        // Estrategia 1: Buscar en el URL (para páginas de detalle)
+        // PRIMERA PRIORIDAD: Buscar en el URL (para páginas de detalle)
         let separacionId = urlParams.get('separacion_id');
         
         if (separacionId) {
@@ -1214,16 +1253,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return separacionId;
         }
         
-        // Estrategia 2: Buscar en la URL actual (para páginas de detalle con ID en la ruta)
+        // SEGUNDA PRIORIDAD: Buscar en la URL actual (para páginas de detalle con ID en la ruta)
         const pathParts = window.location.pathname.split('/');
         const separacionIndex = pathParts.indexOf('separacions');
-        if (separacionIndex !== -1 && pathParts[separacionIndex + 1]) {
+        if (separacionIndex !== -1 && pathParts[separacionIndex + 1] && pathParts[separacionIndex + 1] !== 'create') {
             separacionId = pathParts[separacionIndex + 1];
             console.log('🔍 Separación ID encontrado en ruta:', separacionId);
             return separacionId;
         }
         
-        // Estrategia 3: Buscar en elementos del DOM
+        // TERCERA PRIORIDAD: Buscar en elementos del DOM
         const separacionElement = document.querySelector('[data-separacion-id]');
         if (separacionElement) {
             separacionId = separacionElement.getAttribute('data-separacion-id');
@@ -1231,26 +1270,40 @@ document.addEventListener('DOMContentLoaded', function() {
             return separacionId;
         }
         
-        // Estrategia 4: Buscar en variables globales de JavaScript
+        // CUARTA PRIORIDAD: Buscar en variables globales de JavaScript
         if (typeof window.separacionId !== 'undefined') {
             console.log('🔍 Separación ID encontrado en variable global:', window.separacionId);
             return window.separacionId;
         }
         
-        // Estrategia 5: Buscar en el contexto de Filament/Livewire
+        // QUINTA PRIORIDAD: Buscar en datos de Livewire
         if (typeof Livewire !== 'undefined' && Livewire.components) {
             try {
                 for (let component of Object.values(Livewire.components)) {
-                    // Validación más robusta para evitar errores de propiedades undefined
                     if (component && 
                         typeof component === 'object' && 
                         component.data && 
-                        typeof component.data === 'object' && 
-                        component.data.record && 
-                        typeof component.data.record === 'object' && 
-                        component.data.record.id) {
-                        console.log('🔍 Separación ID encontrado en Livewire:', component.data.record.id);
-                        return component.data.record.id;
+                        typeof component.data === 'object') {
+                        
+                        // Buscar separacion_id en los datos del componente
+                        if (component.data.separacion_id) {
+                            console.log('🔍 Separación ID encontrado en Livewire data:', component.data.separacion_id);
+                            return component.data.separacion_id;
+                        }
+                        
+                        // Buscar en record si existe
+                        if (component.data.record && 
+                            typeof component.data.record === 'object' && 
+                            component.data.record.id) {
+                            console.log('🔍 Separación ID encontrado en Livewire record:', component.data.record.id);
+                            return component.data.record.id;
+                        }
+                        
+                        // También buscar en data directamente
+                        if (component.data.id) {
+                            console.log('🔍 Separación ID encontrado en data de Livewire:', component.data.id);
+                            return component.data.id;
+                        }
                     }
                 }
             } catch (error) {
@@ -1258,26 +1311,61 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Estrategia 6: Buscar en meta tags
-        const metaSeparacionId = document.querySelector('meta[name="separacion-id"]');
-        if (metaSeparacionId) {
-            separacionId = metaSeparacionId.getAttribute('content');
-            console.log('🔍 Separación ID encontrado en meta tag:', separacionId);
-            return separacionId;
+        // SEXTA PRIORIDAD: Buscar en formularios de Filament
+        const separacionIdInput = document.querySelector('input[name="separacion_id"]');
+        if (separacionIdInput && separacionIdInput.value) {
+            console.log('🔍 Separación ID encontrado en input del formulario:', separacionIdInput.value);
+            return separacionIdInput.value;
         }
         
-        // Estrategia 7: Buscar en el título o breadcrumbs
-        const titleElement = document.querySelector('h1, .fi-header-heading');
-        if (titleElement && titleElement.textContent) {
-            const match = titleElement.textContent.match(/separaci[óo]n\s*#?(\d+)/i);
-            if (match) {
-                separacionId = match[1];
-                console.log('🔍 Separación ID encontrado en título:', separacionId);
-                return separacionId;
-            }
+        // SÉPTIMA PRIORIDAD: Buscar en elementos del DOM que puedan contener el ID
+        const createdRecordElement = document.querySelector('[data-record-id]');
+        if (createdRecordElement) {
+            const recordId = createdRecordElement.getAttribute('data-record-id');
+            console.log('🔍 Separación ID encontrado en elemento creado:', recordId);
+            return recordId;
         }
         
-        console.log('❌ No se pudo encontrar el ID de la separación');
+        // Verificar si estamos en proceso de creación
+        const fromSeparacionDefinitiva = urlParams.get('from') === 'separacion_definitiva';
+        if (fromSeparacionDefinitiva) {
+            console.log('⏳ Separación en proceso de creación, ID aún no disponible');
+        } else {
+            console.log('⚠️ No se encontró ID de separación');
+        }
+        
+        return null;
+    }
+        
+    // Función auxiliar para obtener el ID de la proforma actual
+    function getCurrentProformaId() {
+        console.log('🔍 getCurrentProformaId: Iniciando búsqueda...');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Estrategia 1: Buscar en el URL
+        let proformaId = urlParams.get('proforma_id');
+        
+        if (proformaId) {
+            console.log('🔍 Proforma ID encontrado en URL:', proformaId);
+            return proformaId;
+        }
+        
+        // Estrategia 2: Buscar en elementos del DOM
+        const proformaElement = document.querySelector('[data-proforma-id]');
+        if (proformaElement) {
+            proformaId = proformaElement.getAttribute('data-proforma-id');
+            console.log('🔍 Proforma ID encontrado en DOM:', proformaId);
+            return proformaId;
+        }
+        
+        // Estrategia 3: Buscar en variables globales
+        if (typeof window.proformaId !== 'undefined') {
+            console.log('🔍 Proforma ID encontrado en variable global:', window.proformaId);
+            return window.proformaId;
+        }
+        
+        console.log('⚠️ No se encontró ID de proforma');
         return null;
     }
 

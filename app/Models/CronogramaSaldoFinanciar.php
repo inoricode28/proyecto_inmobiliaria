@@ -15,13 +15,14 @@ class CronogramaSaldoFinanciar extends Model
 
     protected $fillable = [
         'separacion_id',
+        'proforma_id',
         'fecha_inicio',
         'monto_total',
         'saldo_financiar',
         'numero_cuotas',
         'tipo_financiamiento_id',
         'banco_id',
-        'tipo_comprobante',
+        'tipo_comprobante_id',
         'bono_mivivienda',
         'bono_verde',
         'bono_integrador',
@@ -44,14 +45,25 @@ class CronogramaSaldoFinanciar extends Model
         return $this->belongsTo(Separacion::class);
     }
 
+    public function proforma(): BelongsTo
+    {
+        return $this->belongsTo(Proforma::class);
+    }
+
+
     public function tipoFinanciamiento(): BelongsTo
     {
-        return $this->belongsTo(TiposFinanciamiento::class, 'tipo_financiamiento_id');
+        return $this->belongsTo(TipoFinanciamiento::class, 'tipo_financiamiento_id');
     }
 
     public function banco(): BelongsTo
     {
         return $this->belongsTo(Banco::class);
+    }
+
+    public function tipoComprobante(): BelongsTo
+    {
+        return $this->belongsTo(TipoComprobante::class, 'tipo_comprobante_id');
     }
 
     public function detalles(): HasMany

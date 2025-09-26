@@ -364,6 +364,13 @@
                 </svg>
                 Historial
             </div>
+            <div class="nav-tab" data-tab="cronograma-sf">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                Cronograma SF
+            </div>
         </div>
 
         <!-- Tab Content Sections -->
@@ -605,6 +612,80 @@
                 </div>
             </x-filament::card>
         </div>
+
+        <!-- Cronograma SF Tab Content -->
+        <div class="tab-content" id="cronograma-sf-content">
+            <x-filament::card>
+                <x-slot name="heading">
+                    Cronograma de Saldo a Financiar
+                </x-slot>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-sm text-gray-600">
+                            <strong>Separación ID:</strong> {{ $separacion->id }}
+                        </div>
+                        <button type="button" 
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm"
+                                onclick="loadCronogramaSF()">
+                            Actualizar Cronograma
+                        </button>
+                    </div>
+                    
+                    <!-- Cuotas Temporales -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 border-l-4 border-yellow-500 pl-3">
+                            Cuotas Temporales
+                        </h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200 rounded-lg" id="cuotas-temporales-sf-table">
+                                <thead class="bg-yellow-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Cuota</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Fecha Vencimiento</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Monto</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuotas-temporales-sf-body">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                                            No hay cuotas temporales registradas
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Cuotas Definitivas -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-3">
+                            Cuotas Definitivas
+                        </h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200 rounded-lg" id="cuotas-definitivas-sf-table">
+                                <thead class="bg-green-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Cuota</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Fecha Vencimiento</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Monto</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuotas-definitivas-sf-body">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                                            No hay cuotas definitivas registradas
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </x-filament::card>
+        </div>
     </div>
 
     <script>
@@ -635,9 +716,131 @@
                 if (targetContent) {
                     targetContent.classList.add('active');
                 }
+
+                // Si es el tab de cronograma SF, cargar los datos
+                if (targetTab === 'cronograma-sf') {
+                    loadCronogramaSF();
+                }
             });
         });
     });
+
+    // Función para cargar el cronograma de saldo a financiar
+    function loadCronogramaSF() {
+        const separacionId = {{ $separacion->id }};
+        
+        // Cargar cuotas temporales
+        fetch(`/cronograma/sf/temporales/${separacionId}`)
+            .then(response => response.json())
+            .then(data => {
+                displayCuotasTemporalesSF(data);
+            })
+            .catch(error => {
+                console.error('Error al cargar cuotas temporales SF:', error);
+                displayErrorMessage('cuotas-temporales-sf-body', 'Error al cargar cuotas temporales');
+            });
+
+        // Cargar cuotas definitivas
+        fetch(`/cronograma/sf/definitivas/${separacionId}`)
+            .then(response => response.json())
+            .then(data => {
+                displayCuotasDefinitivasSF(data);
+            })
+            .catch(error => {
+                console.error('Error al cargar cuotas definitivas SF:', error);
+                displayErrorMessage('cuotas-definitivas-sf-body', 'Error al cargar cuotas definitivas');
+            });
+    }
+
+    // Función para mostrar cuotas temporales SF
+    function displayCuotasTemporalesSF(cuotas) {
+        const tbody = document.getElementById('cuotas-temporales-sf-body');
+        
+        if (!cuotas || cuotas.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                        No hay cuotas temporales registradas
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = cuotas.map(cuota => `
+            <tr class="hover:bg-yellow-50">
+                <td class="px-4 py-2 border-b text-sm">${cuota.numero_cuota}</td>
+                <td class="px-4 py-2 border-b text-sm">${formatDate(cuota.fecha_vencimiento)}</td>
+                <td class="px-4 py-2 border-b text-sm font-semibold">S/ ${formatNumber(cuota.monto)}</td>
+                <td class="px-4 py-2 border-b text-sm">
+                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                        ${cuota.estado || 'Temporal'}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Función para mostrar cuotas definitivas SF
+    function displayCuotasDefinitivasSF(cuotas) {
+        const tbody = document.getElementById('cuotas-definitivas-sf-body');
+        
+        if (!cuotas || cuotas.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                        No hay cuotas definitivas registradas
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = cuotas.map(cuota => `
+            <tr class="hover:bg-green-50">
+                <td class="px-4 py-2 border-b text-sm">${cuota.numero_cuota}</td>
+                <td class="px-4 py-2 border-b text-sm">${formatDate(cuota.fecha_vencimiento)}</td>
+                <td class="px-4 py-2 border-b text-sm font-semibold">S/ ${formatNumber(cuota.monto)}</td>
+                <td class="px-4 py-2 border-b text-sm">
+                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                        ${cuota.estado || 'Definitiva'}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Función para mostrar mensaje de error
+    function displayErrorMessage(tbodyId, message) {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="px-4 py-8 text-center text-red-500">
+                    ${message}
+                </td>
+            </tr>
+        `;
+    }
+
+    // Función para formatear fechas
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-PE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+
+    // Función para formatear números
+    function formatNumber(number) {
+        if (!number) return '0.00';
+        return parseFloat(number).toLocaleString('es-PE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
     </script>
 
     <!-- Modal de Confirmación para Pasar a Venta -->

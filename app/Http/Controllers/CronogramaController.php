@@ -49,11 +49,22 @@ class CronogramaController extends Controller
                 ]);
             }
 
-            // Si no hay separacion_id, guardar cuotas temporales asociadas a la proforma
+            // SIEMPRE verificar si ya existe una separación para esta proforma
+            $separacionExistente = Separacion::where('proforma_id', $proformaId)->first();
+            
+            // Si no hay separacion_id en el request PERO existe una separación para la proforma
+            if (!$separacionId && $separacionExistente) {
+                $separacionId = $separacionExistente->id;
+                Log::info('Separación existente encontrada para proforma', [
+                    'proforma_id' => $proformaId,
+                    'separacion_id' => $separacionId
+                ]);
+            }
+
+            // Si no hay separacion_id Y no existe separación, guardar cuotas temporales
             if (!$separacionId) {
-                // Eliminar cuotas temporales existentes para esta proforma
+                // Eliminar TODAS las cuotas existentes para esta proforma (temporales y definitivas)
                 CronogramaCuotaInicial::where('proforma_id', $proformaId)
-                    ->whereNull('separacion_id')
                     ->delete();
 
                 // Crear las nuevas cuotas temporales
@@ -91,13 +102,16 @@ class CronogramaController extends Controller
             }
 
             // Si hay separacion_id, proceder con el flujo normal
-            // Buscar si ya existe una separación para esta proforma
-            $separacionExistente = Separacion::where('proforma_id', $proformaId)->first();
-            
+            // SIEMPRE usar la separación existente si hay una para esta proforma
             if ($separacionExistente) {
                 $separacion = $separacionExistente;
+                Log::info('Usando separación existente para la proforma', [
+                    'proforma_id' => $proformaId,
+                    'separacion_id' => $separacionExistente->id,
+                    'separacion_fecha' => $separacionExistente->created_at
+                ]);
             } else {
-                // Crear nueva separación
+                // Solo crear nueva separación si NO existe una para esta proforma
                 $separacion = Separacion::create([
                     'proforma_id' => $proformaId,
                     'cliente_id' => $clienteId,
@@ -105,6 +119,11 @@ class CronogramaController extends Controller
                     'estado' => 'Activo',
                     'created_by' => Auth::id() ?? 1,
                     'updated_by' => Auth::id() ?? 1,
+                ]);
+
+                Log::info('Nueva separación creada para la proforma', [
+                    'proforma_id' => $proformaId,
+                    'separacion_id' => $separacion->id
                 ]);
 
                 // Cambiar el estado del prospecto a separación (tipo_gestion_id = 6)
@@ -143,13 +162,8 @@ class CronogramaController extends Controller
                 }
             }
 
-            // Eliminar cuotas existentes para esta separación (si las hay)
-            CronogramaCuotaInicial::where('separacion_id', $separacionId)->delete();
-
-            // También eliminar cuotas temporales de esta proforma
-            CronogramaCuotaInicial::where('proforma_id', $proformaId)
-                ->whereNull('separacion_id')
-                ->delete();
+            // Eliminar TODAS las cuotas existentes para esta proforma (definitivas y temporales)
+            CronogramaCuotaInicial::where('proforma_id', $proformaId)->delete();
 
             // Crear las nuevas cuotas
             foreach ($cuotas as $cuotaData) {
@@ -269,6 +283,204 @@ class CronogramaController extends Controller
     }
 
     /**
+     * Obtener cuotas definitivas por proforma_id (cuotas que ya tienen separacion_id)
+     */
+    public function obtenerCuotasDefinitivasPorProforma($proformaId): JsonResponse
+    {
+        try {
+            $cuotas = CronogramaCuotaInicial::with(['tipoCuota', 'estadoCuota'])
+                ->where('proforma_id', $proformaId)
+                ->whereNotNull('separacion_id')
+                ->orderBy('fecha_pago')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $cuotas
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener cuotas definitivas por proforma', [
+                'error' => $e->getMessage(),
+                'proforma_id' => $proformaId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las cuotas definitivas'
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener cronograma de saldo a financiar por separación
+     */
+    public function obtenerCronogramaSF($separacion_id): JsonResponse
+    {
+        try {
+            $cronogramasSF = \App\Models\CronogramaSaldoFinanciar::where('separacion_id', $separacion_id)
+                ->with(['detalles' => function($query) {
+                    $query->orderBy('numero_cuota');
+                }, 'banco', 'tipoFinanciamiento'])
+                ->get();
+
+            $cuotas = [];
+            foreach ($cronogramasSF as $cronogramaSF) {
+                foreach ($cronogramaSF->detalles as $detalle) {
+                    $cuotas[] = [
+                        'id' => $detalle->id,
+                        'cronograma_sf_id' => $cronogramaSF->id,
+                        'numero_cuota' => $detalle->numero_cuota,
+                        'fecha_pago' => $detalle->fecha_pago,
+                        'monto' => $detalle->monto,
+                        'motivo' => $detalle->motivo,
+                        'estado' => $detalle->estado,
+                        'observaciones' => $detalle->observaciones,
+                        'entidad_financiera' => $cronogramaSF->banco->nombre ?? 'N/A',
+                        'tipo_financiamiento' => $cronogramaSF->tipoFinanciamiento->nombre ?? 'N/A',
+                        'tipo_comprobante' => $cronogramaSF->tipoComprobante->nombre ?? 'N/A',
+                        'tipo_comprobante_id' => $cronogramaSF->tipo_comprobante_id,
+                        'bono_mi_vivienda' => $cronogramaSF->bono_mi_vivienda,
+                        'bono_verde' => $cronogramaSF->bono_verde,
+                        'bono_integrador' => $cronogramaSF->bono_integrador,
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $cuotas,
+                'message' => 'Cuotas de saldo a financiar obtenidas exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener cronograma SF', [
+                'separacion_id' => $separacion_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las cuotas de saldo a financiar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener cuotas de saldo a financiar temporales por proforma
+     */
+    public function obtenerCuotasSFTemporales($proforma_id): JsonResponse
+    {
+        try {
+            $cronogramasSF = \App\Models\CronogramaSaldoFinanciar::where('proforma_id', $proforma_id)
+                ->whereNull('separacion_id')
+                ->with(['detalles' => function($query) {
+                    $query->orderBy('numero_cuota');
+                }, 'banco', 'tipoFinanciamiento'])
+                ->get();
+
+            $cuotas = [];
+            foreach ($cronogramasSF as $cronogramaSF) {
+                foreach ($cronogramaSF->detalles as $detalle) {
+                    $cuotas[] = [
+                        'id' => $detalle->id,
+                        'cronograma_sf_id' => $cronogramaSF->id,
+                        'numero_cuota' => $detalle->numero_cuota,
+                        'fecha_pago' => $detalle->fecha_pago,
+                        'monto' => $detalle->monto,
+                        'motivo' => $detalle->motivo,
+                        'estado' => $detalle->estado,
+                        'observaciones' => $detalle->observaciones,
+                        'entidad_financiera' => $cronogramaSF->banco->nombre ?? 'N/A',
+                        'tipo_financiamiento' => $cronogramaSF->tipoFinanciamiento->nombre ?? 'N/A',
+                        'tipo_comprobante' => $cronogramaSF->tipoComprobante->nombre ?? 'N/A',
+                        'tipo_comprobante_id' => $cronogramaSF->tipo_comprobante_id,
+                        'bono_mi_vivienda' => $cronogramaSF->bono_mi_vivienda,
+                        'bono_verde' => $cronogramaSF->bono_verde,
+                        'bono_integrador' => $cronogramaSF->bono_integrador,
+                        'es_temporal' => true
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $cuotas,
+                'message' => 'Cuotas temporales de saldo a financiar obtenidas exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener cuotas SF temporales', [
+                'proforma_id' => $proforma_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las cuotas temporales de saldo a financiar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener cuotas de saldo a financiar definitivas por proforma
+     */
+    public function obtenerCuotasSFDefinitivasPorProforma($proforma_id): JsonResponse
+    {
+        try {
+            $cronogramasSF = \App\Models\CronogramaSaldoFinanciar::where('proforma_id', $proforma_id)
+                ->whereNotNull('separacion_id')
+                ->with(['detalles' => function($query) {
+                    $query->orderBy('numero_cuota');
+                }, 'banco', 'tipoFinanciamiento'])
+                ->get();
+
+            $cuotas = [];
+            foreach ($cronogramasSF as $cronogramaSF) {
+                foreach ($cronogramaSF->detalles as $detalle) {
+                    $cuotas[] = [
+                        'id' => $detalle->id,
+                        'cronograma_sf_id' => $cronogramaSF->id,
+                        'numero_cuota' => $detalle->numero_cuota,
+                        'fecha_pago' => $detalle->fecha_pago,
+                        'monto' => $detalle->monto,
+                        'motivo' => $detalle->motivo,
+                        'estado' => $detalle->estado,
+                        'observaciones' => $detalle->observaciones,
+                        'entidad_financiera' => $cronogramaSF->banco->nombre ?? 'N/A',
+                        'tipo_financiamiento' => $cronogramaSF->tipoFinanciamiento->nombre ?? 'N/A',
+                        'tipo_comprobante' => $cronogramaSF->tipoComprobante->nombre ?? 'N/A',
+                        'bono_mi_vivienda' => $cronogramaSF->bono_mi_vivienda,
+                        'bono_verde' => $cronogramaSF->bono_verde,
+                        'bono_integrador' => $cronogramaSF->bono_integrador,
+                        'es_definitiva' => true
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $cuotas,
+                'message' => 'Cuotas definitivas de saldo a financiar obtenidas exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener cuotas SF definitivas por proforma', [
+                'proforma_id' => $proforma_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las cuotas definitivas de saldo a financiar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Guardar cronograma de saldo a financiar
      */
     public function guardarCronogramaSF(Request $request): JsonResponse
@@ -276,11 +488,15 @@ class CronogramaController extends Controller
         try {
             $request->validate([
                 'proforma_id' => 'required|exists:proformas,id',
-                'separacion_id' => 'required|exists:separaciones,id',
-                'entidad_financiera_id' => 'required|exists:bancos,id',
+                'separacion_id' => 'nullable|exists:separaciones,id',
+                'fecha_inicio' => 'required|date',
+                'monto_total' => 'required|numeric|min:0',
+                'saldo_financiar' => 'required|numeric|min:0',
+                'numero_cuotas' => 'required|integer|min:1',
+                'banco_id' => 'required|exists:bancos,id',
                 'tipo_financiamiento_id' => 'required|exists:tipos_financiamiento,id',
-                'tipo_comprobante' => 'nullable|string|max:50',
-                'bono_mi_vivienda' => 'boolean',
+                'tipo_comprobante_id' => 'nullable|exists:tipos_comprobante,id',
+                'bono_mivivienda' => 'boolean',
                 'bono_verde' => 'boolean',
                 'bono_integrador' => 'boolean',
                 'cuotas' => 'required|array|min:1',
@@ -293,19 +509,87 @@ class CronogramaController extends Controller
 
             DB::beginTransaction();
 
-            // Crear el cronograma principal
-            $cronogramaSF = \App\Models\CronogramaSaldoFinanciar::create([
-                'separacion_id' => $request->separacion_id,
-                'entidad_financiera_id' => $request->entidad_financiera_id,
-                'tipo_financiamiento_id' => $request->tipo_financiamiento_id,
-                'tipo_comprobante' => $request->tipo_comprobante,
-                'bono_mi_vivienda' => $request->bono_mi_vivienda ?? false,
-                'bono_verde' => $request->bono_verde ?? false,
-                'bono_integrador' => $request->bono_integrador ?? false,
-                'estado' => 'Activo',
-                'created_by' => Auth::id() ?? 1,
-                'updated_by' => Auth::id() ?? 1,
-            ]);
+            // Verificar si ya existe una separación para esta proforma
+            $separacionExistente = null;
+            if ($request->proforma_id) {
+                $separacionExistente = \App\Models\Separacion::where('proforma_id', $request->proforma_id)->first();
+                
+                if ($separacionExistente) {
+                    Log::info('Separación existente encontrada para cronograma SF', [
+                        'proforma_id' => $request->proforma_id,
+                        'separacion_id' => $separacionExistente->id
+                    ]);
+                    
+                    // Usar la separación existente
+                    $separacionId = $separacionExistente->id;
+                } else {
+                    // Usar el separacion_id proporcionado o null si no existe separación
+                    $separacionId = $request->separacion_id;
+                    
+                    Log::info('No se encontró separación existente para cronograma SF', [
+                        'proforma_id' => $request->proforma_id,
+                        'separacion_id_provided' => $request->separacion_id
+                    ]);
+                }
+            } else {
+                $separacionId = $request->separacion_id;
+            }
+
+            // Buscar cronograma SF existente para esta proforma
+            $cronogramaSFExistente = \App\Models\CronogramaSaldoFinanciar::where('proforma_id', $request->proforma_id)->first();
+            
+            if ($cronogramaSFExistente) {
+                // Actualizar el cronograma existente
+                $cronogramaSFExistente->update([
+                    'separacion_id' => $separacionId, // Usar la separación existente o la proporcionada
+                    'fecha_inicio' => $request->fecha_inicio,
+                    'monto_total' => $request->monto_total,
+                    'saldo_financiar' => $request->saldo_financiar,
+                    'numero_cuotas' => $request->numero_cuotas,
+                    'banco_id' => $request->banco_id,
+                    'tipo_financiamiento_id' => $request->tipo_financiamiento_id,
+                    'tipo_comprobante_id' => $request->tipo_comprobante_id,
+                    'bono_mivivienda' => $request->bono_mivivienda ?? false,
+                    'bono_verde' => $request->bono_verde ?? false,
+                    'bono_integrador' => $request->bono_integrador ?? false,
+                    'estado' => 'Activo',
+                    'updated_by' => Auth::id() ?? 1,
+                ]);
+
+                // Eliminar solo los detalles existentes para reemplazarlos
+                \App\Models\CronogramaSaldoFinanciarDetalle::where('cronograma_sf_id', $cronogramaSFExistente->id)->delete();
+                
+                $cronogramaSF = $cronogramaSFExistente;
+                
+                Log::info('Cronograma SF existente actualizado', [
+                    'cronograma_sf_id' => $cronogramaSF->id,
+                    'proforma_id' => $request->proforma_id
+                ]);
+            } else {
+                // Crear nuevo cronograma si no existe
+                $cronogramaSF = \App\Models\CronogramaSaldoFinanciar::create([
+                    'separacion_id' => $separacionId, // Usar la separación existente o la proporcionada
+                    'proforma_id' => $request->proforma_id,
+                    'fecha_inicio' => $request->fecha_inicio,
+                    'monto_total' => $request->monto_total,
+                    'saldo_financiar' => $request->saldo_financiar,
+                    'numero_cuotas' => $request->numero_cuotas,
+                    'banco_id' => $request->banco_id,
+                    'tipo_financiamiento_id' => $request->tipo_financiamiento_id,
+                    'tipo_comprobante_id' => $request->tipo_comprobante_id,
+                    'bono_mivivienda' => $request->bono_mivivienda ?? false,
+                    'bono_verde' => $request->bono_verde ?? false,
+                    'bono_integrador' => $request->bono_integrador ?? false,
+                    'estado' => 'Activo',
+                    'created_by' => Auth::id() ?? 1,
+                    'updated_by' => Auth::id() ?? 1,
+                ]);
+                
+                Log::info('Nuevo cronograma SF creado', [
+                    'cronograma_sf_id' => $cronogramaSF->id,
+                    'proforma_id' => $request->proforma_id
+                ]);
+            }
 
             // Crear los detalles del cronograma
             foreach ($request->cuotas as $cuotaData) {
@@ -359,6 +643,34 @@ class CronogramaController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al guardar el cronograma de saldo a financiar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener tipos de comprobante
+     */
+    public function getTiposComprobante(): JsonResponse
+    {
+        try {
+            $tiposComprobante = \App\Models\TipoComprobante::activos()
+                ->select('id', 'nombre', 'descripcion')
+                ->orderBy('nombre')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $tiposComprobante
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener tipos de comprobante', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener tipos de comprobante'
             ], 500);
         }
     }

@@ -14,6 +14,7 @@ use App\Filament\Resources\Separaciones\SeparacionResource;
 use App\Filament\Resources\PanelSeguimientoResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
+use Filament\Pages\Actions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -206,6 +207,32 @@ class CreateSeparacion extends CreateRecord
                 return; // No crear cuota por defecto si ya hay cuotas temporales
             }
 
+            // Buscar si hay cuotas de saldo a financiar temporales para esta proforma
+            $cuotasSaldoFinanciarTemporales = \App\Models\CronogramaSaldoFinanciar::where('proforma_id', $proforma->id)
+                ->whereNull('separacion_id')
+                ->get();
+            
+            if ($cuotasSaldoFinanciarTemporales->count() > 0) {
+                // Si hay cuotas de saldo a financiar temporales, asignarles el ID de la separación
+                Log::info('Asignando separacion_id a cuotas de saldo a financiar temporales', [
+                    'separacion_id' => $separacion->id,
+                    'proforma_id' => $proforma->id,
+                    'cuotas_sf_count' => $cuotasSaldoFinanciarTemporales->count()
+                ]);
+                
+                foreach ($cuotasSaldoFinanciarTemporales as $cuotaSFTemporal) {
+                    $cuotaSFTemporal->update([
+                        'separacion_id' => $separacion->id,
+                        'updated_by' => Auth::id() ?? 1,
+                    ]);
+                }
+                
+                Log::info('Cuotas de saldo a financiar temporales actualizadas con separacion_id', [
+                    'separacion_id' => $separacion->id,
+                    'cuotas_sf_actualizadas' => $cuotasSaldoFinanciarTemporales->count()
+                ]);
+            }
+
             // Si no hay cuotas temporales, crear cronograma por defecto
             $montoTotal = $proforma->monto_cuota_inicial ?? 0;
 
@@ -275,6 +302,32 @@ class CreateSeparacion extends CreateRecord
         $data['updated_by'] = 1;
 
         return $data;
+    }
+
+    protected function getFormActions(): array
+    {
+        // Verificar si viene desde separación definitiva y si ya existe una separación para la proforma
+        $fromSeparacionDefinitiva = request('from') === 'separacion_definitiva';
+        $proformaId = request('proforma_id');
+        
+        // Si viene desde separación definitiva y ya existe una separación para esta proforma
+        if ($fromSeparacionDefinitiva && $proformaId) {
+            $separacionExistente = \App\Models\Separacion::where('proforma_id', $proformaId)->exists();
+            
+            if ($separacionExistente) {
+                // Mostrar solo el botón de "Guardar sin Separación" para ir al panel de seguimiento
+                return [
+                    Actions\Action::make('guardar_sin_separacion')
+                        ->label('Guardar')
+                        ->color('success')
+                        ->icon('heroicon-o-check')
+                        ->url(PanelSeguimientoResource::getUrl('index'))
+                ];
+            }
+        }
+        
+        // Si no hay conflicto, mostrar los botones normales
+        return parent::getFormActions();
     }
 
     protected function getFooterWidgets(): array

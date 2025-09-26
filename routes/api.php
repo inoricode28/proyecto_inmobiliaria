@@ -36,6 +36,9 @@ Route::get('/bancos', [BancoController::class, 'index']);
 // Rutas para tipos de financiamiento
 Route::get('/tipos-financiamiento', [TipoFinanciamientoController::class, 'index']);
 
+// Rutas para tipos de comprobante
+Route::get('/tipos-comprobante', [CronogramaController::class, 'getTiposComprobante']);
+
 // Rutas para pagos de separación
 Route::prefix('pagos-separacion')->group(function () {
     Route::get('/{separacion_id}', [PagoSeparacionController::class, 'index']);
