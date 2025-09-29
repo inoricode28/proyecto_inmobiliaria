@@ -1,4 +1,5 @@
 {{-- Modal de Cronograma de Saldo a Financiar --}}
+<div>
 <div id="cronograma-sf-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {{-- Background overlay --}}
@@ -241,12 +242,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const fromSeparacionDefinitiva = urlParams.get('from') === 'separacion_definitiva';
         
         if (fromSeparacionDefinitiva) {
-            console.log('🔄 SF: Detectado flujo de separación definitiva en creación');
+            // console.log('🔄 SF: Detectado flujo de separación definitiva en creación');
             
             // Buscar en el formulario de Filament el ID de la separación recién creada
             const separacionIdInput = document.querySelector('input[name="separacion_id"]');
             if (separacionIdInput && separacionIdInput.value) {
-                console.log('🔍 SF: Separación ID encontrado en input del formulario:', separacionIdInput.value);
+                // console.log('🔍 SF: Separación ID encontrado en input del formulario:', separacionIdInput.value);
                 return separacionIdInput.value;
             }
             
@@ -261,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             // Buscar separacion_id en los datos del componente
                             if (component.data.separacion_id) {
-                                console.log('🔍 SF: Separación ID encontrado en Livewire data:', component.data.separacion_id);
+                                // console.log('🔍 SF: Separación ID encontrado en Livewire data:', component.data.separacion_id);
                                 return component.data.separacion_id;
                             }
                             
@@ -269,13 +270,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (component.data.record && 
                                 typeof component.data.record === 'object' && 
                                 component.data.record.id) {
-                                console.log('🔍 SF: Separación ID encontrado en Livewire record:', component.data.record.id);
+                                // console.log('🔍 SF: Separación ID encontrado en Livewire record:', component.data.record.id);
                                 return component.data.record.id;
                             }
                             
                             // También buscar en data directamente
                             if (component.data.id) {
-                                console.log('🔍 SF: Separación ID encontrado en data de Livewire:', component.data.id);
+                                // console.log('🔍 SF: Separación ID encontrado en data de Livewire:', component.data.id);
                                 return component.data.id;
                             }
                         }
@@ -289,12 +290,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const createdRecordElement = document.querySelector('[data-record-id]');
             if (createdRecordElement) {
                 const recordId = createdRecordElement.getAttribute('data-record-id');
-                console.log('🔍 SF: Separación ID encontrado en elemento creado:', recordId);
+                // console.log('🔍 SF: Separación ID encontrado en elemento creado:', recordId);
                 return recordId;
             }
             
             // Si estamos en proceso de creación, devolver null para indicar que aún no hay ID
-            console.log('⏳ SF: Separación en proceso de creación, ID aún no disponible');
+            // console.log('⏳ SF: Separación en proceso de creación, ID aún no disponible');
             return null;
         }
         
@@ -302,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let separacionId = urlParams.get('separacion_id');
         
         if (separacionId) {
-            console.log('🔍 SF: Separación ID encontrado en URL:', separacionId);
+            // console.log('🔍 SF: Separación ID encontrado en URL:', separacionId);
             return separacionId;
         }
         
@@ -311,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const separacionIndex = pathParts.indexOf('separacions');
         if (separacionIndex !== -1 && pathParts[separacionIndex + 1]) {
             separacionId = pathParts[separacionIndex + 1];
-            console.log('🔍 SF: Separación ID encontrado en ruta:', separacionId);
+            // console.log('🔍 SF: Separación ID encontrado en ruta:', separacionId);
             return separacionId;
         }
         
@@ -319,13 +320,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const separacionElement = document.querySelector('[data-separacion-id]');
         if (separacionElement) {
             separacionId = separacionElement.getAttribute('data-separacion-id');
-            console.log('🔍 SF: Separación ID encontrado en DOM:', separacionId);
+            // console.log('🔍 SF: Separación ID encontrado en DOM:', separacionId);
             return separacionId;
         }
         
         // Estrategia 4: Buscar en variables globales de JavaScript
         if (typeof window.separacionId !== 'undefined') {
-            console.log('🔍 SF: Separación ID encontrado en variable global:', window.separacionId);
+            // console.log('🔍 SF: Separación ID encontrado en variable global:', window.separacionId);
             return window.separacionId;
         }
         
@@ -341,12 +342,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         component.data.record && 
                         typeof component.data.record === 'object' && 
                         component.data.record.id) {
-                        console.log('🔍 SF: Separación ID encontrado en Livewire:', component.data.record.id);
+                        // console.log('🔍 SF: Separación ID encontrado en Livewire:', component.data.record.id);
                         return component.data.record.id;
                     }
                 }
             } catch (error) {
-                console.warn('⚠️ SF: Error al buscar en componentes Livewire:', error);
+                // console.warn('⚠️ SF: Error al buscar en componentes Livewire:', error);
             }
         }
         
@@ -354,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const metaSeparacionId = document.querySelector('meta[name="separacion-id"]');
         if (metaSeparacionId) {
             separacionId = metaSeparacionId.getAttribute('content');
-            console.log('🔍 SF: Separación ID encontrado en meta tag:', separacionId);
+            // console.log('🔍 SF: Separación ID encontrado en meta tag:', separacionId);
             return separacionId;
         }
         
@@ -364,18 +365,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const match = titleElement.textContent.match(/separaci[óo]n\s*#?(\d+)/i);
             if (match) {
                 separacionId = match[1];
-                console.log('🔍 SF: Separación ID encontrado en título:', separacionId);
+                // console.log('🔍 SF: Separación ID encontrado en título:', separacionId);
                 return separacionId;
             }
         }
         
-        console.log('❌ SF: No se pudo encontrar separacion_id');
+        // console.log('❌ SF: No se pudo encontrar separacion_id');
         return null;
     }
 
     // Función para cargar datos de la proforma para SF
     function loadProformaSFData() {
-        console.log('=== CARGANDO DATOS PROFORMA PARA SF ===');
+        // console.log('=== CARGANDO DATOS PROFORMA PARA SF ===');
         
         // Múltiples estrategias para obtener el proformaId (igual que el modal principal)
         let proformaId = null;
@@ -384,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const proformaSelect = document.querySelector('select[name="proforma_id"]');
         if (proformaSelect && proformaSelect.value) {
             proformaId = proformaSelect.value;
-            console.log('✓ ProformaId SF encontrado en select proforma_id:', proformaId);
+            // console.log('✓ ProformaId SF encontrado en select proforma_id:', proformaId);
         }
         
         // Estrategia 2: Buscar en inputs ocultos
@@ -392,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const proformaInput = document.querySelector('input[name="proforma_id"]');
             if (proformaInput && proformaInput.value) {
                 proformaId = proformaInput.value;
-                console.log('✓ ProformaId SF encontrado en input proforma_id:', proformaId);
+                // console.log('✓ ProformaId SF encontrado en input proforma_id:', proformaId);
             }
         }
         
@@ -401,18 +402,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const filamentSelect = document.querySelector('[data-field-wrapper="proforma_id"] select');
             if (filamentSelect && filamentSelect.value) {
                 proformaId = filamentSelect.value;
-                console.log('✓ ProformaId SF encontrado en selector Filament:', proformaId);
+                // console.log('✓ ProformaId SF encontrado en selector Filament:', proformaId);
             }
         }
         
         // Estrategia 4: Buscar en selectores genéricos
         if (!proformaId) {
             const genericSelects = document.querySelectorAll('select');
-            console.log('SF: Buscando en', genericSelects.length, 'selectores genéricos...');
+            // console.log('SF: Buscando en', genericSelects.length, 'selectores genéricos...');
             for (let select of genericSelects) {
                 if (select.name && select.name.includes('proforma') && select.value) {
                     proformaId = select.value;
-                    console.log('✓ ProformaId SF encontrado en selector genérico:', proformaId, 'name:', select.name);
+                    // console.log('✓ ProformaId SF encontrado en selector genérico:', proformaId, 'name:', select.name);
                     break;
                 }
             }
@@ -423,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const dataElement = document.querySelector('[data-proforma-id]');
             if (dataElement) {
                 proformaId = dataElement.getAttribute('data-proforma-id');
-                console.log('✓ ProformaId SF encontrado en data-proforma-id:', proformaId);
+                // console.log('✓ ProformaId SF encontrado en data-proforma-id:', proformaId);
             }
         }
         
@@ -434,14 +435,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const proformaField = filamentForm.querySelector('select[name="proforma_id"], input[name="proforma_id"]');
                 if (proformaField && proformaField.value) {
                     proformaId = proformaField.value;
-                    console.log('✓ ProformaId SF encontrado en formulario Filament:', proformaId);
+                    // console.log('✓ ProformaId SF encontrado en formulario Filament:', proformaId);
                 }
             }
         }
         
         // Estrategia 7: Buscar en todos los elementos con valor
         if (!proformaId) {
-            console.log('SF: Buscando en todos los elementos del DOM...');
+            // console.log('SF: Buscando en todos los elementos del DOM...');
             const allElements = document.querySelectorAll('input, select');
             let candidatos = [];
             
@@ -460,13 +461,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     if ((element.name && element.name.toLowerCase().includes('proforma')) || 
                         (element.id && element.id.toLowerCase().includes('proforma'))) {
                         proformaId = element.value;
-                        console.log('✓ ProformaId SF encontrado por coincidencia de nombre/id:', proformaId);
+                        // console.log('✓ ProformaId SF encontrado por coincidencia de nombre/id:', proformaId);
                         break;
                     }
                 }
             }
             
-            console.log('SF: Candidatos encontrados:', candidatos);
+            // console.log('SF: Candidatos encontrados:', candidatos);
         }
         
         // Estrategia 8: Buscar en URL o parámetros
@@ -475,25 +476,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const urlProformaId = urlParams.get('proforma_id') || urlParams.get('id');
             if (urlProformaId) {
                 proformaId = urlProformaId;
-                console.log('✓ ProformaId SF encontrado en URL:', proformaId);
+                // console.log('✓ ProformaId SF encontrado en URL:', proformaId);
             }
         }
         
-        console.log('=== RESULTADO FINAL SF ===');
-        console.log('ProformaId SF final:', proformaId);
-        console.log('Tipo:', typeof proformaId);
-        console.log('Es válido:', proformaId && proformaId !== '' && proformaId !== '0');
+        // console.log('=== RESULTADO FINAL SF ===');
+        // console.log('ProformaId SF final:', proformaId);
+        // console.log('Tipo:', typeof proformaId);
+        // console.log('Es válido:', proformaId && proformaId !== '' && proformaId !== '0');
         
         if (proformaId) {
-            console.log('🚀 Cargando datos SF para proforma ID:', proformaId);
+            // console.log('🚀 Cargando datos SF para proforma ID:', proformaId);
             
             fetch(`/api/proforma/${proformaId}/cronograma-data`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        console.log('✅ Datos SF cargados:', data);
-                        console.log('📊 Saldo a financiar recibido:', data.saldo_financiar);
-                        console.log('📊 Precio venta recibido:', data.precio_venta);
+                        // console.log('✅ Datos SF cargados:', data);
+                        // console.log('📊 Saldo a financiar recibido:', data.saldo_financiar);
+                        // console.log('📊 Precio venta recibido:', data.precio_venta);
                         
                         // Usar exactamente los mismos campos del controlador
                         document.getElementById('sf-proyecto-nombre').textContent = data.proyecto || 'N/A';
@@ -513,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                         
-                        console.log('💰 Saldo a financiar final:', saldoFinanciar);
+                        // console.log('💰 Saldo a financiar final:', saldoFinanciar);
                         
                         document.getElementById('sf-saldo-financiar').textContent = 'S/ ' + saldoFinanciar.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                         document.getElementById('sf-montoTotal').value = saldoFinanciar;
@@ -524,16 +525,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Cargar cuotas existentes primero
                         loadExistingCuotasSF();
                     } else {
-                        console.error('❌ Error en respuesta SF:', data.message || 'Sin mensaje de error');
+                        // console.error('❌ Error en respuesta SF:', data.message || 'Sin mensaje de error');
                         setDefaultSFData();
                     }
                 })
                 .catch(error => {
-                    console.error('❌ Error al cargar datos SF:', error);
+                    // console.error('❌ Error al cargar datos SF:', error);
                     setDefaultSFData();
                 });
         } else {
-            console.warn('⚠️ No se pudo obtener proforma_id para SF');
+            // console.warn('⚠️ No se pudo obtener proforma_id para SF');
             setDefaultSFData();
         }
     }
@@ -569,11 +570,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         select.appendChild(option);
                     });
                 } else {
-                    console.error('Error al cargar bancos:', data.message);
+                    // console.error('Error al cargar bancos:', data.message);
                 }
             })
             .catch(error => {
-                console.error('Error al cargar bancos:', error);
+                // console.error('Error al cargar bancos:', error);
             });
     }
 
@@ -593,11 +594,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         select.appendChild(option);
                     });
                 } else {
-                    console.error('Error al cargar tipos de financiamiento:', data.message);
+                    // console.error('Error al cargar tipos de financiamiento:', data.message);
                 }
             })
             .catch(error => {
-                console.error('Error al cargar tipos de financiamiento:', error);
+                // console.error('Error al cargar tipos de financiamiento:', error);
             });
     }
 
@@ -617,60 +618,60 @@ document.addEventListener('DOMContentLoaded', function() {
                         select.appendChild(option);
                     });
                 } else {
-                    console.error('Error al cargar tipos de comprobante:', data.message);
+                    // console.error('Error al cargar tipos de comprobante:', data.message);
                 }
             })
             .catch(error => {
-                console.error('Error al cargar tipos de comprobante:', error);
+                // console.error('Error al cargar tipos de comprobante:', error);
             });
     }
 
     // Función para cargar cuotas existentes de saldo a financiar
     function loadExistingCuotasSF() {
-        console.log('=== CARGANDO CUOTAS EXISTENTES SF ===');
+        // console.log('=== CARGANDO CUOTAS EXISTENTES SF ===');
         
         const separacionId = getCurrentSeparacionId();
         const proformaId = window.currentProformaId;
         
         if (!proformaId) {
-            console.log('⚠️ No hay proforma_id disponible para cargar cuotas SF');
+            // console.log('⚠️ No hay proforma_id disponible para cargar cuotas SF');
             return;
         }
 
         // Primero intentar cargar cuotas definitivas (con separacion_id)
         if (separacionId) {
-            console.log('🔍 Cargando cuotas SF definitivas para separacion_id:', separacionId);
+            // console.log('🔍 Cargando cuotas SF definitivas para separacion_id:', separacionId);
             fetch(`/cronograma-sf/${separacionId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data.length > 0) {
-                        console.log('✅ Cuotas SF definitivas encontradas:', data.data.length);
+                        // console.log('✅ Cuotas SF definitivas encontradas:', data.data.length);
                         displayExistingCuotasSF(data.data, 'Definitivas');
                     } else {
-                        console.log('ℹ️ No hay cuotas SF definitivas, buscando temporales...');
+                        // console.log('ℹ️ No hay cuotas SF definitivas, buscando temporales...');
                         loadTemporaryCuotasSF(proformaId);
                     }
                 })
                 .catch(error => {
-                    console.error('❌ Error al cargar cuotas SF definitivas:', error);
+                    // console.error('❌ Error al cargar cuotas SF definitivas:', error);
                     loadTemporaryCuotasSF(proformaId);
                 });
         } else {
             // Si no hay separacion_id, buscar cuotas definitivas por proforma_id primero
-            console.log('🔍 No hay separacion_id, buscando cuotas SF definitivas por proforma_id:', proformaId);
+            // console.log('🔍 No hay separacion_id, buscando cuotas SF definitivas por proforma_id:', proformaId);
             fetch(`/cronograma-sf/definitivas/${proformaId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data.length > 0) {
-                        console.log('✅ Cuotas SF definitivas encontradas por proforma_id:', data.data.length);
+                        // console.log('✅ Cuotas SF definitivas encontradas por proforma_id:', data.data.length);
                         displayExistingCuotasSF(data.data, 'Definitivas');
                     } else {
-                        console.log('ℹ️ No hay cuotas SF definitivas, buscando temporales...');
+                        // console.log('ℹ️ No hay cuotas SF definitivas, buscando temporales...');
                         loadTemporaryCuotasSF(proformaId);
                     }
                 })
                 .catch(error => {
-                    console.error('❌ Error al cargar cuotas SF definitivas por proforma:', error);
+                    // console.error('❌ Error al cargar cuotas SF definitivas por proforma:', error);
                     loadTemporaryCuotasSF(proformaId);
                 });
         }
@@ -678,15 +679,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para cargar cuotas temporales SF
     function loadTemporaryCuotasSF(proformaId) {
-        console.log('🔍 Cargando cuotas SF temporales para proforma_id:', proformaId);
+        // console.log('🔍 Cargando cuotas SF temporales para proforma_id:', proformaId);
         fetch(`/cronograma-sf/temporales/${proformaId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.data.length > 0) {
-                    console.log('✅ Cuotas SF temporales encontradas:', data.data.length);
+                    // console.log('✅ Cuotas SF temporales encontradas:', data.data.length);
                     displayExistingCuotasSF(data.data, 'Temporales');
                 } else {
-                    console.log('ℹ️ No hay cuotas SF existentes, generando cuota por defecto...');
+                    // console.log('ℹ️ No hay cuotas SF existentes, generando cuota por defecto...');
                     hideExistingCuotasSFSection();
                     // Solo generar cuota por defecto si no hay cuotas existentes
                     const saldoFinanciar = parseFloat(document.getElementById('sf-montoTotal').value) || 0;
@@ -696,7 +697,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('❌ Error al cargar cuotas SF temporales:', error);
+                // console.error('❌ Error al cargar cuotas SF temporales:', error);
                 hideExistingCuotasSFSection();
                 // En caso de error, también generar cuota por defecto
                 const saldoFinanciar = parseFloat(document.getElementById('sf-montoTotal').value) || 0;
@@ -712,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.getElementById('sf-cuotasExistentesTableBody');
         
         if (!section || !tableBody) {
-            console.error('❌ No se encontraron elementos de cuotas existentes SF');
+            // console.error('❌ No se encontraron elementos de cuotas existentes SF');
             return;
         }
 
@@ -731,7 +732,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     for (let option of tipoComprobanteSelect.options) {
                         if (option.value == primeraCuota.tipo_comprobante_id) {
                             option.selected = true;
-                            console.log('✅ Tipo comprobante preseleccionado:', primeraCuota.tipo_comprobante);
+                            // console.log('✅ Tipo comprobante preseleccionado:', primeraCuota.tipo_comprobante);
                             break;
                         }
                     }
@@ -800,7 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Mostrar la sección
         section.classList.remove('hidden');
-        console.log('✅ Cuotas SF existentes mostradas y campos preseleccionados');
+        // console.log('✅ Cuotas SF existentes mostradas y campos preseleccionados');
     }
 
     // Función para ocultar sección de cuotas existentes SF
@@ -884,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const existingCuotasSection = document.getElementById('sf-cuotasExistentesSection');
         if (existingCuotasSection && !existingCuotasSection.classList.contains('hidden')) {
             existingCuotasSection.classList.add('hidden');
-            console.log('🔄 Ocultando cuotas existentes para mostrar nuevas cuotas generadas');
+            // console.log('🔄 Ocultando cuotas existentes para mostrar nuevas cuotas generadas');
         }
 
         const montoPorCuota = montoTotal / numeroCuotas;
@@ -922,7 +923,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('sf-totalSaldoFinanciar').value = montoTotal.toFixed(2);
         document.getElementById('sf-diferencia').value = '0.00';
         
-        console.log('✅ Nuevas cuotas SF generadas, tabla existente oculta');
+        // console.log('✅ Nuevas cuotas SF generadas, tabla existente oculta');
     });
 
     // Event listener para aceptar saldo financiar
@@ -1057,3 +1058,4 @@ document.addEventListener('DOMContentLoaded', function() {
     top: 0;
 }
 </style>
+</div>

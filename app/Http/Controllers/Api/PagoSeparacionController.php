@@ -245,15 +245,15 @@ class PagoSeparacionController extends Controller
                 
                 if ($separacion) {
                     $separacionId = $separacion->id;
-                    Log::info('Separación encontrada automáticamente:', [
-                        'proforma_id' => $proformaId,
-                        'separacion_id' => $separacionId
-                    ]);
+                    // Log::info('Separación encontrada automáticamente:', [
+                    //     'proforma_id' => $proformaId,
+                    //     'separacion_id' => $separacionId
+                    // ]);
                 } else {
-                    Log::warning('No se encontró separación para la proforma:', [
-                        'proforma_id' => $proformaId,
-                        'separacion_id' => $separacionId
-                    ]);
+                    // Log::warning('No se encontró separación para la proforma:', [
+                    //     'proforma_id' => $proformaId,
+                    //     'separacion_id' => $separacionId
+                    // ]);
                 }
             }
 
@@ -263,21 +263,21 @@ class PagoSeparacionController extends Controller
                 ->sum('monto_pago');
 
             // Log para depuración
-            Log::info('Datos de pagos recibidos:', [
-                'pagos' => $pagosData,
-                'monto_separacion' => $montoSeparacion,
-                'pagos_existentes' => $pagosExistentes
-            ]);
+            // Log::info('Datos de pagos recibidos:', [
+            //     'pagos' => $pagosData,
+            //     'monto_separacion' => $montoSeparacion,
+            //     'pagos_existentes' => $pagosExistentes
+            // ]);
 
             // Validar que la suma de montos (existentes + nuevos) no exceda el monto de separación
             $totalNuevosPagos = array_sum(array_column($pagosData, 'monto_pago'));
             $totalTodosPagos = $pagosExistentes + $totalNuevosPagos;
             
-            Log::info('Cálculo de totales:', [
-                'total_nuevos_pagos' => $totalNuevosPagos,
-                'total_todos_pagos' => $totalTodosPagos,
-                'montos_individuales' => array_column($pagosData, 'monto_pago')
-            ]);
+            // Log::info('Cálculo de totales:', [
+            //     'total_nuevos_pagos' => $totalNuevosPagos,
+            //     'total_todos_pagos' => $totalTodosPagos,
+            //     'montos_individuales' => array_column($pagosData, 'monto_pago')
+            // ]);
             
             if ($totalTodosPagos > $montoSeparacion) {
                 return response()->json([
@@ -323,12 +323,12 @@ class PagoSeparacionController extends Controller
                     $archivoPath = $archivo->storeAs('pagos_separacion', $nombreArchivo, 'public');
                     $archivosSubidos[] = $archivoPath;
                     
-                    Log::info("Archivo subido:", [
-                        'index' => $index,
-                        'nombre_original' => $archivo->getClientOriginalName(),
-                        'ruta_guardada' => $archivoPath,
-                        'tamaño' => $archivo->getSize()
-                    ]);
+                    // Log::info("Archivo subido:", [
+                    //     'index' => $index,
+                    //     'nombre_original' => $archivo->getClientOriginalName(),
+                    //     'ruta_guardada' => $archivoPath,
+                    //     'tamaño' => $archivo->getSize()
+                    // ]);
                 }
 
                 $pagoId = DB::table('pagos_separacion')->insertGetId([
@@ -425,10 +425,10 @@ class PagoSeparacionController extends Controller
                 }
             }
 
-            Log::error('Error en storeBatch:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Log::error('Error en storeBatch:', [
+            //     'message' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
 
             return response()->json([
                 'success' => false,

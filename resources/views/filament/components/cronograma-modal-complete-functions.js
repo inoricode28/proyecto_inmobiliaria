@@ -1,10 +1,10 @@
 // Función auxiliar para agregar cuotas a la tabla sin limpiarla
 function appendCuotasToTable(cuotas) {
-    console.log('📝 Agregando', cuotas.length, 'cuotas adicionales a la tabla');
+    // console.log('📝 Agregando', cuotas.length, 'cuotas adicionales a la tabla');
     
     const cuotasTableBody = document.getElementById('cuotasTableBody');
     if (!cuotasTableBody) {
-        console.error('❌ ERROR: No se encontró el elemento cuotasTableBody');
+        // console.error('❌ ERROR: No se encontró el elemento cuotasTableBody');
         return;
     }
     
@@ -14,10 +14,10 @@ function appendCuotasToTable(cuotas) {
         .then(tiposData => {
             if (tiposData.success && tiposData.data) {
                 const tiposCuota = tiposData.data;
-                console.log('✅ Tipos de cuota obtenidos para agregar:', tiposCuota.length);
+                // console.log('✅ Tipos de cuota obtenidos para agregar:', tiposCuota.length);
                 
                 cuotas.forEach((cuota, index) => {
-                    console.log(`Agregando cuota adicional ${index + 1}:`, cuota);
+                    // console.log(`Agregando cuota adicional ${index + 1}:`, cuota);
                     
                     const row = document.createElement('tr');
                     
@@ -45,35 +45,35 @@ function appendCuotasToTable(cuotas) {
                     row.appendChild(accionesCell);
                     
                     cuotasTableBody.appendChild(row);
-                    console.log(`Cuota adicional ${index + 1} agregada a la tabla`);
+                    // console.log(`Cuota adicional ${index + 1} agregada a la tabla`);
                 });
                 
                 // Mostrar la sección de cuotas
                 const cuotasSection = document.getElementById('cuotasSection');
                 if (cuotasSection) {
                     cuotasSection.style.display = 'block';
-                    console.log('✅ Sección de cuotas mostrada');
+                    // console.log('✅ Sección de cuotas mostrada');
                 }
                 
-                console.log('✅ Cuotas adicionales agregadas correctamente');
+                // console.log('✅ Cuotas adicionales agregadas correctamente');
             } else {
-                console.error('❌ Error en la respuesta de tipos de cuota:', tiposData);
+                // console.error('❌ Error en la respuesta de tipos de cuota:', tiposData);
             }
         })
         .catch(error => {
-            console.error('❌ Error al obtener tipos de cuota para agregar:', error);
+            // console.error('❌ Error al obtener tipos de cuota para agregar:', error);
         });
 }
 
 // Función para verificar y generar cuota por defecto cuando no hay cuotas
 function checkAndGenerateDefaultCuota() {
-    console.log('🔍 Verificando si generar cuota por defecto...');
+    // console.log('🔍 Verificando si generar cuota por defecto...');
     
     const cuotasTableBody = document.getElementById('cuotasTableBody');
     const hasExistingCuotas = cuotasTableBody && cuotasTableBody.children.length > 0;
     
     if (hasExistingCuotas) {
-        console.log('ℹ️ Ya hay cuotas en la tabla, no se genera cuota por defecto');
+        // console.log('ℹ️ Ya hay cuotas en la tabla, no se genera cuota por defecto');
         return;
     }
     
@@ -82,9 +82,9 @@ function checkAndGenerateDefaultCuota() {
     const montoTotal = montoTotalElement ? parseFloat(montoTotalElement.value) : 0;
     
     if (montoTotal > 0) {
-        console.log('🔄 Generando cuota por defecto con monto:', montoTotal);
+        // console.log('🔄 Generando cuota por defecto con monto:', montoTotal);
         generateDefaultCuota(montoTotal);
     } else {
-        console.log('⚠️ No se puede generar cuota por defecto: monto total no válido');
+        // console.log('⚠️ No se puede generar cuota por defecto: monto total no válido');
     }
 }

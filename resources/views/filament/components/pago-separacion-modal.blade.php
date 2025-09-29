@@ -1,4 +1,5 @@
 {{-- Modal de Registro de Pago de Separación --}}
+<div>
 <div id="pago-separacion-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
@@ -92,16 +93,6 @@
                             </select>
                         </div>
 
-                        {{-- Número de Operación --}}
-                        <div>
-                            <label for="numero_operacion" class="block text-sm font-medium text-gray-700 mb-2">
-                                Número de Operación
-                            </label>
-                            <input type="text" id="numero_operacion" name="numero_operacion" maxlength="100"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Ingrese número de operación">
-                        </div>
-
                         {{-- Número de Documento --}}
                         <div>
                             <label for="numero_documento" class="block text-sm font-medium text-gray-700 mb-2">
@@ -110,6 +101,16 @@
                             <input type="text" id="numero_documento" name="numero_documento" maxlength="100"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Ingrese número de documento">
+                        </div>
+
+                        {{-- Número de Operación (oculto en tabla) --}}
+                        <div>
+                            <label for="numero_operacion" class="block text-sm font-medium text-gray-700 mb-2">
+                                Número de Operación
+                            </label>
+                            <input type="text" id="numero_operacion" name="numero_operacion" maxlength="100"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Ingrese número de operación">
                         </div>
 
                         {{-- Agencia Bancaria --}}
@@ -189,13 +190,13 @@
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo Cambio</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto Pago</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medio Pago</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nº Operación</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="pagos-table-body" class="bg-white divide-y divide-gray-200">
                                 <tr id="no-pagos-row">
-                                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                         No hay pagos registrados
                                     </td>
                                 </tr>
@@ -266,24 +267,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para cargar datos iniciales
     function loadInitialData() {
-        console.log('=== CARGANDO DATOS INICIALES PAGO SEPARACIÓN ===');
+        // console.log('=== CARGANDO DATOS INICIALES PAGO SEPARACIÓN ===');
         
         // Obtener ID de separación
         const separacionId = getCurrentSeparacionId();
         if (separacionId) {
             document.getElementById('separacion_id').value = separacionId;
-            console.log('✓ Separación ID establecido:', separacionId);
+            // console.log('✓ Separación ID establecido:', separacionId);
             
             // Si es un ID temporal (empieza con "temp_"), cargar datos de proforma
             if (separacionId.startsWith('temp_')) {
-                console.log('🔄 ID temporal detectado, cargando datos de proforma...');
+                // console.log('🔄 ID temporal detectado, cargando datos de proforma...');
                 loadProformaData();
             } else {
                 // Cargar información de la separación real
                 loadSeparacionInfo(separacionId);
             }
         } else {
-            console.log('❌ No se pudo encontrar el ID de la separación');
+            // console.log('❌ No se pudo encontrar el ID de la separación');
             // Si no hay separación ID, intentar cargar datos de la proforma
             loadProformaData();
         }
@@ -313,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         option.textContent = moneda.nombre;
                         select.appendChild(option);
                     });
-                    console.log('✓ Monedas cargadas:', data.data.length);
+                    // console.log('✓ Monedas cargadas:', data.data.length);
                 }
             })
             .catch(error => {
@@ -336,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         option.textContent = medio.nombre;
                         select.appendChild(option);
                     });
-                    console.log('✓ Medios de pago cargados:', data.data.length);
+                    // console.log('✓ Medios de pago cargados:', data.data.length);
                 }
             })
             .catch(error => {
@@ -359,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         option.textContent = `${cuenta.banco} ${cuenta.moneda}/ ${cuenta.numero_cuenta}`;
                         select.appendChild(option);
                     });
-                    console.log('✓ Cuentas bancarias cargadas:', data.data.length);
+                    // console.log('✓ Cuentas bancarias cargadas:', data.data.length);
                 }
             })
             .catch(error => {
@@ -390,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Guardar el monto de separación para validaciones
                     window.montoSeparacionActual = montoSeparacion;
                     
-                    console.log('✓ Información de separación cargada:', separacionInfo);
+                    // console.log('✓ Información de separación cargada:', separacionInfo);
                 }
             })
             .catch(error => {
@@ -452,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log('✅ Pago registrado:', data);
+                // console.log('✅ Pago registrado:', data);
                 alert('Pago registrado exitosamente');
                 
                 // Limpiar formulario
@@ -518,24 +519,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para cargar pagos existentes
     function loadExistingPagos() {
-        console.log('=== CARGANDO PAGOS EXISTENTES ===');
+        // console.log('=== CARGANDO PAGOS EXISTENTES ===');
         
         const proformaId = getCurrentProformaId();
         
         if (!proformaId) {
-            console.log('⚠️ No se encontró proforma_id');
+            // console.log('⚠️ No se encontró proforma_id');
             // Mostrar sección vacía pero visible
             displayPagos({ success: true, data: [] });
             return;
         }
         
-        console.log('🔍 Proforma ID encontrado:', proformaId);
+        // console.log('🔍 Proforma ID encontrado:', proformaId);
         
         // PRIMERO: Intentar cargar pagos definitivos (pagos que ya tienen separacion_id)
         const separacionId = getCurrentSeparacionId();
         
         if (separacionId && !separacionId.startsWith('temp_')) {
-            console.log('🔍 Buscando pagos definitivos para separacion_id:', separacionId);
+            // console.log('🔍 Buscando pagos definitivos para separacion_id:', separacionId);
             
             fetch(`/api/pagos-separacion/${separacionId}`)
                 .then(response => {
@@ -545,14 +546,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.json();
                 })
                 .then(data => {
-                    console.log('📦 Pagos definitivos recibidos:', data);
+                    // console.log('📦 Pagos definitivos recibidos:', data);
                     
-                    if (data.success && data.data && data.data.length > 0) {
-                        console.log('✅ Mostrando', data.data.length, 'pagos definitivos');
+                    if (data.success && data.data.length > 0) {
+                        // console.log('✅ Mostrando', data.data.length, 'pagos definitivos');
                         displayPagos(data);
                         return; // Salir aquí si encontramos pagos definitivos
                     } else {
-                        console.log('ℹ️ No hay pagos definitivos, buscando pagos por proforma...');
+                        // console.log('ℹ️ No hay pagos definitivos, buscando pagos por proforma...');
                         loadPagosByProforma(proformaId);
                     }
                 })
@@ -562,14 +563,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadPagosByProforma(proformaId);
                 });
         } else {
-            console.log('ℹ️ No hay separacion_id válido, buscando pagos por proforma...');
+            // console.log('ℹ️ No hay separacion_id válido, buscando pagos por proforma...');
             loadPagosByProforma(proformaId);
         }
     }
     
     // Función auxiliar para cargar pagos por proforma
     function loadPagosByProforma(proformaId) {
-        console.log('🔍 Buscando pagos por proforma_id:', proformaId);
+        // console.log('🔍 Buscando pagos por proforma_id:', proformaId);
         
         fetch(`/api/pagos-separacion/proforma/${proformaId}`)
             .then(response => {
@@ -579,13 +580,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Pagos por proforma recibidos:', data);
+                // console.log('📦 Pagos por proforma recibidos:', data);
                 
-                if (data.success && data.data && data.data.length > 0) {
-                    console.log('✅ Mostrando', data.data.length, 'pagos por proforma');
+                if (data.success && data.data.length > 0) {
+                    // console.log('✅ Mostrando', data.data.length, 'pagos por proforma');
                     displayPagos(data);
                 } else {
-                    console.log('ℹ️ No hay pagos por proforma');
+                    // console.log('ℹ️ No hay pagos por proforma');
                     // Mostrar sección vacía pero visible
                     displayPagos({ success: true, data: [] });
                 }
@@ -599,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función auxiliar para mostrar los pagos en la tabla
     function displayPagos(data) {
-        console.log('📊 Mostrando pagos en tabla:', data);
+        // console.log('📊 Mostrando pagos en tabla:', data);
         
         const tbody = document.getElementById('pagos-table-body');
         const noDataRow = document.getElementById('no-pagos-row');
@@ -609,11 +610,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Asegurar que la sección de pagos siempre esté visible
         if (pagosSection) {
             pagosSection.classList.remove('hidden');
-            console.log('👁️ Sección de pagos mostrada');
+            // console.log('👁️ Sección de pagos mostrada');
         }
         
         if (data.success && data.data && data.data.length > 0) {
-            console.log('✅ Mostrando', data.data.length, 'pagos');
+            // console.log('✅ Mostrando', data.data.length, 'pagos');
             
             // Ocultar fila de "no hay datos"
             noDataRow.style.display = 'none';
@@ -623,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Actualizar resumen con datos del backend
             if (data.resumen) {
-                console.log('📈 Actualizando resumen:', data.resumen);
+                // console.log('📈 Actualizando resumen:', data.resumen);
                 
                 // Guardar datos globalmente para uso en pagos temporales
                 window.resumenPagosGlobal = data.resumen;
@@ -655,12 +656,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Agregar filas de pagos
             data.data.forEach((pago, index) => {
-                console.log('📝 Creando fila para pago:', pago);
+                // console.log('📝 Creando fila para pago:', pago);
                 const row = createPagoRow(pago);
                 tbody.appendChild(row);
             });
         } else {
-            console.log('📭 No hay pagos para mostrar');
+            // console.log('📭 No hay pagos para mostrar');
             
             // Mostrar fila de "no hay datos"
             noDataRow.style.display = 'table-row';
@@ -699,7 +700,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <td class="px-4 py-3 text-sm text-gray-900">${pago.medio_pago_nombre || pago.medio_pago?.nombre || 'N/A'}</td>
             <td class="px-4 py-3 text-sm text-gray-900">
                 ${iconoDescarga}
-                ${pago.numero_operacion || 'N/A'}
             </td>
             <td class="px-4 py-3 text-sm text-gray-900">
                 <button onclick="eliminarPago(${pago.id})" 
@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para agregar pago a la tabla temporal
     window.agregarPagoATabla = function() {
-        console.log('🔄 Agregando pago a la tabla...');
+        // console.log('🔄 Agregando pago a la tabla...');
         
         // Validar formulario
         if (!validarFormulario()) {
@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Limpiar formulario
         resetFormFields();
         
-        console.log('✅ Pago agregado a la tabla temporal');
+        // console.log('✅ Pago agregado a la tabla temporal');
     };
 
     // Función para validar formulario
@@ -811,8 +811,8 @@ document.addEventListener('DOMContentLoaded', function() {
             medio_pago_id: medioPagoSelect.value,
             medio_pago_nombre: medioPagoSelect.options[medioPagoSelect.selectedIndex]?.text || 'N/A',
             cuenta_bancaria_id: cuentaBancariaSelect.value || null,
-            numero_operacion: document.getElementById('numero_operacion').value || '',
             numero_documento: document.getElementById('numero_documento').value || '',
+            numero_operacion: document.getElementById('numero_operacion').value || '',
             agencia_bancaria: document.getElementById('agencia_bancaria').value || '',
             observaciones: document.getElementById('observaciones').value || '',
             archivo_comprobante_info: archivoInfo
@@ -899,7 +899,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td class="px-4 py-3 text-sm text-gray-900">${pago.tipo_cambio}</td>
             <td class="px-4 py-3 text-sm text-gray-900">${formatCurrency(pago.monto_pago)}</td>
             <td class="px-4 py-3 text-sm text-gray-900">${pago.medio_pago_nombre}</td>
-            <td class="px-4 py-3 text-sm text-gray-900">${pago.numero_operacion || 'N/A'}</td>
+            <td class="px-4 py-3 text-sm text-gray-900">${pago.archivo_comprobante_info?.name || 'N/A'}</td>
             <td class="px-4 py-3 text-sm text-gray-900">
                 <button onclick="eliminarPagoTemporal('${pago.temp_id}')" 
                     class="text-red-600 hover:text-red-800 text-sm">
@@ -922,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Actualizar tabla
         actualizarTablaConPagosTemporales();
         
-        console.log('✅ Pago temporal eliminado');
+        // console.log('✅ Pago temporal eliminado');
     };
 
     // Función para guardar todos los pagos
@@ -936,7 +936,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        console.log('🚀 Guardando todos los pagos...');
+        // console.log('🚀 Guardando todos los pagos...');
         
         // Obtener separación ID y proforma ID
         const separacionId = getCurrentSeparacionId();
@@ -979,12 +979,12 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('_token', csrfToken);
         }
         
-        console.log('📤 Datos a enviar:', {
-            separacion_id: separacionId,
-            proforma_id: proformaId,
-            pagos: pagosParaEnvio,
-            archivos: pagosTemporales.filter(p => p.archivo_comprobante_info).length
-        });
+        // console.log('📤 Datos a enviar:', {
+        //     separacion_id: separacionId,
+        //     proforma_id: proformaId,
+        //     pagos: pagosParaEnvio,
+        //     archivos: pagosTemporales.filter(p => p.archivo_comprobante_info).length
+        // });
         
         // Enviar a la API
         fetch('/api/pagos-separacion/batch', {
@@ -995,7 +995,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => {
-            console.log('📥 Respuesta recibida, status:', response.status);
+            // console.log('📥 Respuesta recibida, status:', response.status);
             
             // Verificar si la respuesta es JSON válida
             const contentType = response.headers.get('content-type');
@@ -1010,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            console.log('✅ Datos JSON parseados:', data);
+            // console.log('✅ Datos JSON parseados:', data);
             
             if (data.success) {
                 alert('Pagos guardados exitosamente');
@@ -1082,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para obtener ID de separación actual
     function getCurrentSeparacionId() {
-        console.log('🔍 getCurrentSeparacionId: Iniciando búsqueda...');
+        // console.log('🔍 getCurrentSeparacionId: Iniciando búsqueda...');
         let separacionId = null;
         
         // Estrategia 1: Buscar en URL
@@ -1090,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const separacionIndex = pathParts.indexOf('separacions');
         if (separacionIndex !== -1 && pathParts[separacionIndex + 1] && pathParts[separacionIndex + 1] !== 'create') {
             separacionId = pathParts[separacionIndex + 1];
-            console.log('🔍 Separación ID encontrado en ruta:', separacionId);
+            // console.log('🔍 Separación ID encontrado en ruta:', separacionId);
             return separacionId;
         }
 
@@ -1101,7 +1101,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // En proceso de creación de separación definitiva, usar proforma_id como referencia
             const proformaId = urlParams.get('proforma_id');
             if (proformaId) {
-                console.log('🔍 Proceso de separación definitiva detectado, usando proforma_id:', proformaId);
+                // console.log('🔍 Proceso de separación definitiva detectado, usando proforma_id:', proformaId);
                 return 'temp_' + proformaId; // ID temporal para separación en proceso
             }
         }
@@ -1110,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const separacionElement = document.querySelector('[data-separacion-id]');
         if (separacionElement) {
             separacionId = separacionElement.getAttribute('data-separacion-id');
-            console.log('🔍 Separación ID encontrado en DOM:', separacionId);
+            // console.log('🔍 Separación ID encontrado en DOM:', separacionId);
             return separacionId;
         }
 
@@ -1120,7 +1120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 for (let component of Object.values(window.Livewire.components.componentsById)) {
                     if (component.data && component.data.record && component.data.record.id) {
                         separacionId = component.data.record.id;
-                        console.log('🔍 Separación ID encontrado en Livewire:', separacionId);
+                        // console.log('🔍 Separación ID encontrado en Livewire:', separacionId);
                         return separacionId;
                     }
                 }
@@ -1131,17 +1131,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Estrategia 5: Buscar en variables globales
         if (typeof window.separacionId !== 'undefined') {
-            console.log('🔍 Separación ID encontrado en variable global:', window.separacionId);
+            // console.log('🔍 Separación ID encontrado en variable global:', window.separacionId);
             return window.separacionId;
         }
 
-        console.log('❌ No se pudo encontrar el ID de la separación');
+        // console.log('❌ No se pudo encontrar el ID de la separación');
         return null;
     }
 
     // Función para obtener ID de proforma actual
     function getCurrentProformaId() {
-        console.log('🔍 getCurrentProformaId: Iniciando búsqueda...');
+        // console.log('🔍 getCurrentProformaId: Iniciando búsqueda...');
         
         let proformaId = null;
         
@@ -1150,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const proformaIndex = pathParts.indexOf('proformas');
         if (proformaIndex !== -1 && pathParts[proformaIndex + 1] && pathParts[proformaIndex + 1] !== 'create') {
             proformaId = pathParts[proformaIndex + 1];
-            console.log('🔍 Proforma ID encontrado en ruta:', proformaId);
+            // console.log('🔍 Proforma ID encontrado en ruta:', proformaId);
             return proformaId;
         }
         
@@ -1158,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         proformaId = urlParams.get('proforma_id');
         if (proformaId) {
-            console.log('🔍 Proforma ID encontrado en parámetros URL:', proformaId);
+            // console.log('🔍 Proforma ID encontrado en parámetros URL:', proformaId);
             return proformaId;
         }
         
@@ -1166,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const proformaElement = document.querySelector('[data-proforma-id]');
         if (proformaElement) {
             proformaId = proformaElement.getAttribute('data-proforma-id');
-            console.log('🔍 Proforma ID encontrado en DOM:', proformaId);
+            // console.log('🔍 Proforma ID encontrado en DOM:', proformaId);
             return proformaId;
         }
         
@@ -1174,17 +1174,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const proformaInput = document.querySelector('input[name="proforma_id"]');
         if (proformaInput && proformaInput.value) {
             proformaId = proformaInput.value;
-            console.log('🔍 Proforma ID encontrado en input:', proformaId);
+            // console.log('🔍 Proforma ID encontrado en input:', proformaId);
             return proformaId;
         }
         
         // Estrategia 5: Buscar en variables globales
         if (typeof window.proformaId !== 'undefined') {
-            console.log('🔍 Proforma ID encontrado en variable global:', window.proformaId);
+            // console.log('🔍 Proforma ID encontrado en variable global:', window.proformaId);
             return window.proformaId;
         }
         
-        console.log('❌ No se pudo encontrar el ID de la proforma');
+        // console.log('❌ No se pudo encontrar el ID de la proforma');
         return null;
     }
 
@@ -1205,22 +1205,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para cargar datos de la proforma
 function loadProformaData() {
-    console.log('=== INICIANDO loadProformaData ===');
+    // console.log('=== INICIANDO loadProformaData ===');
     
     // Obtener datos directamente del DOM de la página
     const proformaData = extractProformaDataFromDOM();
     
     if (proformaData && proformaData.monto_separacion) {
-        console.log('✅ Datos de proforma obtenidos del DOM:', proformaData);
+        // console.log('✅ Datos de proforma obtenidos del DOM:', proformaData);
         updateModalWithProformaData(proformaData);
     } else {
-        console.warn('⚠️ No se pudieron obtener los datos de la proforma del DOM');
+        // console.warn('⚠️ No se pudieron obtener los datos de la proforma del DOM');
     }
 }
 
 // Función para extraer datos de la proforma del DOM
 function extractProformaDataFromDOM() {
-    console.log('🔍 Extrayendo datos del DOM...');
+    // console.log('🔍 Extrayendo datos del DOM...');
     
     const data = {};
     
@@ -1228,7 +1228,7 @@ function extractProformaDataFromDOM() {
     const montoSeparacionInput = document.querySelector('input[name="monto_separacion"]');
     if (montoSeparacionInput && montoSeparacionInput.value) {
         data.monto_separacion = montoSeparacionInput.value;
-        console.log('✓ Monto separación encontrado en input:', data.monto_separacion);
+        // console.log('✓ Monto separación encontrado en input:', data.monto_separacion);
     }
     
     // Estrategia 2: Buscar en campos de texto que contengan el valor
@@ -1242,7 +1242,7 @@ function extractProformaDataFromDOM() {
                 const label = element.closest('.grid')?.querySelector('label');
                 if (label && label.textContent.includes('Monto de Separación')) {
                     data.monto_separacion = value.trim();
-                    console.log('✓ Monto separación encontrado en elemento:', data.monto_separacion);
+                    // console.log('✓ Monto separación encontrado en elemento:', data.monto_separacion);
                     break;
                 }
             }
@@ -1259,7 +1259,7 @@ function extractProformaDataFromDOM() {
                              document.querySelector(`input[id="${label.getAttribute('for')}"]`);
                 if (input && input.value) {
                     data.monto_separacion = input.value;
-                    console.log('✓ Monto separación encontrado por label:', data.monto_separacion);
+                    // console.log('✓ Monto separación encontrado por label:', data.monto_separacion);
                     break;
                 }
             }
@@ -1276,7 +1276,7 @@ function extractProformaDataFromDOM() {
             
             if (label && input && label.textContent.includes('Monto de Separación')) {
                 data.monto_separacion = input.value;
-                console.log('✓ Monto separación encontrado en Filament wrapper:', data.monto_separacion);
+                // console.log('✓ Monto separación encontrado en Filament wrapper:', data.monto_separacion);
                 break;
             }
         }
@@ -1296,7 +1296,7 @@ function extractProformaDataFromDOM() {
                         const value = valueCell.textContent.trim().replace(/[^\d.]/g, '');
                         if (value && !isNaN(parseFloat(value))) {
                             data.monto_separacion = value;
-                            console.log('✓ Monto separación encontrado en tabla:', data.monto_separacion);
+                            // console.log('✓ Monto separación encontrado en tabla:', data.monto_separacion);
                             break;
                         }
                     }
@@ -1307,31 +1307,31 @@ function extractProformaDataFromDOM() {
         }
     }
     
-    console.log('📋 Datos extraídos del DOM:', data);
+    // console.log('📋 Datos extraídos del DOM:', data);
     return data;
 }
 
 // Función para actualizar el modal con datos de la proforma
 function updateModalWithProformaData(data) {
-    console.log('🔄 Actualizando modal con datos de proforma:', data);
+    // console.log('🔄 Actualizando modal con datos de proforma:', data);
     
     // Actualizar monto de separación
     const montoSeparacionElement = document.getElementById('monto-separacion-info');
     if (montoSeparacionElement && data.monto_separacion) {
         montoSeparacionElement.textContent = `(Monto separación: S/ ${parseFloat(data.monto_separacion).toFixed(2)})`;
-        console.log('✅ Monto separación actualizado:', data.monto_separacion);
+        // console.log('✅ Monto separación actualizado:', data.monto_separacion);
         
         // También establecer como valor por defecto en el campo monto si está vacío
         const montoInput = document.getElementById('monto');
         if (montoInput && (!montoInput.value || montoInput.value === '0' || montoInput.value === '0.00')) {
             montoInput.value = parseFloat(data.monto_separacion).toFixed(2);
-            console.log('✅ Monto por defecto establecido:', data.monto_separacion);
+            // console.log('✅ Monto por defecto establecido:', data.monto_separacion);
         }
         
         // Guardar el monto para validaciones futuras
         window.montoSeparacionActual = parseFloat(data.monto_separacion);
     } else {
-        console.warn('⚠️ No se pudo actualizar monto separación - elemento no encontrado o dato no disponible');
+        // console.warn('⚠️ No se pudo actualizar monto separación - elemento no encontrado o dato no disponible');
     }
 }
 
@@ -1378,3 +1378,4 @@ function updateModalWithProformaData(data) {
     cursor: not-allowed;
 }
 </style>
+</div>

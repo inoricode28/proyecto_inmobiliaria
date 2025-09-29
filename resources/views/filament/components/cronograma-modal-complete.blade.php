@@ -1,4 +1,5 @@
 {{-- Modal de Cronograma Completo --}}
+<div>
 <div id="cronograma-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {{-- Background overlay --}}
@@ -142,25 +143,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Nueva función para cargar cuotas existentes
     function loadExistingCuotas() {
-        console.log('=== CARGANDO CUOTAS EXISTENTES ===');
+        // console.log('=== CARGANDO CUOTAS EXISTENTES ===');
         
         const proformaId = getCurrentProformaId();
         
         if (!proformaId) {
-            console.log('⚠️ No se encontró proforma_id');
+            // console.log('⚠️ No se encontró proforma_id');
             // Mostrar sección vacía
             const cuotasSection = document.getElementById('cuotasSection');
             if (cuotasSection) {
                 cuotasSection.classList.remove('hidden');
-                console.log('👁️ Sección de cuotas mostrada (vacía)');
+                // console.log('👁️ Sección de cuotas mostrada (vacía)');
             }
             return;
         }
         
-        console.log('🔍 Proforma ID encontrado:', proformaId);
+        // console.log('🔍 Proforma ID encontrado:', proformaId);
         
         // PRIMERO: Intentar cargar cuotas definitivas (cuotas que ya tienen separacion_id)
-        console.log('🔍 Buscando cuotas definitivas para proforma ID:', proformaId);
+        // console.log('🔍 Buscando cuotas definitivas para proforma ID:', proformaId);
         
         fetch(`/cronograma/definitivas/${proformaId}`)
             .then(response => {
@@ -170,14 +171,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Cuotas definitivas recibidas:', data);
+                // console.log('📦 Cuotas definitivas recibidas:', data);
                 
                 if (data.success && data.data && data.data.length > 0) {
-                    console.log('✅ Mostrando', data.data.length, 'cuotas definitivas');
+                    // console.log('✅ Mostrando', data.data.length, 'cuotas definitivas');
                     displayExistingCuotas(data.data);
                     return; // Salir aquí si encontramos cuotas definitivas
                 } else {
-                    console.log('ℹ️ No hay cuotas definitivas, buscando cuotas temporales...');
+                    // console.log('ℹ️ No hay cuotas definitivas, buscando cuotas temporales...');
                     
                     // SEGUNDO: Si no hay cuotas definitivas, buscar cuotas temporales
                     return fetch(`/cronograma/temporales/${proformaId}`);
@@ -196,36 +197,36 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (data) {
-                    console.log('📦 Cuotas temporales recibidas:', data);
+                    // console.log('📦 Cuotas temporales recibidas:', data);
                     
                     if (data.success && data.data && data.data.length > 0) {
-                        console.log('✅ Mostrando', data.data.length, 'cuotas temporales');
+                        // console.log('✅ Mostrando', data.data.length, 'cuotas temporales');
                         displayExistingCuotas(data.data);
                     } else {
-                        console.log('ℹ️ No hay cuotas temporales');
+                        // console.log('ℹ️ No hay cuotas temporales');
                         // Mostrar sección vacía
                         const cuotasSection = document.getElementById('cuotasSection');
                         if (cuotasSection) {
                             cuotasSection.classList.remove('hidden');
-                            console.log('👁️ Sección de cuotas mostrada (vacía)');
+                            // console.log('👁️ Sección de cuotas mostrada (vacía)');
                         }
                     }
                 }
             })
             .catch(error => {
-                console.error('❌ Error al cargar cuotas:', error);
+                // console.error('❌ Error al cargar cuotas:', error);
                 // Si falla, mostrar sección vacía
                 const cuotasSection = document.getElementById('cuotasSection');
                 if (cuotasSection) {
                     cuotasSection.classList.remove('hidden');
-                    console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
+                    // console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
                 }
             });
     }
     
     // Nueva función específica para cargar cuotas definitivas de una separación existente
     function loadCuotasDefinitivas(separacionId) {
-        console.log('🔍 Cargando cuotas definitivas para separación ID:', separacionId);
+        // console.log('🔍 Cargando cuotas definitivas para separación ID:', separacionId);
         
         // Hacer petición para obtener las cuotas definitivas
         fetch(`/cronograma/${separacionId}`)
@@ -236,28 +237,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Cuotas definitivas recibidas:', data);
+                // console.log('📦 Cuotas definitivas recibidas:', data);
                 
                 if (data.success && data.data && data.data.length > 0) {
-                    console.log('✅ Mostrando', data.data.length, 'cuotas definitivas');
+                    // console.log('✅ Mostrando', data.data.length, 'cuotas definitivas');
                     displayExistingCuotas(data.data);
                 } else {
-                    console.log('ℹ️ No hay cuotas definitivas para esta separación');
+                    // console.log('ℹ️ No hay cuotas definitivas para esta separación');
                     // Mostrar sección vacía para permitir agregar cuotas
                     const cuotasSection = document.getElementById('cuotasSection');
                     if (cuotasSection) {
                         cuotasSection.classList.remove('hidden');
-                        console.log('👁️ Sección de cuotas mostrada (vacía) para agregar cuotas');
+                        // console.log('👁️ Sección de cuotas mostrada (vacía) para agregar cuotas');
                     }
                 }
             })
             .catch(error => {
-                console.error('❌ Error al cargar cuotas definitivas:', error);
+                // console.error('❌ Error al cargar cuotas definitivas:', error);
                 // Mostrar sección vacía en caso de error
                 const cuotasSection = document.getElementById('cuotasSection');
                 if (cuotasSection) {
                     cuotasSection.classList.remove('hidden');
-                    console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
+                    // console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
                 }
             });
     }
@@ -268,21 +269,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const separacionId = getCurrentSeparacionId();
         
         if (!separacionId) {
-            console.log('⚠️ No se encontró ID de separación');
+            // console.log('⚠️ No se encontró ID de separación');
             
             // Si no hay cuotas temporales, mostrar la sección vacía
             if (!yaHayCuotasTemporales) {
-                console.log('ℹ️ No hay cuotas temporales, mostrando sección vacía');
+                // console.log('ℹ️ No hay cuotas temporales, mostrando sección vacía');
                 const cuotasSection = document.getElementById('cuotasSection');
                 if (cuotasSection) {
                     cuotasSection.classList.remove('hidden');
-                    console.log('👁️ Sección de cuotas mostrada (vacía)');
+                    // console.log('👁️ Sección de cuotas mostrada (vacía)');
                 }
             }
             return;
         }
         
-        console.log('🔍 Cargando cuotas para separación ID:', separacionId);
+        // console.log('🔍 Cargando cuotas para separación ID:', separacionId);
         
         // Hacer petición para obtener las cuotas existentes
         fetch(`/cronograma/${separacionId}`)
@@ -293,45 +294,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Cuotas de separación recibidas:', data);
+                // console.log('📦 Cuotas de separación recibidas:', data);
                 
                 if (data.success && data.data && data.data.length > 0) {
-                    console.log('✅ Mostrando', data.data.length, 'cuotas de separación');
+                    // console.log('✅ Mostrando', data.data.length, 'cuotas de separación');
                     
                     // Si ya hay cuotas temporales, agregar las de separación sin limpiar
                     if (yaHayCuotasTemporales) {
-                        console.log('ℹ️ Agregando cuotas de separación a las temporales existentes');
+                        // console.log('ℹ️ Agregando cuotas de separación a las temporales existentes');
                         appendCuotasToTable(data.data);
                     } else {
                         displayExistingCuotas(data.data);
                     }
                 } else {
-                    console.log('ℹ️ No hay cuotas de separación para mostrar');
+                    // console.log('ℹ️ No hay cuotas de separación para mostrar');
                     
                     // CAMBIO: No generar cuota por defecto automáticamente
                     // Solo mostrar mensaje informativo
-                    console.log('ℹ️ No se encontraron cuotas para esta separación');
+                    // console.log('ℹ️ No se encontraron cuotas para esta separación');
                     
                     // Si no hay cuotas temporales, mostrar la sección vacía
                     if (!yaHayCuotasTemporales) {
                         const cuotasSection = document.getElementById('cuotasSection');
                         if (cuotasSection) {
                             cuotasSection.classList.remove('hidden');
-                            console.log('👁️ Sección de cuotas mostrada (vacía)');
+                            // console.log('👁️ Sección de cuotas mostrada (vacía)');
                         }
                     }
                 }
             })
             .catch(error => {
-                console.error('❌ Error al cargar cuotas de separación:', error);
+                // console.error('❌ Error al cargar cuotas de separación:', error);
                 
                 // Si no hay cuotas temporales y falla la carga de separación, mostrar sección vacía
                 if (!yaHayCuotasTemporales) {
-                    console.log('ℹ️ Error al cargar cuotas, mostrando sección vacía');
+                    // console.log('ℹ️ Error al cargar cuotas, mostrando sección vacía');
                     const cuotasSection = document.getElementById('cuotasSection');
                     if (cuotasSection) {
                         cuotasSection.classList.remove('hidden');
-                        console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
+                        // console.log('👁️ Sección de cuotas mostrada (vacía) después de error');
                     }
                 }
             });
@@ -339,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función auxiliar para obtener el proforma_id actual
     function getCurrentProformaId() {
-        console.log('🔍 getCurrentProformaId: Iniciando búsqueda...');
+        // console.log('🔍 getCurrentProformaId: Iniciando búsqueda...');
         
         // Múltiples estrategias para obtener el proformaId (misma lógica que loadProformaData)
         let proformaId = null;
@@ -348,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const proformaSelect = document.querySelector('select[name="proforma_id"]');
         if (proformaSelect && proformaSelect.value) {
             proformaId = proformaSelect.value;
-            console.log('✓ ProformaId encontrado en select proforma_id:', proformaId);
+            // console.log('✓ ProformaId encontrado en select proforma_id:', proformaId);
         }
         
         // Estrategia 2: Buscar en inputs ocultos
@@ -356,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const proformaInput = document.querySelector('input[name="proforma_id"]');
             if (proformaInput && proformaInput.value) {
                 proformaId = proformaInput.value;
-                console.log('✓ ProformaId encontrado en input proforma_id:', proformaId);
+                // console.log('✓ ProformaId encontrado en input proforma_id:', proformaId);
             }
         }
         
@@ -365,18 +366,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const filamentSelect = document.querySelector('[data-field-wrapper="proforma_id"] select');
             if (filamentSelect && filamentSelect.value) {
                 proformaId = filamentSelect.value;
-                console.log('✓ ProformaId encontrado en selector Filament:', proformaId);
+                // console.log('✓ ProformaId encontrado en selector Filament:', proformaId);
             }
         }
         
         // Estrategia 4: Buscar en selectores genéricos
         if (!proformaId) {
             const genericSelects = document.querySelectorAll('select');
-            console.log('🔍 Buscando en', genericSelects.length, 'selectores genéricos...');
+            // console.log('🔍 Buscando en', genericSelects.length, 'selectores genéricos...');
             for (let select of genericSelects) {
                 if (select.name && select.name.includes('proforma') && select.value) {
                     proformaId = select.value;
-                    console.log('✓ ProformaId encontrado en selector genérico:', proformaId, 'name:', select.name);
+                    // console.log('✓ ProformaId encontrado en selector genérico:', proformaId, 'name:', select.name);
                     break;
                 }
             }
@@ -387,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const dataElement = document.querySelector('[data-proforma-id]');
             if (dataElement) {
                 proformaId = dataElement.getAttribute('data-proforma-id');
-                console.log('✓ ProformaId encontrado en data-proforma-id:', proformaId);
+                // console.log('✓ ProformaId encontrado en data-proforma-id:', proformaId);
             }
         }
         
@@ -398,14 +399,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const proformaField = filamentForm.querySelector('select[name="proforma_id"], input[name="proforma_id"]');
                 if (proformaField && proformaField.value) {
                     proformaId = proformaField.value;
-                    console.log('✓ ProformaId encontrado en formulario Filament:', proformaId);
+                    // console.log('✓ ProformaId encontrado en formulario Filament:', proformaId);
                 }
             }
         }
         
         // Estrategia 7: Buscar en todos los elementos con valor
         if (!proformaId) {
-            console.log('🔍 Buscando en todos los elementos del DOM...');
+            // console.log('🔍 Buscando en todos los elementos del DOM...');
             const allElements = document.querySelectorAll('input, select');
             let candidatos = [];
             
@@ -424,22 +425,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     if ((element.name && element.name.toLowerCase().includes('proforma')) || 
                         (element.id && element.id.toLowerCase().includes('proforma'))) {
                         proformaId = element.value;
-                        console.log('✓ ProformaId encontrado por coincidencia de nombre/id:', proformaId);
+                        // console.log('✓ ProformaId encontrado por coincidencia de nombre/id:', proformaId);
                         break;
                     }
                 }
             }
             
-            console.log('🔍 Candidatos encontrados:', candidatos);
+            // console.log('🔍 Candidatos encontrados:', candidatos);
         }
         
-        console.log('🔍 getCurrentProformaId resultado final:', proformaId);
+        // console.log('🔍 getCurrentProformaId resultado final:', proformaId);
         return proformaId;
     }
     
     // Función para mostrar las cuotas existentes en la tabla
     function displayExistingCuotas(cuotas) {
-        console.log('🔄 Mostrando cuotas existentes en la tabla');
+        // console.log('🔄 Mostrando cuotas existentes en la tabla');
         
         const cuotasTableBody = document.getElementById('cuotasTableBody');
         cuotasTableBody.innerHTML = ''; // Limpiar tabla
@@ -452,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const tiposCuota = tiposData.data;
                     
                     cuotas.forEach((cuota, index) => {
-                        console.log(`🔄 Procesando cuota ${index + 1}:`, cuota);
+                        // console.log(`🔄 Procesando cuota ${index + 1}:`, cuota);
                         
                         const row = document.createElement('tr');
                         row.className = 'hover:bg-gray-50';
@@ -466,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         // Formatear fecha para input date
                         const fechaFormateada = new Date(cuota.fecha_pago).toISOString().split('T')[0];
-                        console.log(`📅 Fecha formateada para cuota ${index + 1}:`, fechaFormateada);
+                        // console.log(`📅 Fecha formateada para cuota ${index + 1}:`, fechaFormateada);
                         
                         row.innerHTML = `
                             <td class="border border-gray-300 px-4 py-2">
@@ -489,9 +490,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             </td>
                         `;
                         
-                        console.log(`➕ Agregando fila ${index + 1} a la tabla`);
+                        // console.log(`➕ Agregando fila ${index + 1} a la tabla`);
                         cuotasTableBody.appendChild(row);
-                        console.log(`✅ Fila ${index + 1} agregada exitosamente`);
+                        // console.log(`✅ Fila ${index + 1} agregada exitosamente`);
                         
                         // Agregar event listener para eliminar cuota
                         row.querySelector('.eliminar-cuota').addEventListener('click', function() {
@@ -508,20 +509,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Mostrar la sección de cuotas
                     const cuotasSection = document.getElementById('cuotasSection');
-                    console.log('🔍 Elemento cuotasSection encontrado:', cuotasSection);
+                    // console.log('🔍 Elemento cuotasSection encontrado:', cuotasSection);
                     
                     if (cuotasSection) {
                         cuotasSection.classList.remove('hidden');
-                        console.log('👁️ Sección de cuotas mostrada');
+                        // console.log('👁️ Sección de cuotas mostrada');
                         
                         // Verificar que las filas se agregaron correctamente
-                        console.log('📊 Filas en la tabla después de agregar:', cuotasTableBody.children.length);
-                        console.log('📊 Contenido HTML de la tabla:', cuotasTableBody.innerHTML.substring(0, 200) + '...');
+                        // console.log('📊 Filas en la tabla después de agregar:', cuotasTableBody.children.length);
+                        // console.log('📊 Contenido HTML de la tabla:', cuotasTableBody.innerHTML.substring(0, 200) + '...');
                     } else {
                         console.error('❌ ERROR: No se encontró el elemento cuotasSection');
                     }
                     
-                    console.log('✅ Cuotas existentes mostradas correctamente');
+                    // console.log('✅ Cuotas existentes mostradas correctamente');
                 } else {
                     console.error('❌ Error en la respuesta de tipos de cuota:', tiposData);
                 }
@@ -533,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para cargar datos de la proforma
     function loadProformaData() {
-        console.log('=== INICIANDO loadProformaData ===');
+        // console.log('=== INICIANDO loadProformaData ===');
         
         // Múltiples estrategias para obtener el proformaId
         let proformaId = null;
@@ -542,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const proformaSelect = document.querySelector('select[name="proforma_id"]');
         if (proformaSelect && proformaSelect.value) {
             proformaId = proformaSelect.value;
-            console.log('✓ ProformaId encontrado en select proforma_id:', proformaId);
+            // console.log('✓ ProformaId encontrado en select proforma_id:', proformaId);
         }
         
         // Estrategia 2: Buscar en inputs ocultos
@@ -550,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const proformaInput = document.querySelector('input[name="proforma_id"]');
             if (proformaInput && proformaInput.value) {
                 proformaId = proformaInput.value;
-                console.log('✓ ProformaId encontrado en input proforma_id:', proformaId);
+                // console.log('✓ ProformaId encontrado en input proforma_id:', proformaId);
             }
         }
         
@@ -559,18 +560,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const filamentSelect = document.querySelector('[data-field-wrapper="proforma_id"] select');
             if (filamentSelect && filamentSelect.value) {
                 proformaId = filamentSelect.value;
-                console.log('✓ ProformaId encontrado en selector Filament:', proformaId);
+                // console.log('✓ ProformaId encontrado en selector Filament:', proformaId);
             }
         }
         
         // Estrategia 4: Buscar en selectores genéricos
         if (!proformaId) {
             const genericSelects = document.querySelectorAll('select');
-            console.log('Buscando en', genericSelects.length, 'selectores genéricos...');
+            // console.log('Buscando en', genericSelects.length, 'selectores genéricos...');
             for (let select of genericSelects) {
                 if (select.name && select.name.includes('proforma') && select.value) {
                     proformaId = select.value;
-                    console.log('✓ ProformaId encontrado en selector genérico:', proformaId, 'name:', select.name);
+                    // console.log('✓ ProformaId encontrado en selector genérico:', proformaId, 'name:', select.name);
                     break;
                 }
             }
@@ -581,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const dataElement = document.querySelector('[data-proforma-id]');
             if (dataElement) {
                 proformaId = dataElement.getAttribute('data-proforma-id');
-                console.log('✓ ProformaId encontrado en data-proforma-id:', proformaId);
+                // console.log('✓ ProformaId encontrado en data-proforma-id:', proformaId);
             }
         }
         
@@ -592,14 +593,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const proformaField = filamentForm.querySelector('select[name="proforma_id"], input[name="proforma_id"]');
                 if (proformaField && proformaField.value) {
                     proformaId = proformaField.value;
-                    console.log('✓ ProformaId encontrado en formulario Filament:', proformaId);
+                    // console.log('✓ ProformaId encontrado en formulario Filament:', proformaId);
                 }
             }
         }
         
         // Estrategia 7: Buscar en todos los elementos con valor
         if (!proformaId) {
-            console.log('Buscando en todos los elementos del DOM...');
+            // console.log('Buscando en todos los elementos del DOM...');
             const allElements = document.querySelectorAll('input, select');
             let candidatos = [];
             
@@ -618,13 +619,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     if ((element.name && element.name.toLowerCase().includes('proforma')) || 
                         (element.id && element.id.toLowerCase().includes('proforma'))) {
                         proformaId = element.value;
-                        console.log('✓ ProformaId encontrado por coincidencia de nombre/id:', proformaId);
+                        // console.log('✓ ProformaId encontrado por coincidencia de nombre/id:', proformaId);
                         break;
                     }
                 }
             }
             
-            console.log('Candidatos encontrados:', candidatos);
+            // console.log('Candidatos encontrados:', candidatos);
         }
         
         // Estrategia 8: Buscar en URL o parámetros
@@ -633,23 +634,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const urlProformaId = urlParams.get('proforma_id') || urlParams.get('id');
             if (urlProformaId) {
                 proformaId = urlProformaId;
-                console.log('✓ ProformaId encontrado en URL:', proformaId);
+                // console.log('✓ ProformaId encontrado en URL:', proformaId);
             }
         }
         
-        console.log('=== RESULTADO FINAL ===');
-        console.log('ProformaId final:', proformaId);
-        console.log('Tipo:', typeof proformaId);
-        console.log('Es válido:', proformaId && proformaId !== '' && proformaId !== '0');
+        // console.log('=== RESULTADO FINAL ===');
+        // console.log('ProformaId final:', proformaId);
+        // console.log('Tipo:', typeof proformaId);
+        // console.log('Es válido:', proformaId && proformaId !== '' && proformaId !== '0');
         
         if (proformaId && proformaId !== '' && proformaId !== '0') {
-            console.log('🚀 Realizando petición para proforma ID:', proformaId);
+            // console.log('🚀 Realizando petición para proforma ID:', proformaId);
             
             // Intentar primero la ruta que está en el código actual
             fetch(`/api/proforma/${proformaId}/cronograma-data`)
                 .then(response => {
-                    console.log('📡 Respuesta HTTP status:', response.status);
-                    console.log('📡 Respuesta HTTP headers:', response.headers);
+                    // console.log('📡 Respuesta HTTP status:', response.status);
+                    // console.log('📡 Respuesta HTTP headers:', response.headers);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -658,9 +659,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.json();
                 })
                 .then(data => {
-                    console.log('📦 Datos recibidos completos:', JSON.stringify(data, null, 2));
+                    // console.log('📦 Datos recibidos completos:', JSON.stringify(data, null, 2));
                     if (data.success) {
-                        console.log('✅ Actualizando elementos del DOM...');
+                        // console.log('✅ Actualizando elementos del DOM...');
                         updateModalElements(data);
                     } else {
                         console.error('❌ Error al cargar datos de la proforma:', data.message);
@@ -675,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         } else {
             console.warn('⚠️ No se encontró ID de proforma válido');
-            console.log('Elementos disponibles en el DOM:');
+            // console.log('Elementos disponibles en el DOM:');
             logDOMElements();
             setDefaultData();
         }
@@ -683,12 +684,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para intentar rutas alternativas
     function tryAlternativeRoute(proformaId) {
-        console.log('🔄 Intentando ruta alternativa...');
+        // console.log('🔄 Intentando ruta alternativa...');
         
         // Intentar la ruta del controlador que sabemos que existe
         fetch(`/api/proformas/${proformaId}`)
             .then(response => {
-                console.log('📡 Respuesta alternativa HTTP status:', response.status);
+                // console.log('📡 Respuesta alternativa HTTP status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -697,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('📦 Datos de ruta alternativa:', JSON.stringify(data, null, 2));
+                // console.log('📦 Datos de ruta alternativa:', JSON.stringify(data, null, 2));
                 updateModalElements(data);
             })
             .catch(error => {
@@ -708,22 +709,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para actualizar elementos del modal con datos de la proforma
     function updateModalElements(data) {
-        console.log('🔄 Actualizando elementos del modal con datos:', data);
+        // console.log('🔄 Actualizando elementos del modal con datos:', data);
         
         // Actualizar cliente
         const clienteElement = document.getElementById('cliente-nombre');
         if (clienteElement) {
             clienteElement.textContent = data.cliente || 'N/A';
-            console.log('✅ Cliente actualizado:', data.cliente);
-        } else {
-            console.warn('⚠️ Elemento cliente-nombre no encontrado');
+            // console.log('✅ Cliente actualizado:', data.cliente);
         }
         
         // Actualizar proyecto
         const proyectoElement = document.getElementById('proyecto-nombre');
         if (proyectoElement) {
             proyectoElement.textContent = data.proyecto || 'N/A';
-            console.log('✅ Proyecto actualizado:', data.proyecto);
+            // console.log('✅ Proyecto actualizado:', data.proyecto);
         } else {
             console.warn('⚠️ Elemento proyecto-nombre no encontrado');
         }
@@ -732,7 +731,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const inmuebleElement = document.getElementById('inmueble-numero');
         if (inmuebleElement) {
             inmuebleElement.textContent = data.inmueble || 'N/A';
-            console.log('✅ Inmueble actualizado:', data.inmueble);
+            // console.log('✅ Inmueble actualizado:', data.inmueble);
         } else {
             console.warn('⚠️ Elemento inmueble-numero no encontrado');
         }
@@ -741,16 +740,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const precioVentaElement = document.getElementById('precio-venta');
         if (precioVentaElement) {
             precioVentaElement.textContent = data.precio_venta || 'S/ 0.00';
-            console.log('✅ Precio venta actualizado:', data.precio_venta);
-        } else {
-            console.warn('⚠️ Elemento precio-venta no encontrado');
+            // console.log('✅ Precio venta actualizado:', data.precio_venta);
         }
         
         // Actualizar cuota inicial
         const cuotaInicialElement = document.getElementById('cuota-inicial');
         if (cuotaInicialElement) {
             cuotaInicialElement.textContent = data.cuota_inicial || 'S/ 0.00';
-            console.log('✅ Cuota inicial actualizada:', data.cuota_inicial);
+            // console.log('✅ Cuota inicial actualizada:', data.cuota_inicial);
         } else {
             console.warn('⚠️ Elemento cuota-inicial no encontrado');
         }
@@ -759,7 +756,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const montoTotalElement = document.getElementById('montoTotal');
         if (montoTotalElement) {
             montoTotalElement.value = data.monto_cuota_inicial || 0;
-            console.log('✅ Monto total actualizado:', data.monto_cuota_inicial);
+            // console.log('✅ Monto total actualizado:', data.monto_cuota_inicial);
         } else {
             console.warn('⚠️ Elemento montoTotal no encontrado');
         }
@@ -774,41 +771,41 @@ document.addEventListener('DOMContentLoaded', function() {
         // 2. NO hay cuotas existentes en la tabla
         // 3. NO hay proforma_id válido (porque si hay proforma_id, debería cargar cuotas existentes)
         if (data.monto_cuota_inicial && data.monto_cuota_inicial > 0 && !hasExistingCuotas && !proformaId) {
-            console.log('🔄 Generando cuota por defecto automáticamente (sin proforma_id ni cuotas existentes)...');
+            // console.log('🔄 Generando cuota por defecto automáticamente (sin proforma_id ni cuotas existentes)...');
             generateDefaultCuota(data.monto_cuota_inicial);
         } else if (hasExistingCuotas) {
-            console.log('ℹ️ No se genera cuota por defecto porque ya existen cuotas cargadas');
+            // console.log('ℹ️ No se genera cuota por defecto porque ya existen cuotas cargadas');
         } else if (proformaId) {
-            console.log('ℹ️ No se genera cuota por defecto porque hay proforma_id válido:', proformaId);
+            // console.log('ℹ️ No se genera cuota por defecto porque hay proforma_id válido:', proformaId);
         } else {
-            console.log('ℹ️ No se genera cuota por defecto - condiciones no cumplidas');
+            // console.log('ℹ️ No se genera cuota por defecto - condiciones no cumplidas');
             
             // Si no se cumplieron las condiciones pero no hay cuotas, mostrar sección vacía
             if (!hasExistingCuotas && data.monto_cuota_inicial && data.monto_cuota_inicial > 0) {
-                console.log('ℹ️ No se genera cuota por defecto porque hay proforma_id válido:', getCurrentProformaId());
+                // console.log('ℹ️ No se genera cuota por defecto porque hay proforma_id válido:', getCurrentProformaId());
                 const cuotasSection = document.getElementById('cuotasSection');
                 if (cuotasSection) {
                     cuotasSection.classList.remove('hidden');
-                    console.log('👁️ Sección de cuotas mostrada (vacía) para permitir agregar manualmente');
+                    // console.log('👁️ Sección de cuotas mostrada (vacía) para permitir agregar manualmente');
                 }
             }
         }
         
-        console.log('✅ Todos los elementos procesados');
+        // console.log('✅ Todos los elementos procesados');
     }
     
     // Nueva función para generar una cuota por defecto automáticamente
     function generateDefaultCuota(montoTotal) {
-        console.log('🔄 Generando cuota por defecto con monto:', montoTotal);
+        // console.log('🔄 Generando cuota por defecto con monto:', montoTotal);
         
         // Verificar si ya existen cuotas en la tabla
         const cuotasTableBody = document.getElementById('cuotasTableBody');
         if (cuotasTableBody && cuotasTableBody.children.length > 0) {
-            console.log('⚠️ Ya existen', cuotasTableBody.children.length, 'cuotas en la tabla. No se generará cuota por defecto.');
+            // console.log('⚠️ Ya existen', cuotasTableBody.children.length, 'cuotas en la tabla. No se generará cuota por defecto.');
             return;
         }
         
-        console.log('✅ No hay cuotas existentes, generando cuota por defecto...');
+        // console.log('✅ No hay cuotas existentes, generando cuota por defecto...');
         
         // Obtener tipos de cuota desde la API
         fetch('/api/cronograma/tipos-cuota')
@@ -881,7 +878,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                     
-                    console.log('✅ Cuota por defecto generada exitosamente');
+                    // console.log('✅ Cuota por defecto generada exitosamente');
                 } else {
                     console.error('❌ Error al cargar tipos de cuota para generar cuota por defecto');
                 }
@@ -893,29 +890,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para registrar elementos del DOM disponibles
     function logDOMElements() {
-        console.log('=== ELEMENTOS DOM DISPONIBLES ===');
+        // console.log('=== ELEMENTOS DOM DISPONIBLES ===');
         
         const selects = document.querySelectorAll('select');
-        console.log('Selects encontrados:', selects.length);
+        // console.log('Selects encontrados:', selects.length);
         selects.forEach((select, index) => {
-            console.log(`Select ${index}:`, {
-                name: select.name,
-                id: select.id,
-                value: select.value,
-                options: Array.from(select.options).map(opt => ({text: opt.text, value: opt.value}))
-            });
+            // console.log(`Select ${index}:`, {
+            //     name: select.name,
+            //     id: select.id,
+            //     value: select.value,
+            //     options: Array.from(select.options).map(opt => ({text: opt.text, value: opt.value}))
+            // });
         });
         
         const inputs = document.querySelectorAll('input');
-        console.log('Inputs encontrados:', inputs.length);
+        // console.log('Inputs encontrados:', inputs.length);
         inputs.forEach((input, index) => {
             if (input.value) {
-                console.log(`Input ${index}:`, {
-                    name: input.name,
-                    id: input.id,
-                    type: input.type,
-                    value: input.value
-                });
+                // console.log(`Input ${index}:`, {
+                //     name: input.name,
+                //     id: input.id,
+                //     type: input.type,
+                //     value: input.value
+                // });
             }
         });
     }
@@ -967,7 +964,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const cuotasTableBody = document.getElementById('cuotasTableBody');
         cuotasTableBody.innerHTML = '';
 
-        console.log('🔄 Regenerando cronograma - esto actualizará las cuotas existentes');
+        // console.log('🔄 Regenerando cronograma - esto actualizará las cuotas existentes');
 
         // Obtener tipos de cuota desde la API
         fetch('/api/cronograma/tipos-cuota')
@@ -1056,7 +1053,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listener para guardar cronograma
     document.getElementById('guardarCronograma').addEventListener('click', function() {
-        console.log('🔄 Iniciando proceso de guardado del cronograma...');
+        // console.log('🔄 Iniciando proceso de guardado del cronograma...');
         
         // Proceder directamente con el guardado del cronograma
         guardarCronogramaCompleto();
@@ -1064,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función separada para guardar el cronograma
     function guardarCronogramaCompleto() {
-        console.log('💾 Iniciando guardado del cronograma...');
+        // console.log('💾 Iniciando guardado del cronograma...');
         
         // Obtener datos de la proforma
         let proformaId = null;
@@ -1084,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = document.querySelector(selector);
             if (element && element.value) {
                 proformaId = element.value;
-                console.log('✅ Proforma ID encontrado con selector:', selector, 'Valor:', proformaId);
+                // console.log('✅ Proforma ID encontrado con selector:', selector, 'Valor:', proformaId);
                 break;
             }
         }
@@ -1093,26 +1090,26 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!proformaId) {
             const urlParams = new URLSearchParams(window.location.search);
             const fromParam = urlParams.get('from');
-            console.log('🔍 Parámetro "from" de la URL:', fromParam);
+            // console.log('🔍 Parámetro "from" de la URL:', fromParam);
             
             if (fromParam && fromParam.includes('separacion_definitiva:')) {
                 const parts = fromParam.split(':');
                 if (parts.length >= 2) {
                     proformaId = parts[1];
-                    console.log('✅ Proforma ID obtenido de la URL (separación definitiva):', proformaId);
+                    // console.log('✅ Proforma ID obtenido de la URL (separación definitiva):', proformaId);
                 } else {
-                    console.log('❌ Error al extraer ID del parámetro "from":', fromParam);
+                    // console.log('❌ Error al extraer ID del parámetro "from":', fromParam);
                 }
             } else if (fromParam && fromParam === 'separacion_definitiva') {
                 // Si el parámetro from es solo 'separacion_definitiva', usar el ID que ya encontró loadProformaData
-                console.log('🔍 Parámetro "from" es "separacion_definitiva", buscando ID ya cargado...');
+                // console.log('🔍 Parámetro "from" es "separacion_definitiva", buscando ID ya cargado...');
                 
                 // Buscar en elementos que ya tienen el ID cargado
                 const elementosConId = document.querySelectorAll('[id*="proforma"], [name*="proforma"]');
                 for (const elemento of elementosConId) {
                     if (elemento.value && elemento.value !== '' && !isNaN(elemento.value)) {
                         proformaId = elemento.value;
-                        console.log('✅ Proforma ID encontrado en elemento ya cargado:', elemento.tagName, elemento.id || elemento.name, 'Valor:', proformaId);
+                        // console.log('✅ Proforma ID encontrado en elemento ya cargado:', elemento.tagName, elemento.id || elemento.name, 'Valor:', proformaId);
                         break;
                     }
                 }
@@ -1126,14 +1123,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             const valor = parseInt(elemento.value);
                             if (valor > 0 && valor < 100000) {
                                 proformaId = elemento.value;
-                                console.log('✅ Posible Proforma ID encontrado en:', elemento.tagName, elemento.id || elemento.name || 'sin-nombre', 'Valor:', proformaId);
+                                // console.log('✅ Posible Proforma ID encontrado en:', elemento.tagName, elemento.id || elemento.name || 'sin-nombre', 'Valor:', proformaId);
                                 break;
                             }
                         }
                     }
                 }
             } else {
-                console.log('❌ Parámetro "from" no contiene "separacion_definitiva:"');
+                // console.log('❌ Parámetro "from" no contiene "separacion_definitiva:"');
             }
         }
         
@@ -1151,25 +1148,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = document.querySelector(selector);
             if (element && element.value) {
                 clienteId = element.value;
-                console.log('✅ Cliente ID encontrado con selector:', selector, 'Valor:', clienteId);
+                // console.log('✅ Cliente ID encontrado con selector:', selector, 'Valor:', clienteId);
                 break;
             }
         }
         
         if (!proformaId) {
             console.error('❌ No se pudo encontrar el ID de la proforma. Selectores probados:', proformaSelectors);
-            console.log('🔍 Elementos del formulario disponibles:');
+            // console.log('🔍 Elementos del formulario disponibles:');
             const allInputs = document.querySelectorAll('input, select');
             allInputs.forEach(input => {
                 if (input.name && (input.name.includes('proforma') || input.name.includes('cliente'))) {
-                    console.log('- Elemento encontrado:', input.tagName, 'name="' + input.name + '"', 'value="' + input.value + '"');
+                    // console.log('- Elemento encontrado:', input.tagName, 'name="' + input.name + '"', 'value="' + input.value + '"');
                 }
             });
             alert('Error: No se pudo obtener el ID de la proforma. Revisa la consola para más detalles.');
             return;
         }
         
-        console.log('✅ Datos obtenidos - Proforma ID:', proformaId, 'Cliente ID:', clienteId);
+        // console.log('✅ Datos obtenidos - Proforma ID:', proformaId, 'Cliente ID:', clienteId);
         
         const cuotas = [];
         const rows = document.querySelectorAll('#cuotasTableBody tr');
@@ -1204,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', function() {
             _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
         };
         
-        console.log('📤 Enviando cronograma:', cronogramaData);
+        // console.log('📤 Enviando cronograma:', cronogramaData);
         
         // Enviar datos al servidor usando fetch
         fetch('/cronograma/guardar', {
@@ -1223,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            console.log('✅ Cronograma guardado:', data);
+            // console.log('✅ Cronograma guardado:', data);
             if (data.success) {
                 alert('Cronograma guardado exitosamente' + (data.data.separacion_creada ? ' (Separación creada automáticamente)' : ''));
                 // Cerrar el modal
@@ -1241,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para obtener el ID de la separación actual (definida globalmente)
     function getCurrentSeparacionId() {
-        console.log('🔍 getCurrentSeparacionId: Iniciando búsqueda...');
+        // console.log('🔍 getCurrentSeparacionId: Iniciando búsqueda...');
         
         const urlParams = new URLSearchParams(window.location.search);
         
@@ -1249,7 +1246,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let separacionId = urlParams.get('separacion_id');
         
         if (separacionId) {
-            console.log('🔍 Separación ID encontrado en URL:', separacionId);
+            // console.log('🔍 Separación ID encontrado en URL:', separacionId);
             return separacionId;
         }
         
@@ -1258,7 +1255,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const separacionIndex = pathParts.indexOf('separacions');
         if (separacionIndex !== -1 && pathParts[separacionIndex + 1] && pathParts[separacionIndex + 1] !== 'create') {
             separacionId = pathParts[separacionIndex + 1];
-            console.log('🔍 Separación ID encontrado en ruta:', separacionId);
+            // console.log('🔍 Separación ID encontrado en ruta:', separacionId);
             return separacionId;
         }
         
@@ -1266,13 +1263,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const separacionElement = document.querySelector('[data-separacion-id]');
         if (separacionElement) {
             separacionId = separacionElement.getAttribute('data-separacion-id');
-            console.log('🔍 Separación ID encontrado en DOM:', separacionId);
+            // console.log('🔍 Separación ID encontrado en DOM:', separacionId);
             return separacionId;
         }
         
         // CUARTA PRIORIDAD: Buscar en variables globales de JavaScript
         if (typeof window.separacionId !== 'undefined') {
-            console.log('🔍 Separación ID encontrado en variable global:', window.separacionId);
+            // console.log('🔍 Separación ID encontrado en variable global:', window.separacionId);
             return window.separacionId;
         }
         
@@ -1287,7 +1284,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         // Buscar separacion_id en los datos del componente
                         if (component.data.separacion_id) {
-                            console.log('🔍 Separación ID encontrado en Livewire data:', component.data.separacion_id);
+                            // console.log('🔍 Separación ID encontrado en Livewire data:', component.data.separacion_id);
                             return component.data.separacion_id;
                         }
                         
@@ -1295,13 +1292,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (component.data.record && 
                             typeof component.data.record === 'object' && 
                             component.data.record.id) {
-                            console.log('🔍 Separación ID encontrado en Livewire record:', component.data.record.id);
+                            // console.log('🔍 Separación ID encontrado en Livewire record:', component.data.record.id);
                             return component.data.record.id;
                         }
                         
                         // También buscar en data directamente
                         if (component.data.id) {
-                            console.log('🔍 Separación ID encontrado en data de Livewire:', component.data.id);
+                            // console.log('🔍 Separación ID encontrado en data de Livewire:', component.data.id);
                             return component.data.id;
                         }
                     }
@@ -1314,7 +1311,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // SEXTA PRIORIDAD: Buscar en formularios de Filament
         const separacionIdInput = document.querySelector('input[name="separacion_id"]');
         if (separacionIdInput && separacionIdInput.value) {
-            console.log('🔍 Separación ID encontrado en input del formulario:', separacionIdInput.value);
+            // console.log('🔍 Separación ID encontrado en input del formulario:', separacionIdInput.value);
             return separacionIdInput.value;
         }
         
@@ -1322,16 +1319,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const createdRecordElement = document.querySelector('[data-record-id]');
         if (createdRecordElement) {
             const recordId = createdRecordElement.getAttribute('data-record-id');
-            console.log('🔍 Separación ID encontrado en elemento creado:', recordId);
+            // console.log('🔍 Separación ID encontrado en elemento creado:', recordId);
             return recordId;
         }
         
         // Verificar si estamos en proceso de creación
         const fromSeparacionDefinitiva = urlParams.get('from') === 'separacion_definitiva';
         if (fromSeparacionDefinitiva) {
-            console.log('⏳ Separación en proceso de creación, ID aún no disponible');
+            // console.log('⏳ Separación en proceso de creación, ID aún no disponible');
         } else {
-            console.log('⚠️ No se encontró ID de separación');
+            // console.log('⚠️ No se encontró ID de separación');
         }
         
         return null;
@@ -1339,7 +1336,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
     // Función auxiliar para obtener el ID de la proforma actual
     function getCurrentProformaId() {
-        console.log('🔍 getCurrentProformaId: Iniciando búsqueda...');
+        // console.log('🔍 getCurrentProformaId: Iniciando búsqueda...');
         
         const urlParams = new URLSearchParams(window.location.search);
         
@@ -1347,7 +1344,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let proformaId = urlParams.get('proforma_id');
         
         if (proformaId) {
-            console.log('🔍 Proforma ID encontrado en URL:', proformaId);
+            // console.log('🔍 Proforma ID encontrado en URL:', proformaId);
             return proformaId;
         }
         
@@ -1355,23 +1352,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const proformaElement = document.querySelector('[data-proforma-id]');
         if (proformaElement) {
             proformaId = proformaElement.getAttribute('data-proforma-id');
-            console.log('🔍 Proforma ID encontrado en DOM:', proformaId);
+            // console.log('🔍 Proforma ID encontrado en DOM:', proformaId);
             return proformaId;
         }
         
         // Estrategia 3: Buscar en variables globales
         if (typeof window.proformaId !== 'undefined') {
-            console.log('🔍 Proforma ID encontrado en variable global:', window.proformaId);
+            // console.log('🔍 Proforma ID encontrado en variable global:', window.proformaId);
             return window.proformaId;
         }
         
-        console.log('⚠️ No se encontró ID de proforma');
+        // console.log('⚠️ No se encontró ID de proforma');
         return null;
     }
 
     // Función auxiliar para agregar cuotas a la tabla sin limpiarla
     function appendCuotasToTable(cuotas) {
-        console.log('📝 Agregando', cuotas.length, 'cuotas adicionales a la tabla');
+        // console.log('📝 Agregando', cuotas.length, 'cuotas adicionales a la tabla');
         
         const cuotasTableBody = document.getElementById('cuotasTableBody');
         if (!cuotasTableBody) {
@@ -1385,10 +1382,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(tiposData => {
                 if (tiposData.success && tiposData.data) {
                     const tiposCuota = tiposData.data;
-                    console.log('✅ Tipos de cuota obtenidos para agregar:', tiposCuota.length);
+                    // console.log('✅ Tipos de cuota obtenidos para agregar:', tiposCuota.length);
                     
                     cuotas.forEach((cuota, index) => {
-                        console.log(`Agregando cuota adicional ${index + 1}:`, cuota);
+                        // console.log(`Agregando cuota adicional ${index + 1}:`, cuota);
                         
                         const row = document.createElement('tr');
                         const currentRowIndex = cuotasTableBody.children.length;
@@ -1417,17 +1414,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         row.appendChild(accionesCell);
                         
                         cuotasTableBody.appendChild(row);
-                        console.log(`Cuota adicional ${index + 1} agregada a la tabla`);
+                        // console.log(`Cuota adicional ${index + 1} agregada a la tabla`);
                     });
                     
                     // Mostrar la sección de cuotas
                     const cuotasSection = document.getElementById('cuotasSection');
                     if (cuotasSection) {
                         cuotasSection.style.display = 'block';
-                        console.log('✅ Sección de cuotas mostrada');
+                        // console.log('✅ Sección de cuotas mostrada');
                     }
                     
-                    console.log('✅ Cuotas adicionales agregadas correctamente');
+                    // console.log('✅ Cuotas adicionales agregadas correctamente');
                 } else {
                     console.error('❌ Error en la respuesta de tipos de cuota:', tiposData);
                 }
@@ -1439,13 +1436,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para verificar y generar cuota por defecto cuando no hay cuotas
     function checkAndGenerateDefaultCuota() {
-        console.log('🔍 Verificando si generar cuota por defecto...');
+        // console.log('🔍 Verificando si generar cuota por defecto...');
         
         const cuotasTableBody = document.getElementById('cuotasTableBody');
         const hasExistingCuotas = cuotasTableBody && cuotasTableBody.children.length > 0;
         
         if (hasExistingCuotas) {
-            console.log('ℹ️ Ya hay cuotas en la tabla, no se genera cuota por defecto');
+            // console.log('ℹ️ Ya hay cuotas en la tabla, no se genera cuota por defecto');
             return;
         }
         
@@ -1454,10 +1451,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const montoTotal = montoTotalElement ? parseFloat(montoTotalElement.value) : 0;
         
         if (montoTotal > 0) {
-            console.log('🔄 Generando cuota por defecto con monto:', montoTotal);
+            // console.log('🔄 Generando cuota por defecto con monto:', montoTotal);
             generateDefaultCuota(montoTotal);
         } else {
-            console.log('⚠️ No se puede generar cuota por defecto: monto total no válido');
+            // console.log('⚠️ No se puede generar cuota por defecto: monto total no válido');
         }
     }
 });
@@ -1481,3 +1478,4 @@ document.addEventListener('DOMContentLoaded', function() {
     backdrop-filter: blur(4px);
 }
 </style>
+</div>
