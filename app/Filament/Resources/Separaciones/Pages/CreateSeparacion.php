@@ -233,6 +233,34 @@ class CreateSeparacion extends CreateRecord
                 ]);
             }
 
+            // Buscar si hay pagos de separación temporales para esta proforma
+            $pagosTemporales = \DB::table('pagos_separacion')
+                ->where('proforma_id', $proforma->id)
+                ->whereNull('separacion_id')
+                ->get();
+            
+            if ($pagosTemporales->count() > 0) {
+                // Si hay pagos temporales, asignarles el ID de la separación
+                Log::info('Asignando separacion_id a pagos de separación temporales', [
+                    'separacion_id' => $separacion->id,
+                    'proforma_id' => $proforma->id,
+                    'pagos_count' => $pagosTemporales->count()
+                ]);
+                
+                \DB::table('pagos_separacion')
+                    ->where('proforma_id', $proforma->id)
+                    ->whereNull('separacion_id')
+                    ->update([
+                        'separacion_id' => $separacion->id,
+                        'updated_at' => now()
+                    ]);
+                
+                Log::info('Pagos de separación temporales actualizados con separacion_id', [
+                    'separacion_id' => $separacion->id,
+                    'pagos_actualizados' => $pagosTemporales->count()
+                ]);
+            }
+
             // Si no hay cuotas temporales, crear cronograma por defecto
             $montoTotal = $proforma->monto_cuota_inicial ?? 0;
 

@@ -13,12 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('tipos_comprobante', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre');
-            $table->text('descripcion')->nullable();
-            $table->boolean('activo')->default(true);
-            $table->timestamps();
+        Schema::table('pagos_separacion', function (Blueprint $table) {
+            $table->decimal('monto_convertido', 12, 2)->after('monto_pago')->nullable()->comment('Monto convertido con tipo de cambio aplicado');
         });
     }
 
@@ -29,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tipos_comprobante');
+        Schema::table('pagos_separacion', function (Blueprint $table) {
+            $table->dropColumn('monto_convertido');
+        });
     }
 };

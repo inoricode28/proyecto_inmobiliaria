@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TipoComprobante extends Model
 {
-    use HasFactory;
-
     protected $table = 'tipos_comprobante';
 
     protected $fillable = [
@@ -21,9 +18,19 @@ class TipoComprobante extends Model
         'activo' => 'boolean'
     ];
 
-    // Scope para obtener solo tipos activos
+    /**
+     * Scope para obtener solo tipos activos
+     */
     public function scopeActivos($query)
     {
         return $query->where('activo', true);
+    }
+
+    /**
+     * Relación con cronograma saldo a financiar
+     */
+    public function cronogramaSaldoFinanciar()
+    {
+        return $this->hasMany(CronogramaSaldoFinanciar::class, 'tipo_comprobante_id');
     }
 }

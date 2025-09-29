@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('cronogramas_saldo_financiar', function (Blueprint $table) {
-            //
+        Schema::table('pagos_separacion', function (Blueprint $table) {
+            // Hacer separacion_id nullable
+            $table->unsignedBigInteger('separacion_id')->nullable()->change();
         });
     }
 
@@ -25,8 +26,9 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('cronogramas_saldo_financiar', function (Blueprint $table) {
-            //
+        Schema::table('pagos_separacion', function (Blueprint $table) {
+            // Revertir separacion_id a no nullable
+            $table->unsignedBigInteger('separacion_id')->nullable(false)->change();
         });
     }
 };

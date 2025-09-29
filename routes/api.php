@@ -42,10 +42,15 @@ Route::get('/tipos-comprobante', [CronogramaController::class, 'getTiposComproba
 // Rutas para pagos de separación
 Route::prefix('pagos-separacion')->group(function () {
     Route::get('/{separacion_id}', [PagoSeparacionController::class, 'index']);
+    Route::get('/proforma/{proforma_id}', [PagoSeparacionController::class, 'getByProforma']);
     Route::post('/', [PagoSeparacionController::class, 'store']);
+    Route::post('/batch', [PagoSeparacionController::class, 'storeBatch']);
     Route::delete('/{id}', [PagoSeparacionController::class, 'destroy']);
     Route::get('/comprobante/{id}', [PagoSeparacionController::class, 'descargarComprobante']);
 });
+
+// Ruta para obtener información de separación
+Route::get('/separacion/{separacion_id}/info', [PagoSeparacionController::class, 'getSeparacionInfo']);
 
 // Rutas para datos auxiliares de pagos de separación
 Route::get('/monedas', [PagoSeparacionController::class, 'getMonedas']);

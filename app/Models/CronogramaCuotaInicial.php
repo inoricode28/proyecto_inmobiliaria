@@ -39,14 +39,6 @@ class CronogramaCuotaInicial extends Model
     }
 
     /**
-     * Relación con Proforma (para cuotas temporales)
-     */
-    public function proforma(): BelongsTo
-    {
-        return $this->belongsTo(Proforma::class);
-    }
-
-    /**
      * Relación con TipoCuota
      */
     public function tipoCuota(): BelongsTo

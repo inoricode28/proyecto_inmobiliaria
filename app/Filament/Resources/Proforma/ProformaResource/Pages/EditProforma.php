@@ -29,8 +29,8 @@ class EditProforma extends EditRecord
                     $montoDescuento = $departamento->Precio_lista * ($descuento / 100);
                     $data['precio_venta'] = $departamento->Precio_lista - $montoDescuento;
                 } else {
-                    // Si no hay descuento o es 0%, usar el precio_lista (igual comportamiento que el formulario)
-                    $data['precio_venta'] = $departamento->Precio_lista;
+                    // Si no hay descuento o es 0%, usar el precio_venta original del inmueble
+                    $data['precio_venta'] = $departamento->Precio_venta;
                 }
                 
                 // Asegurar que precio_lista esté establecido
