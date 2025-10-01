@@ -168,126 +168,31 @@ class SeparacionResource extends Resource
                 ]),
 
                 Tab::make('Inmueble')->schema([
-                    Grid::make(3)->schema([
-                        // Select de inmuebles basado en la proforma seleccionada
-                        Select::make('departamento_id')
-                            ->label('Inmuebles')
-                            ->options(function (callable $get) {
-                                $proformaId = $get('proforma_id');
-                                if (!$proformaId) return [];
-
-                                $proforma = \App\Models\Proforma::find($proformaId);
-                                if (!$proforma || !$proforma->departamento_id) return [];
-
-                                // Solo mostrar el departamento específico de la proforma
-                                $departamento = \App\Models\Departamento::with(['edificio', 'tipoInmueble', 'estadoDepartamento'])
-                                    ->where('id', $proforma->departamento_id)
-                                    ->first();
-
-                                if (!$departamento) return [];
-
-                                $label = "EDIFICIO: {$departamento->edificio->nombre} - " .
-                                        "TIPO: {$departamento->tipoInmueble->nombre} - " .
-                                        "NRO: {$departamento->num_departamento} - " .
-                                        "CANT. HAB.: {$departamento->num_dormitorios}";
-                                
-                                return [$departamento->id => $label];
-                            })
-                            ->searchable()
-                            ->preload()
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                if ($state) {
-                                    $departamento = \App\Models\Departamento::with(['proyecto', 'tipoInmueble'])->find($state);
-                                    if ($departamento) {
-                                        $set('proyecto_nombre', $departamento->proyecto->nombre ?? '');
-                                        $set('departamento_nombre', $departamento->num_departamento ?? '');
-                                        $set('precio_lista', $departamento->Precio_lista ?? 0);
-                                        
-                                        // Obtener la proforma para calcular el precio de venta con descuento
-                                        $proformaId = $get('proforma_id');
-                                        if ($proformaId) {
-                                            $proforma = \App\Models\Proforma::find($proformaId);
-                                            if ($proforma) {
-                                                $set('descuento', $proforma->descuento ?? 0);
-                                                // Calcular precio de venta con descuento de la proforma
-                                                $precioLista = $departamento->Precio_lista ?? 0;
-                                                $descuento = $proforma->descuento ?? 0;
-                                                $precioVenta = $precioLista - (($descuento * $precioLista) / 100);
-                                                $set('precio_venta', $precioVenta);
-                                                $set('monto_separacion', $proforma->monto_separacion ?? 0);
-                                                $set('cuota_inicial', $proforma->monto_cuota_inicial ?? 0);
-                                            }
-                                        } else {
-                                            // Si no hay proforma, usar valores por defecto del departamento
-                                            $set('descuento', $departamento->descuento ?? 0);
-                                            $set('precio_venta', $departamento->Precio_venta ?? 0);
-                                            $set('monto_separacion', 0);
-                                            $set('cuota_inicial', ($departamento->Precio_venta ?? 0) * 0.2);
-                                        }
-                                    }
-                                }
-                            })
-                            ->columnSpan(3),
-
-                        TextInput::make('proyecto_nombre')->label('Proyecto')->disabled()->dehydrated(false),
-                        TextInput::make('departamento_nombre')->label('Inmueble')->disabled()->dehydrated(false),
-                        TextInput::make('precio_lista')
-                            ->label('Precio Lista')
-                            ->disabled()
-                            ->dehydrated(false)
-                            ->formatStateUsing(function ($state) {
-                                return $state ? number_format($state, 2) : '0.00';
-                            }),
-                        TextInput::make('descuento')->label('Descuento')->disabled()->dehydrated(false),
-                        TextInput::make('precio_venta')
-                            ->label('Precio Venta')
-                            ->disabled()
-                            ->dehydrated(false)
-                            /*
-                            ->formatStateUsing(function ($state) {
-                                return $state ? number_format($state, 2) : '0.00';
-                            })
-                                */
-                            ->reactive()
-                            ->afterStateUpdated(function (callable $set, callable $get) {
-    \App\Filament\Resources\Separaciones\SeparacionResource::actualizarSaldoFinanciar($set, $get);
-                            }),
-
-                        TextInput::make('monto_separacion')
-                            ->label('Monto de Separación')
-                            ->disabled()
-                            ->dehydrated(false)
-                            ->reactive()
-                            ->afterStateUpdated(function (callable $set, callable $get) {
-    \App\Filament\Resources\Separaciones\SeparacionResource::actualizarSaldoFinanciar($set, $get);
-                            }),
-
-                        TextInput::make('cuota_inicial')
-                            ->label('Monto de Cuota Inicial')
-                            ->disabled()
-                            ->dehydrated(false)
-                            ->reactive()
-                            ->afterStateUpdated(function (callable $set, callable $get) {
-    \App\Filament\Resources\Separaciones\SeparacionResource::actualizarSaldoFinanciar($set, $get);
-                            }),
-
-                        TextInput::make('saldo_financiar')
-                            ->label('Saldo a Financiar')
-                            ->disabled()
-                            ->dehydrated(false)
-                            ->reactive()
-                            ->afterStateHydrated(function (callable $set, callable $get) {
-                                \App\Filament\Resources\Separaciones\SeparacionResource::actualizarSaldoFinanciar($set, $get);
-                            }),
-                        DatePicker::make('fecha_vencimiento')
-                            ->label('Fecha de Vencimiento')
-                            ->displayFormat('d/m/Y')
-                            ->format('Y-m-d')
-                            ->nullable()
-                            ->default(now()),
-                    ]),
+                    // Tabla de propiedades de la proforma
+                    Forms\Components\ViewField::make('propiedades_tabla')
+                        ->label('Propiedades de la Proforma')
+                        ->view('filament.components.propiedades-tabla-separacion')
+                        ->columnSpan('full'),
+                        
+                    // Campos ocultos para mantener los datos necesarios
+                    Hidden::make('departamento_id'),
+                    Hidden::make('proyecto_nombre'),
+                    Hidden::make('departamento_nombre'),
+                    Hidden::make('precio_lista'),
+                    Hidden::make('descuento'),
+                    Hidden::make('precio_venta'),
+                    Hidden::make('monto_separacion'),
+                    Hidden::make('cuota_inicial'),
+                    Hidden::make('saldo_financiar'),
                     
+                    /*
+                    DatePicker::make('fecha_vencimiento')
+                        ->label('Fecha de Vencimiento')
+                        ->displayFormat('d/m/Y')
+                        ->format('Y-m-d')
+                        ->nullable()
+                        ->default(now()),
+                        */
                     // Botones de Cronograma - Visibles cuando hay una proforma seleccionada Y NO viene desde separación definitiva
                     Forms\Components\Placeholder::make('cronograma_actions')
                         ->label('')
