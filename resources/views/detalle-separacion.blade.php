@@ -30,9 +30,9 @@
                 <div class="flex">
                     <div class="bg-gray-400 text-white px-4 py-2 text-sm font-bold">Proforma</div>
                     <div class="bg-gray-100 px-4 py-2 text-xs border border-gray-300">
-                        <div><strong>Fecha Creación:</strong> {{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
-                        <div><strong>Fecha Proforma:</strong> {{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
-                        <div><strong>Fecha de Vencimiento:</strong> {{ $separacion->proforma->fecha_vencimiento ? $separacion->proforma->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
+                        <div><strong>Fecha Creación:</strong> {{ $proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Proforma:</strong> {{ $proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha de Vencimiento:</strong> {{ $proforma->fecha_vencimiento ? $proforma->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
                     </div>
                 </div>
                 
@@ -47,6 +47,7 @@
                 --}}
                 
                 <!-- Separación Definitiva -->
+                @if($separacion)
                 <div class="flex">
                     <div class="bg-yellow-500 text-white px-4 py-2 text-sm font-bold">Separación Definitiva</div>
                     <div class="bg-yellow-100 px-4 py-2 text-xs border border-yellow-300">
@@ -55,6 +56,14 @@
                         <div><strong>Fecha de Vencimiento:</strong> {{ $separacion->fecha_vencimiento ? $separacion->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
                     </div>
                 </div>
+                @else
+                <div class="flex">
+                    <div class="bg-gray-400 text-white px-4 py-2 text-sm font-bold">Separación Definitiva</div>
+                    <div class="bg-gray-100 px-4 py-2 text-xs border border-gray-300">
+                        <div>Sin separación registrada</div>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -65,8 +74,12 @@
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <div class="mb-2"><strong>Tipo Cotización:</strong> PRESENCIAL</div>
+                    @if($separacion)
                     <div class="mb-2"><strong>Etapa Comercial:</strong> SEPARACION DEFINITIVA*{{ str_pad($separacion->id, 6, '0', STR_PAD_LEFT) }}</div>
-                    <div class="mb-2"><strong>Vendedor:</strong> {{ $separacion->proforma->prospecto->nombres ?? 'N/A' }} {{ $separacion->proforma->prospecto->ape_paterno ?? '' }}</div>
+                    @else
+                    <div class="mb-2"><strong>Etapa Comercial:</strong> PROFORMA*{{ str_pad($proforma->id, 6, '0', STR_PAD_LEFT) }}</div>
+                    @endif
+                    <div class="mb-2"><strong>Vendedor:</strong> {{ $proforma->prospecto->nombres ?? 'N/A' }} {{ $proforma->prospecto->ape_paterno ?? '' }}</div>
                 </div>
                 <div>
                     <div class="mb-2"><strong>Tipo Financiamiento:</strong> {{ $departamento->tipoFinanciamiento->nombre ?? 'Contado' }}</div>
@@ -89,14 +102,14 @@
             </div>
 
             <!-- Información del cliente -->
-            @if($separacion->proforma)
+            @if($proforma)
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <h4 class="font-bold mb-3">Información del Cliente</h4>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><strong>Documento:</strong> {{ $separacion->proforma->tipoDocumento->nombre ?? 'N/A' }} - {{ $separacion->proforma->numero_documento }}</div>
-                    <div><strong>Nombres:</strong> {{ $separacion->proforma->nombres }} {{ $separacion->proforma->ape_paterno }} {{ $separacion->proforma->ape_materno }}</div>
-                    <div><strong>Email:</strong> {{ $separacion->proforma->email }}</div>
-                    <div><strong>Teléfono:</strong> {{ $separacion->proforma->celular }}</div>
+                    <div><strong>Documento:</strong> {{ $proforma->tipoDocumento->nombre ?? 'N/A' }} - {{ $proforma->numero_documento }}</div>
+                    <div><strong>Nombres:</strong> {{ $proforma->nombres }} {{ $proforma->ape_paterno }} {{ $proforma->ape_materno }}</div>
+                    <div><strong>Email:</strong> {{ $proforma->email }}</div>
+                    <div><strong>Teléfono:</strong> {{ $proforma->celular }}</div>
                 </div>
             </div>
             @endif

@@ -16,6 +16,44 @@ class CreateProforma extends CreateRecord
     {
         $proforma = $this->record;
 
+        // Crear el inmueble principal en la tabla proforma_inmuebles
+        if ($proforma->departamento_id) {
+            $departamento = \App\Models\Departamento::find($proforma->departamento_id);
+            if ($departamento) {
+                \App\Models\ProformaInmueble::create([
+                    'proforma_id' => $proforma->id,
+                    'departamento_id' => $proforma->departamento_id,
+                    'precio_lista' => $proforma->precio_lista,
+                    'precio_venta' => $proforma->precio_venta,
+                    'descuento' => $proforma->descuento,
+                    'monto_separacion' => $proforma->monto_separacion,
+                    'monto_cuota_inicial' => $proforma->monto_cuota_inicial,
+                    'orden' => 1,
+                    'es_principal' => true,
+                ]);
+            }
+        }
+
+        // Crear inmuebles adicionales si existen
+        $formData = $this->form->getState();
+        if (isset($formData['inmuebles_adicionales']) && is_array($formData['inmuebles_adicionales'])) {
+            foreach ($formData['inmuebles_adicionales'] as $index => $inmuebleData) {
+                if (isset($inmuebleData['departamento_id'])) {
+                    \App\Models\ProformaInmueble::create([
+                        'proforma_id' => $proforma->id,
+                        'departamento_id' => $inmuebleData['departamento_id'],
+                        'precio_lista' => $inmuebleData['precio_lista'] ?? 0,
+                        'precio_venta' => $inmuebleData['precio_venta'] ?? 0,
+                        'descuento' => $inmuebleData['descuento'] ?? null,
+                        'monto_separacion' => $inmuebleData['monto_separacion'] ?? null,
+                        'monto_cuota_inicial' => $inmuebleData['monto_cuota_inicial'] ?? 0,
+                        'orden' => $index + 2, // Empezar desde 2 porque el principal es 1
+                        'es_principal' => false,
+                    ]);
+                }
+            }
+        }
+
         // Cargar la relación del prospecto si no está cargada
         if (!$proforma->relationLoaded('prospecto')) {
             $proforma->load('prospecto');
@@ -134,6 +172,12 @@ class CreateProforma extends CreateRecord
 
                 // Asignar fecha de vencimiento (fecha actual + 2 días)
                 $formData['fecha_vencimiento'] = now()->addDays(2)->format('Y-m-d');
+
+                // Agregar 2 items por defecto para inmuebles adicionales
+                $formData['inmuebles_adicionales'] = [
+                    ['departamento_id' => null, 'precio_lista' => null, 'precio_venta' => null, 'separacion' => null, 'cuota_inicial' => null],
+                    ['departamento_id' => null, 'precio_lista' => null, 'precio_venta' => null, 'separacion' => null, 'cuota_inicial' => null]
+                ];
 
                 // Llenar el formulario con los datos del prospecto
                 $this->form->fill($formData);

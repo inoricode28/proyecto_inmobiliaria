@@ -66,7 +66,7 @@ class PanelSeguimientoResource extends Resource
                             : ($prospecto->razon_social ?? '-');
                     })
                     ->url(fn ($record) => PanelSeguimientoResource::getUrl('view', ['record' => $record->prospecto_id]))
-                    ->openUrlInNewTab()
+                    //->openUrlInNewTab()
                     ->searchable(),
 
                 TextColumn::make('prospecto.celular')
@@ -434,8 +434,8 @@ class PanelSeguimientoResource extends Resource
                         ->visible(fn ($record) => in_array($record->prospecto?->tipo_gestion_id, [1, 2, 3, 4, 5]))
                         ->url(fn ($record) =>
                             ProformaResource::getUrl('create', ['prospecto_id' => $record->prospecto->id])
-                        )
-                        ->openUrlInNewTab(),
+                        ),
+                        //->openUrlInNewTab(),
                     Action::make('separacion')
                         ->label('Separación')
                         ->icon('heroicon-o-badge-check')
@@ -445,8 +445,8 @@ class PanelSeguimientoResource extends Resource
                         ->visible(fn ($record) => $record->prospecto?->tipo_gestion_id === 5)
                         ->url(fn ($record) =>
                             SeparacionResource::getUrl('create', ['prospecto_id' => $record->prospecto->id])
-                        )
-                        ->openUrlInNewTab(),
+                         ),
+                        //->openUrlInNewTab(),
                     ],
                 position: \Filament\Tables\Actions\Position::BeforeColumns);
     }

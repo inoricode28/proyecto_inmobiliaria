@@ -234,7 +234,7 @@ class CreateSeparacion extends CreateRecord
             }
 
             // Buscar si hay pagos de separación temporales para esta proforma
-            $pagosTemporales = \DB::table('pagos_separacion')
+            $pagosTemporales = DB::table('pagos_separacion')
                 ->where('proforma_id', $proforma->id)
                 ->whereNull('separacion_id')
                 ->get();
@@ -247,7 +247,7 @@ class CreateSeparacion extends CreateRecord
                     'pagos_count' => $pagosTemporales->count()
                 ]);
                 
-                \DB::table('pagos_separacion')
+                DB::table('pagos_separacion')
                     ->where('proforma_id', $proforma->id)
                     ->whereNull('separacion_id')
                     ->update([

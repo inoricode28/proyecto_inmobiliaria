@@ -47,6 +47,104 @@ use App\Filament\Resources\Proforma\ProformaResource; // <- Ajusta el namespace 
         </div>
     </div>
 
+    {{-- Sección de Proformas del Prospecto --}}
+    @if($prospecto->proformas->isNotEmpty())
+    <div class="mt-8 mb-6">
+        <x-filament::card>
+            <x-slot name="heading">
+                Operaciones Comerciales
+            </x-slot>
+
+            <div class="space-y-4">
+                @foreach($prospecto->proformas as $proforma)
+                    <div class="border border-gray-300 rounded-lg overflow-hidden bg-white">
+                        <!-- Header colapsible -->
+                        <div class="bg-gray-100 px-4 py-3 cursor-pointer hover:bg-gray-200 transition-colors" 
+                             onclick="toggleProforma('proforma-{{ $proforma->id }}')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-blue-600 font-medium" id="arrow-{{ $proforma->id }}">▼</span>
+                                    <a href="/Proforma/DetalleProforma/{{ $proforma->id }}" 
+                                        target="_blank"
+                                        class="text-blue-600 hover:text-blue-800 font-medium"
+                                        onclick="event.stopPropagation()">
+                                         Proforma N° {{ str_pad($proforma->id, 6, '0', STR_PAD_LEFT) }} - {{ $proforma->created_at->format('d/m/Y H:i') }}
+                                     </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contenido colapsible -->
+                        <div id="proforma-{{ $proforma->id }}" class="px-4 py-3 border-t border-gray-200">
+                            <div class="text-sm text-gray-700 space-y-1">
+                                <div><strong>Proyecto:</strong> {{ $proforma->proyecto->nombre ?? 'N/A' }}</div>
+                                <div><strong>Vendedor:</strong> {{ $proforma->prospecto->nombres ?? 'N/A' }} {{ $proforma->prospecto->ape_paterno ?? '' }}</div>
+                                
+                                <!-- Inmuebles -->
+                                @if($proforma->proformaInmuebles && $proforma->proformaInmuebles->count() > 0)
+                                    @foreach($proforma->proformaInmuebles as $proformaInmueble)
+                                        @if($proformaInmueble->departamento)
+                                            <div class="ml-4 mt-2">
+                                                <div class="text-gray-800">
+                                                    • <strong>Edificio:</strong> {{ $proformaInmueble->departamento->edificio->nombre ?? 'N/A' }} - <strong>Departamento N°:</strong> {{ $proformaInmueble->departamento->num_departamento }}
+                                                </div>
+                                                <div class="text-gray-600 text-sm ml-2">
+                                                    Proyecto: {{ $proformaInmueble->departamento->proyecto->nombre ?? 'N/A' }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                @elseif($proforma->departamento)
+                                    <!-- Fallback para proformas que usan el campo departamento_id directamente -->
+                                    <div class="ml-4 mt-2">
+                                        <div class="text-gray-800">
+                                            • <strong>Edificio:</strong> {{ $proforma->departamento->edificio->nombre ?? 'N/A' }} - <strong>Departamento N°:</strong> {{ $proforma->departamento->num_departamento }}
+                                        </div>
+                                       
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <script>
+                function toggleProforma(id) {
+                    const content = document.getElementById(id);
+                    const arrow = document.getElementById('arrow-' + id.split('-')[1]);
+                    
+                    if (content.style.display === 'none') {
+                        content.style.display = 'block';
+                        arrow.textContent = '▼';
+                    } else {
+                        content.style.display = 'none';
+                        arrow.textContent = '▶';
+                    }
+                }
+                
+                // Inicializar todos los elementos como expandidos
+                document.addEventListener('DOMContentLoaded', function() {
+                    @foreach($prospecto->proformas as $proforma)
+                        document.getElementById('proforma-{{ $proforma->id }}').style.display = 'block';
+                    @endforeach
+                });
+            </script>
+        </x-filament::card>
+    </div>
+    @else
+    <div class="mt-8 mb-6">
+        <x-filament::card>
+            <x-slot name="heading">
+                Operaciones Comerciales
+            </x-slot>
+            <div class="text-center py-8 text-gray-500">
+                <p>No hay proformas asociadas a este prospecto.</p>
+            </div>
+        </x-filament::card>
+    </div>
+    @endif
+
     <div class="flex flex-wrap gap-3 mb-6">
         <a href="{{ ProformaResource::getUrl('create', ['numero_documento' => $prospecto->numero_documento]) }}"
             target="_blank"

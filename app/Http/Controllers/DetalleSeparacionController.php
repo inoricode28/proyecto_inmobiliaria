@@ -30,12 +30,9 @@ class DetalleSeparacionController extends Controller
             abort(404, 'No se encontró la proforma especificada');
         }
         
-        if (!$proforma->separacion) {
-            abort(404, 'No se encontró información de separación para esta proforma');
-        }
-
+        // Permitir acceso sin importar si tiene separación o no
         $departamento = $proforma->departamento;
-        $separacion = $proforma->separacion;
+        $separacion = $proforma->separacion; // Puede ser null
 
         return view('detalle-separacion', compact('departamento', 'separacion', 'proforma'));
     }

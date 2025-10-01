@@ -11,7 +11,7 @@ use Filament\Resources\Form;
 use Filament\Resources\Table;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Components\{Grid, TextInput, Select, DatePicker, Textarea, FileUpload};
+use Filament\Forms\Components\{Grid, TextInput, Select, DatePicker, Textarea, FileUpload, Repeater};
 use Filament\Forms\Components\Hidden;
 use App\Filament\Resources\Proforma\ProformaResource\Pages;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -202,7 +202,7 @@ class ProformaResource extends Resource
                     ]),
 
                     Tab::make('Inmueble')->schema([
-                        Grid::make(3)->schema([
+                        Grid::make(2)->schema([
                             // PROYECTO
                             Select::make('proyecto_id')
                                 ->label('Proyecto')
@@ -211,9 +211,9 @@ class ProformaResource extends Resource
                                 ->reactive()
                                 ->afterStateUpdated(fn ($set) => $set('departamento_id', null)),
 
-                            // DEPARTAMENTO
+                            // DEPARTAMENTO PRINCIPAL
                             Select::make('departamento_id')
-                                ->label('Inmueble')
+                                ->label('Inmueble Principal')
                                 ->options(function ($get) {
                                     $proyectoId = $get('proyecto_id');
                                     if (!$proyectoId) return [];
@@ -250,7 +250,10 @@ class ProformaResource extends Resource
                                         }
                                     }
                                 }),
+                        ]),
 
+                        // Campos del inmueble principal
+                        Grid::make(3)->schema([
                             // CAMPOS AUTOCOMPLETADOS
                             TextInput::make('precio_lista')
                                 ->label('Precio Lista')
@@ -358,9 +361,121 @@ class ProformaResource extends Resource
                                 ->format('Y-m-d')
                                 ->nullable()
                                 ->default(now()->addDays(2)),
+                        ]),
 
+                        // Inmuebles Adicionales
+                        Repeater::make('inmuebles_adicionales')
+                            ->label('Inmuebles Adicionales')
+                            ->schema([
+                                Grid::make(3)->schema([
+                                    Select::make('departamento_id')
+                                        ->label('Inmueble')
+                                        ->options(function ($get) {
+                                            $proyectoId = $get('../../proyecto_id');
+                                            if (!$proyectoId) return [];
 
-                        ])
+                                            return \App\Models\Departamento::with(['edificio', 'tipoInmueble', 'estadoDepartamento'])
+                                                ->where('proyecto_id', $proyectoId)
+                                                ->whereHas('estadoDepartamento', function ($query) {
+                                                    $query->where('nombre', 'Disponible');
+                                                })
+                                                ->get()
+                                                ->mapWithKeys(function ($departamento) {
+                                                    $label = "EDIFICIO: {$departamento->edificio->nombre} - " .
+                                                            "TIPO: {$departamento->tipoInmueble->nombre} - " .
+                                                            "NRO: {$departamento->num_departamento} - " .
+                                                            "CANT. HAB.: {$departamento->num_dormitorios}";
+                                                    return [$departamento->id => $label];
+                                                })
+                                                ->toArray();
+                                        })
+                                        ->searchable()
+                                        //->required()
+                                        ->reactive()
+                                        ->afterStateUpdated(function (callable $set, $state) {
+                                            if ($state) {
+                                                $departamento = \App\Models\Departamento::find($state);
+                                                if ($departamento) {
+                                                    $set('precio_lista', $departamento->Precio_lista);
+                                                    $set('precio_venta', $departamento->Precio_venta);
+                                                    $set('descuento', null);
+                                                    $montoCuotaInicial = $departamento->Precio_venta * 0.10;
+                                                    $set('monto_cuota_inicial', $montoCuotaInicial);
+                                                }
+                                            }
+                                        }),
+
+                                    TextInput::make('precio_lista')
+                                        ->label('Precio Lista')
+                                        ->disabled()
+                                        ->dehydrated(false),
+
+                                    TextInput::make('precio_venta')
+                                        ->label('Precio Venta')
+                                        ->numeric()
+                                        ->disabled()
+                                        ->dehydrated(),
+                                ]),
+
+                                Grid::make(3)->schema([
+                                    TextInput::make('descuento')
+                                        ->label('Descuento (%)')
+                                        ->numeric()
+                                        ->nullable()
+                                        ->minValue(0)
+                                        ->maxValue(5)
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            $precioLista = $get('precio_lista');
+                                            $departamentoId = $get('departamento_id');
+                                            
+                                            if ($precioLista && is_numeric($precioLista) && $departamentoId) {
+                                                $departamento = \App\Models\Departamento::find($departamentoId);
+                                                
+                                                if ($state !== null && is_numeric($state)) {
+                                                    $descuento = floatval($state);
+                                                    
+                                                    if ($descuento == 0) {
+                                                        $set('precio_venta', $precioLista);
+                                                    } else {
+                                                        $montoDescuento = $precioLista * ($descuento / 100);
+                                                        $nuevoPrecioVenta = $precioLista - $montoDescuento;
+                                                        $set('precio_venta', $nuevoPrecioVenta);
+                                                    }
+                                                    
+                                                    $precioVenta = $get('precio_venta');
+                                                    if ($precioVenta) {
+                                                        $montoCuotaInicial = $precioVenta * 0.10;
+                                                        $set('monto_cuota_inicial', $montoCuotaInicial);
+                                                    }
+                                                } else {
+                                                    if ($departamento) {
+                                                        $set('precio_venta', $departamento->Precio_venta);
+                                                        $montoCuotaInicial = $departamento->Precio_venta * 0.10;
+                                                        $set('monto_cuota_inicial', $montoCuotaInicial);
+                                                    }
+                                                }
+                                            }
+                                        }),
+
+                                    TextInput::make('monto_separacion')
+                                        ->label('Monto de Separación')
+                                        ->numeric()
+                                        ->minValue(500)
+                                        ->maxValue(2000),
+
+                                    TextInput::make('monto_cuota_inicial')
+                                        ->label('Monto de Cuota Inicial')
+                                        ->numeric()
+                                        ->disabled()
+                                        ->dehydrated(),
+                                ]),
+                            ])
+                            ->collapsible()
+                            ->createItemButtonLabel('Agregar Inmueble Adicional')
+                            ->defaultItems(2)
+                            ->minItems(0)
+                            ->maxItems(10),
                     ]),
 
                     Tab::make('Observaciones')->schema([

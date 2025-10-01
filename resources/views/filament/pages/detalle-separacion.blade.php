@@ -121,12 +121,12 @@
     <div class="space-y-6">
         <!-- Botones superiores -->
         <div class="flex gap-2 mb-6">
-            @if(!$tieneVenta)
+            @if($separacion && !$tieneVenta)
                 <x-filament::button color="primary" x-data="{}"
                     x-on:click="$dispatch('open-modal', { id: 'confirmar-venta-modal' })">
                     PASAR A VENTA
                 </x-filament::button>
-            @else
+            @elseif($separacion)
                 @if($entregaExistente)
                     {{-- Si ya existe una entrega, ir al formulario de edición --}}
                     <x-filament::button color="warning" tag="a"
@@ -143,7 +143,7 @@
             @endif
             
             <x-filament::button color="gray" tag="a"
-                href="{{ route('filament.resources.panel-seguimiento.view-prospecto-info', ['record' => $separacion->proforma->prospecto->id ?? $separacion->proforma->id]) }}">
+                href="{{ route('filament.resources.panel-seguimiento.view-prospecto-info', ['record' => $separacion?->proforma?->prospecto?->id ?? $proforma->prospecto?->id ?? $proforma->id]) }}">
                 Información del Contacto
             </x-filament::button>
             
@@ -176,9 +176,11 @@
                 <div class="breadcrumb-step">
                     Visita
                 </div>
+                @if($separacion)
                 <div class="breadcrumb-step active">
                     Separación Definitiva
                 </div>
+                @endif
                 @if($tieneVenta)
                 <div class="breadcrumb-step" style="background: #4ac204;">
                     Venta
@@ -192,14 +194,14 @@
             </div>
 
             <!-- Date Details -->
-            <div class="grid {{ $entregaExistente ? 'grid-cols-5' : ($tieneVenta ? 'grid-cols-4' : 'grid-cols-3') }} gap-4">
+            <div class="grid {{ $entregaExistente ? 'grid-cols-5' : ($tieneVenta ? 'grid-cols-4' : ($separacion ? 'grid-cols-3' : 'grid-cols-2')) }} gap-4">
                 <!-- Proforma Details -->
                 <div class="bg-gray-100 p-4 rounded border">
                     <h4 class="font-bold text-gray-700 mb-2">Proforma</h4>
                     <div class="text-xs space-y-1">
-                        <div><strong>Fecha Creación:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
-                        <div><strong>Fecha Proforma:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
-                        <div><strong>Fecha de Vencimiento:</strong><br>{{ $separacion->proforma->fecha_vencimiento ? $separacion->proforma->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
+                        <div><strong>Fecha Creación:</strong><br>{{ $proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Proforma:</strong><br>{{ $proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha de Vencimiento:</strong><br>{{ $proforma->fecha_vencimiento ? $proforma->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
                     </div>
                 </div>
 
@@ -207,11 +209,12 @@
                 <div class="bg-gray-100 p-4 rounded border">
                     <h4 class="font-bold text-gray-700 mb-2">Visita</h4>
                     <div class="text-xs space-y-1">
-                        <div><strong>Fecha Visita:</strong><br>{{ $separacion->proforma->created_at->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Visita:</strong><br>{{ $proforma->created_at->format('d/m/Y H:i') }}</div>
                     </div>
                 </div>
 
                 <!-- Separación Definitiva Details -->
+                @if($separacion)
                 <div class="bg-orange-100 p-4 rounded border">
                     <h4 class="font-bold text-orange-700 mb-2">Separación Definitiva</h4>
                     <div class="text-xs space-y-1">
@@ -220,6 +223,7 @@
                         <div><strong>Fecha de Vencimiento:</strong><br>{{ $separacion->fecha_vencimiento ? $separacion->fecha_vencimiento->format('d/m/Y H:i') : 'N/A' }}</div>
                     </div>
                 </div>
+                @endif
                 
                 @if($tieneVenta)
                 <!-- Venta Details -->
@@ -260,18 +264,29 @@
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <div class="mb-2"><strong>Tipo Cotización:</strong> PRESENCIAL</div>
+                    @if($separacion)
                     <div class="mb-2"><strong>Etapa Comercial:</strong> SEPARACION
                         DEFINITIVA*{{ str_pad($separacion->id, 6, '0', STR_PAD_LEFT) }}</div>
+                    @else
+                    <div class="mb-2"><strong>Etapa Comercial:</strong> PROFORMA*{{ str_pad($proforma?->id ?? 0, 6, '0', STR_PAD_LEFT) }}</div>
+                    @endif
                     <div class="mb-2"><strong>Vendedor:</strong>
-                        {{ $separacion->proforma->prospecto->nombres ?? 'N/A' }}
-                        {{ $separacion->proforma->prospecto->ape_paterno ?? '' }}</div>
+                        {{ $proforma?->prospecto?->nombres ?? 'N/A' }}
+                        {{ $proforma?->prospecto?->ape_paterno ?? '' }}</div>
                 </div>
                 <div>
+                    @if($separacion)
                     <div class="mb-2"><strong>Fecha Separación:</strong> {{ $separacion->created_at->format('d/m/Y') }}
                     </div>
                     <div class="mb-2"><strong>Monto Separación:</strong> S/
                         {{ number_format($separacion->monto_separacion ?? 0, 2) }}</div>
                     <div class="mb-2"><strong>Estado:</strong> {{ $separacion->estado ?? 'ACTIVO' }}</div>
+                    @else
+                    <div class="mb-2"><strong>Fecha Proforma:</strong> {{ $proforma->created_at->format('d/m/Y') }}
+                    </div>
+                    <div class="mb-2"><strong>Monto Separación:</strong> S/ 0.00</div>
+                    <div class="mb-2"><strong>Estado:</strong> SIN SEPARACION</div>
+                    @endif
                 </div>
             </div>
         </x-filament::card>
@@ -379,17 +394,17 @@
         <div class="tab-content active" id="cliente-content">
 
             <!-- Información del cliente -->
-            @if($separacion->proforma)
+            @if($proforma)
             <x-filament::card>
                 <x-slot name="heading">
-                    Titular: {{ $separacion->proforma->nombres }} {{ $separacion->proforma->ape_paterno }}
-                    {{ $separacion->proforma->ape_materno }}
+                    Titular: {{ $proforma->nombres }} {{ $proforma->ape_paterno }}
+                    {{ $proforma->ape_materno }}
                 </x-slot>
 
                 <div class="text-sm text-gray-600 mb-4">
-                    {{ $separacion->proforma->tipoDocumento->nombre ?? 'DNI' }}
-                    {{ $separacion->proforma->numero_documento }}
-                    ({{ $separacion->proforma->nacionalidad->nombre ?? 'PERU' }})
+                    {{ $proforma->tipoDocumento->nombre ?? 'DNI' }}
+                    {{ $proforma->numero_documento }}
+                    ({{ $proforma->nacionalidad->nombre ?? 'PERU' }})
                 </div>
 
                 <div class="grid grid-cols-3 gap-6">
@@ -398,12 +413,12 @@
                         <h4 class="text-blue-600 font-semibold mb-3 border-l-4 border-blue-500 pl-3">Contacto</h4>
                         <div class="space-y-2 text-sm">
                             <div><strong>Teléfono Casa:</strong></div>
-                            <div><strong>Celular:</strong> {{ $separacion->proforma->celular ?? '' }} /</div>
-                            <div><strong>Email:</strong> {{ $separacion->proforma->email ?? '' }}</div>
+                            <div><strong>Celular:</strong> {{ $proforma->celular ?? '' }} /</div>
+                            <div><strong>Email:</strong> {{ $proforma->email ?? '' }}</div>
                             <div><strong>Fecha Nac.:</strong>
-                                {{ $separacion->proforma->fecha_nacimiento ? \Carbon\Carbon::parse($separacion->proforma->fecha_nacimiento)->format('d/m/Y') : '' }}
+                                {{ $proforma->fecha_nacimiento ? \Carbon\Carbon::parse($proforma->fecha_nacimiento)->format('d/m/Y') : '' }}
                             </div>
-                            <div><strong>Dirección:</strong> {{ $separacion->proforma->direccion ?? '' }}</div>
+                            <div><strong>Dirección:</strong> {{ $proforma->direccion ?? '' }}</div>
                             <div><strong>Dirección Adicional:</strong></div>
                         </div>
                     </div>
@@ -413,8 +428,8 @@
                         <h4 class="text-blue-600 font-semibold mb-3 border-l-4 border-blue-500 pl-3">Otros datos</h4>
                         <div class="space-y-2 text-sm">
                             <div><strong>Estado Civil:</strong>
-                                {{ $separacion->proforma->estadoCivil->nombre ?? 'Casado(a)' }}</div>
-                            <div><strong>Género:</strong> {{ $separacion->proforma->genero->nombre ?? 'Masculino' }}
+                                {{ $proforma->estadoCivil->nombre ?? 'Casado(a)' }}</div>
+                            <div><strong>Género:</strong> {{ $proforma->genero->nombre ?? 'Masculino' }}
                             </div>
                             <div><strong>Separación de Bienes:</strong> No</div>
                             <div><strong>Con Poderes:</strong> No</div>
@@ -430,8 +445,8 @@
                         </h4>
                         <div class="space-y-2 text-sm">
                             <div><strong>Ocupación:</strong></div>
-                            <div><strong>Profesión:</strong> {{ $separacion->proforma->profesion ?? 'Docente' }}</div>
-                            <div><strong>Puesto:</strong> {{ $separacion->proforma->puesto ?? 'Cirujano dentista' }}
+                            <div><strong>Profesión:</strong> {{ $proforma->profesion ?? 'Docente' }}</div>
+                            <div><strong>Puesto:</strong> {{ $proforma->puesto ?? 'Cirujano dentista' }}
                             </div>
                             <div><strong>Categoría:</strong> 0 °</div>
                             <div><strong>RUC:</strong></div>
@@ -615,6 +630,7 @@
 
         <!-- Cronograma SF Tab Content -->
         <div class="tab-content" id="cronograma-sf-content">
+            @if($separacion)
             <x-filament::card>
                 <x-slot name="heading">
                     Cronograma de Saldo a Financiar
@@ -623,7 +639,7 @@
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-4">
                         <div class="text-sm text-gray-600">
-                            <strong>Separación ID:</strong> {{ $separacion->id }}
+                            <strong>Separación ID:</strong> {{ $separacion?->id ?? 'N/A' }}
                         </div>
                         <button type="button" 
                                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm"
@@ -685,6 +701,17 @@
                     </div>
                 </div>
             </x-filament::card>
+            @else
+            <x-filament::card>
+                <x-slot name="heading">
+                    Cronograma de Saldo a Financiar
+                </x-slot>
+                <div class="p-6 text-center text-gray-500">
+                    <p>No hay separación registrada.</p>
+                    <p class="text-sm mt-2">El cronograma de saldo a financiar estará disponible una vez que se registre una separación definitiva.</p>
+                </div>
+            </x-filament::card>
+            @endif
         </div>
     </div>
 
@@ -727,8 +754,12 @@
 
     // Función para cargar el cronograma de saldo a financiar
     function loadCronogramaSF() {
-        const separacionId = {{ $separacion->id }};
+        const separacionId = {{ $separacion?->id ?? 'null' }};
         
+        if (separacionId === null) {
+            alert('No hay separación disponible');
+            return;
+        }
         // Cargar cuotas temporales
         fetch(`/cronograma/sf/temporales/${separacionId}`)
             .then(response => response.json())
@@ -876,7 +907,13 @@
         }));
 
         // Redirigir al formulario de creación de venta con la separación preseleccionada
-        const separacionId = '{{ $separacion->id }}';
+        const separacionId = '{{ $separacion?->id ?? '' }}';
+        
+        if (!separacionId) {
+            alert('No hay separación disponible');
+            return;
+        }
+        
         const createVentaUrl = '/ventas/create?separacion_id=' + separacionId;
         window.location.href = createVentaUrl;
     }

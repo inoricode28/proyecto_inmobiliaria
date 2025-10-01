@@ -47,16 +47,13 @@ class DetalleSeparacion extends Page
         if (!$this->proforma) {
             abort(404, 'No se encontró la proforma especificada');
         }
-        
-        if (!$this->proforma->separacion) {
-            abort(404, 'No se encontró información de separación para esta proforma');
-        }
 
+        // Permitir acceso sin importar si tiene separación o no
         $this->departamento = $this->proforma->departamento;
-        $this->separacion = $this->proforma->separacion;
+        $this->separacion = $this->proforma->separacion; // Puede ser null
         
         // Verificar si la separación tiene una venta asociada
-        $this->tieneVenta = $this->separacion->venta !== null;
+        $this->tieneVenta = $this->separacion && $this->separacion->venta !== null;
         
         // Verificar si ya existe una entrega para esta venta
         if ($this->tieneVenta && $this->separacion->venta) {

@@ -14,8 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('pagos_separacion', function (Blueprint $table) {
-            $table->unsignedBigInteger('proforma_id')->nullable()->after('separacion_id');
-            $table->foreign('proforma_id')->references('id')->on('proformas')->onDelete('set null');
+            if (!Schema::hasColumn('pagos_separacion', 'proforma_id')) {
+                $table->unsignedBigInteger('proforma_id')->nullable()->after('separacion_id');
+                $table->foreign('proforma_id')->references('id')->on('proformas')->onDelete('set null');
+            }
         });
     }
 
@@ -27,8 +29,10 @@ return new class extends Migration
     public function down()
     {
         Schema::table('pagos_separacion', function (Blueprint $table) {
-            $table->dropForeign(['proforma_id']);
-            $table->dropColumn('proforma_id');
+            if (Schema::hasColumn('pagos_separacion', 'proforma_id')) {
+                $table->dropForeign(['proforma_id']);
+                $table->dropColumn('proforma_id');
+            }
         });
     }
 };

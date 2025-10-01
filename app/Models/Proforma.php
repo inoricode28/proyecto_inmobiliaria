@@ -102,6 +102,30 @@ class Proforma extends Model
         return $this->belongsTo(Departamento::class);
     }
 
+    /**
+     * Relación con múltiples inmuebles a través de la tabla intermedia
+     */
+    public function inmuebles()
+    {
+        return $this->hasMany(ProformaInmueble::class)->ordenado();
+    }
+
+    /**
+     * Obtener el inmueble principal (para compatibilidad con código existente)
+     */
+    public function inmueblePrincipal()
+    {
+        return $this->hasOne(ProformaInmueble::class)->principal();
+    }
+
+    /**
+     * Obtener inmuebles adicionales
+     */
+    public function inmueblesAdicionales()
+    {
+        return $this->hasMany(ProformaInmueble::class)->adicionales()->ordenado();
+    }
+
     public function documentos()
     {
         return $this->hasMany(ProformaDocumento::class);

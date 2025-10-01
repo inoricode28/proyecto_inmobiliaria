@@ -14,9 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::table('cronogramas_saldo_financiar', function (Blueprint $table) {
-            // Cambiar el campo tipo_comprobante de string a foreign key
-            $table->dropColumn('tipo_comprobante');
-            $table->foreignId('tipo_comprobante_id')->nullable()->constrained('tipos_comprobante')->after('banco_id');
+            // Verificar si la columna tipo_comprobante existe antes de eliminarla
+            if (Schema::hasColumn('cronogramas_saldo_financiar', 'tipo_comprobante')) {
+                $table->dropColumn('tipo_comprobante');
+            }
+            
+            // Verificar si la columna tipo_comprobante_id no existe antes de agregarla
+            if (!Schema::hasColumn('cronogramas_saldo_financiar', 'tipo_comprobante_id')) {
+                $table->foreignId('tipo_comprobante_id')->nullable()->constrained('tipos_comprobante')->after('banco_id');
+            }
         });
     }
 
