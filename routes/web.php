@@ -62,6 +62,15 @@ Route::get('/Proforma/DetalleProforma/{proforma_id}', \App\Filament\Pages\Detall
 Route::get('/detalle-separacion/{proforma_id}', [\App\Http\Controllers\DetalleSeparacionController::class, 'show'])
     ->name('detalle-separacion.show');
 
+// Rutas para separaciones múltiples
+Route::post('/separaciones/multiple', [\App\Http\Controllers\SeparacionController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('separaciones.create-multiple');
+
+Route::get('/separaciones/multiple/info', [\App\Http\Controllers\SeparacionController::class, 'getMultipleSeparacionesInfo'])
+    ->middleware(['auth', 'verified'])
+    ->name('separaciones.multiple-info');
+
 Route::get('/download/temp/{filename}', function ($filename) {
     $path = storage_path('app/temp/' . $filename);
     

@@ -203,7 +203,19 @@ class SeparacionResource extends Resource
                             return new \Illuminate\Support\HtmlString('
                                 <div class="flex gap-2">
                                     <button type="button" 
-                                            onclick="window.dispatchEvent(new CustomEvent(\'open-modal\', { detail: { id: \'cronograma-modal\' } }))"
+                                            onclick="console.log(\'🔥 Botón CRONOGRAMA C.I. clickeado\'); 
+                                                     console.log(\'🔍 Verificando función:\', typeof window.openCronogramaModal);
+                                                     if(typeof window.openCronogramaModal === \'function\') { 
+                                                         console.log(\'✅ Función encontrada, ejecutando...\'); 
+                                                         try {
+                                                             window.openCronogramaModal(); 
+                                                             console.log(\'✅ openCronogramaModal ejecutada sin errores\');
+                                                         } catch(error) {
+                                                             console.error(\'❌ Error al ejecutar openCronogramaModal:\', error);
+                                                         }
+                                                     } else { 
+                                                         console.error(\'❌ Función openCronogramaModal no encontrada\'); 
+                                                     }"
                                             class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                             style="display: ' . $display . ';">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

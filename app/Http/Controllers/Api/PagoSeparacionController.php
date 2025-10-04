@@ -771,6 +771,47 @@ class PagoSeparacionController extends Controller
     }
 
     /**
+     * Obtener propiedades con separación
+     */
+    public function getPropiedadesConSeparacion()
+    {
+        try {
+            $propiedades = DB::table('inmuebles as i')
+                ->join('departamentos as d', 'i.departamento_id', '=', 'd.id')
+                ->join('proyectos as p', 'd.proyecto_id', '=', 'p.id')
+                ->leftJoin('tipo_inmueble as ti', 'd.tipo_inmueble_id', '=', 'ti.id')
+                ->select(
+                    'i.id as inmueble_id',
+                    'd.id as departamento_id',
+                    'p.nombre as proyecto',
+                    'd.num_departamento as numero',
+                    'ti.nombre as tipo',
+                    'd.num_dormitorios as dormitorios',
+                    'd.construida as area',
+                    'd.Precio_lista as precio',
+                    'i.descuento',
+                    'i.monto_separacion as separacion',
+                    'i.monto_cuota_inicial as cuotaInicial',
+                    'i.separacion_id'
+                )
+                ->whereNotNull('i.separacion_id')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $propiedades,
+                'message' => 'Propiedades con separación obtenidas exitosamente'
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener propiedades: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Descargar comprobante de pago
      */
     public function descargarComprobante($id)

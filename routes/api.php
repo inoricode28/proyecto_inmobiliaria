@@ -49,6 +49,12 @@ Route::prefix('pagos-separacion')->group(function () {
     Route::get('/comprobante/{id}', [PagoSeparacionController::class, 'descargarComprobante']);
 });
 
+// Ruta para propiedades con separación
+Route::get('/propiedades-separacion', [PagoSeparacionController::class, 'getPropiedadesConSeparacion']);
+
+// Ruta para obtener propiedades de una proforma con información de separación
+Route::get('/propiedades-con-separacion', [ProformaController::class, 'getPropiedadesConSeparacion']);
+
 // Ruta para obtener información de separación
 Route::get('/separacion/{separacion_id}/info', [PagoSeparacionController::class, 'getSeparacionInfo']);
 

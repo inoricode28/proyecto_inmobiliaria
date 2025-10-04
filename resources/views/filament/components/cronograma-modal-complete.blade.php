@@ -118,7 +118,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Función para abrir el modal y cargar datos
-    window.openCronogramaModal = function() {
+    window.openCronogramaModal = async function() {
+        console.log('🎯 Abriendo modal del cronograma');
+        console.log('🔍 Estado actual de window.multiplePropertiesData:', window.multiplePropertiesData);
+        
+        // Si no hay datos de múltiples propiedades, intentar obtenerlos
+        if (!window.multiplePropertiesData && typeof getMultiplePropertiesData === 'function') {
+            console.log('🔄 Intentando obtener datos de múltiples propiedades...');
+            try {
+                const multipleData = getMultiplePropertiesData();
+                console.log('📊 Datos obtenidos:', multipleData);
+                
+                if (multipleData && multipleData.properties && multipleData.properties.length > 0) {
+                    // Crear separaciones si es necesario
+                    if (typeof createMultipleSeparaciones === 'function') {
+                        console.log('🔄 Creando separaciones múltiples...');
+                        await createMultipleSeparaciones(multipleData);
+                    }
+                    
+                    window.multiplePropertiesData = multipleData;
+                    console.log('✅ window.multiplePropertiesData establecido:', window.multiplePropertiesData);
+                }
+            } catch (error) {
+                console.error('❌ Error al obtener datos múltiples:', error);
+            }
+        }
+        
         const modal = document.getElementById('cronograma-modal');
         if (modal) {
             modal.classList.remove('hidden');
@@ -128,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadExistingCuotas(); // Cargar cuotas existentes PRIMERO
                 loadProformaData();   // Luego cargar datos de proforma (sin generar cuota por defecto si ya hay cuotas)
                 setDefaultDate();
-            }, 100); // Pequeño delay para asegurar que el DOM esté listo
+            }, 200); // Aumentar el delay para asegurar que window.multiplePropertiesData esté disponible
         }
     };
 
@@ -534,8 +559,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para cargar datos de la proforma
     function loadProformaData() {
-        // console.log('=== INICIANDO loadProformaData ===');
+        console.log('=== INICIANDO loadProformaData ===');
         
+        // Agregar un pequeño delay para permitir que window.multiplePropertiesData se establezca
+        setTimeout(() => {
+            console.log('🔍 Verificando window.multiplePropertiesData (después del delay):', window.multiplePropertiesData);
+            
+            // Verificar si hay datos de múltiples propiedades
+            if (window.multiplePropertiesData && window.multiplePropertiesData.totals) {
+                console.log('📦 Usando datos de múltiples propiedades:', window.multiplePropertiesData);
+                updateModalElementsWithMultipleData(window.multiplePropertiesData);
+                return;
+            } else {
+                console.log('⚠️ No se encontraron datos de múltiples propiedades, usando lógica individual');
+                proceedWithIndividualLogic();
+            }
+        }, 150); // Delay de 150ms para asegurar que los datos estén disponibles
+    }
+    
+    function proceedWithIndividualLogic() {
         // Múltiples estrategias para obtener el proformaId
         let proformaId = null;
         
@@ -676,9 +718,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         } else {
             console.warn('⚠️ No se encontró ID de proforma válido');
-            // console.log('Elementos disponibles en el DOM:');
-            logDOMElements();
-            setDefaultData();
+            console.log('Elementos disponibles en el DOM:');
+            const allElements = document.querySelectorAll('input, select');
+            for (let element of allElements) {
+                if (element.value) {
+                    console.log(`- ${element.tagName} [${element.name || element.id || 'sin-nombre'}]: ${element.value}`);
+                }
+            }
         }
     }
     
@@ -1455,6 +1501,62 @@ document.addEventListener('DOMContentLoaded', function() {
             generateDefaultCuota(montoTotal);
         } else {
             // console.log('⚠️ No se puede generar cuota por defecto: monto total no válido');
+        }
+    }
+    
+    // Función para actualizar elementos del modal con datos de múltiples propiedades
+    function updateModalElementsWithMultipleData(multipleData) {
+        console.log('🔄 Actualizando modal con datos múltiples:', multipleData);
+        
+        // Actualizar proyecto
+        const proyectoElement = document.getElementById('proyecto-nombre');
+        if (proyectoElement) {
+            const proyectos = [...new Set(multipleData.properties.map(p => p.proyecto))];
+            if (proyectos.length > 1) {
+                proyectoElement.textContent = 'Múltiples proyectos';
+            } else {
+                proyectoElement.textContent = proyectos[0];
+            }
+            console.log('✓ Proyecto actualizado:', proyectoElement.textContent);
+        } else {
+            console.log('❌ No se encontró elemento proyecto-nombre');
+        }
+        
+        // Actualizar inmuebles
+        const inmuebleElement = document.getElementById('inmueble-numero');
+        if (inmuebleElement) {
+            const inmuebles = multipleData.properties.map(p => p.inmueble);
+            inmuebleElement.textContent = inmuebles.join(', ');
+            console.log('✓ Inmueble actualizado:', inmuebleElement.textContent);
+        } else {
+            console.log('❌ No se encontró elemento inmueble-numero');
+        }
+        
+        // Actualizar cuota inicial total
+        const cuotaInicialElement = document.getElementById('cuota-inicial');
+        if (cuotaInicialElement) {
+            cuotaInicialElement.textContent = 'S/ ' + multipleData.totals.cuota_inicial.toLocaleString('es-PE', {minimumFractionDigits: 2});
+            console.log('✓ Cuota inicial actualizada:', cuotaInicialElement.textContent);
+        } else {
+            console.log('❌ No se encontró elemento cuota-inicial');
+        }
+        
+        // Actualizar monto total para el cronograma
+        const montoTotalElement = document.getElementById('montoTotal');
+        if (montoTotalElement) {
+            montoTotalElement.value = multipleData.totals.cuota_inicial;
+            console.log('✓ Monto total actualizado:', montoTotalElement.value);
+        } else {
+            console.log('❌ No se encontró elemento montoTotal');
+        }
+        
+        // Mostrar sección de cuotas
+        const cuotasSection = document.getElementById('cuotasSection');
+        if (cuotasSection) {
+            cuotasSection.classList.remove('hidden');
+            console.log('✓ Sección de cuotas mostrada');
+        } else {
+            console.log('❌ No se encontró elemento cuotasSection');
         }
     }
 });
