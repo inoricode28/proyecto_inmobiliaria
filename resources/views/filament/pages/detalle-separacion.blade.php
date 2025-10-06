@@ -481,6 +481,47 @@
                 </div>
             </x-filament::card>
 
+            <!-- Inmuebles vinculados a la Proforma -->
+            <x-filament::card>
+                <x-slot name="heading">Inmuebles vinculados a la Proforma</x-slot>
+                @if(isset($inmuebles) && $inmuebles->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-2 py-1 text-left">Orden</th>
+                                    <th class="px-2 py-1 text-left">Principal</th>
+                                    <th class="px-2 py-1 text-left">Proyecto</th>
+                                    <th class="px-2 py-1 text-left">Departamento</th>
+                                    <th class="px-2 py-1 text-left">Precio Lista</th>
+                                    <th class="px-2 py-1 text-left">Precio Venta</th>
+                                    <th class="px-2 py-1 text-left">Descuento (%)</th>
+                                    <th class="px-2 py-1 text-left">Separación</th>
+                                    <th class="px-2 py-1 text-left">Cuota Inicial</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($inmuebles as $pi)
+                                    <tr class="border-b">
+                                        <td class="px-2 py-1">{{ $pi->orden }}</td>
+                                        <td class="px-2 py-1">{{ $pi->es_principal ? 'Sí' : 'No' }}</td>
+                                        <td class="px-2 py-1">{{ $pi->departamento->proyecto->nombre ?? 'N/A' }}</td>
+                                        <td class="px-2 py-1">{{ $pi->departamento->num_departamento ?? $pi->departamento_id }}</td>
+                                        <td class="px-2 py-1">S/ {{ number_format($pi->precio_lista ?? 0, 2) }}</td>
+                                        <td class="px-2 py-1">S/ {{ number_format($pi->precio_venta ?? 0, 2) }}</td>
+                                        <td class="px-2 py-1">{{ $pi->descuento ?? 0 }}</td>
+                                        <td class="px-2 py-1">S/ {{ number_format($pi->monto_separacion ?? 0, 2) }}</td>
+                                        <td class="px-2 py-1">S/ {{ number_format($pi->monto_cuota_inicial ?? 0, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-xs text-gray-500">No hay inmuebles vinculados a esta proforma.</div>
+                @endif
+            </x-filament::card>
+
             <!-- Detalles Adicionales del Inmueble -->
             <x-filament::card>
                 <x-slot name="heading">

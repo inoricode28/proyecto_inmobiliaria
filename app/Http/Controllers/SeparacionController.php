@@ -46,6 +46,12 @@ class SeparacionController extends Controller
             $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
 
             foreach ($propiedades as $propiedad) {
+                // Obtener el departamento para asegurar actualización de estado en cualquier rama
+                $departamento = Departamento::find($propiedad['departamento_id']);
+                if (!$departamento) {
+                    throw new \Exception("Departamento no encontrado con ID: " . $propiedad['departamento_id']);
+                }
+
                 // Verificar si ya existe una proforma para este departamento y cliente
                 $proformaExistente = Proforma::where('departamento_id', $propiedad['departamento_id'])
                     ->where('numero_documento', $clienteData['numero_documento'])
@@ -64,12 +70,6 @@ class SeparacionController extends Controller
                     ]);
                 } else {
                     // Crear nueva proforma para esta propiedad
-                    $departamento = Departamento::find($propiedad['departamento_id']);
-                    
-                    if (!$departamento) {
-                        throw new \Exception("Departamento no encontrado con ID: " . $propiedad['departamento_id']);
-                    }
-                    
                     // Obtener el proyecto_id desde el departamento
                     $proyectoId = $departamento->edificio->proyecto_id ?? null;
                     
@@ -110,14 +110,11 @@ class SeparacionController extends Controller
                         'updated_by' => Auth::id() ?? 1,
                     ]);
 
-                    $separacionesCreadas[] = $separacion;
-
-                    // Cambiar el estado del departamento a 'Separacion'
-                    if ($estadoSeparacion && $departamento) {
-                        $departamento->update([
-                            'estado_departamento_id' => $estadoSeparacion->id
-                        ]);
-                    }
+                    // Registrar la separación junto con el departamento seleccionado
+                    $separacionesCreadas[] = [
+                        'model' => $separacion,
+                        'departamento_id' => $propiedad['departamento_id']
+                    ];
 
                     Log::info('Separación creada para propiedad', [
                         'separacion_id' => $separacion->id,
@@ -126,12 +123,34 @@ class SeparacionController extends Controller
                         'monto_separacion' => $propiedad['monto_separacion']
                     ]);
                 } else {
-                    $separacionesCreadas[] = $separacionExistente;
+                    // Registrar la separación existente junto con el departamento seleccionado
+                    $separacionesCreadas[] = [
+                        'model' => $separacionExistente,
+                        'departamento_id' => $propiedad['departamento_id']
+                    ];
                     
                     Log::info('Separación existente encontrada para propiedad', [
                         'separacion_id' => $separacionExistente->id,
                         'proforma_id' => $proforma->id,
                         'departamento_id' => $propiedad['departamento_id']
+                    ]);
+                }
+
+                // Cambiar el estado del departamento a 'Separacion'
+                if ($estadoSeparacion && $departamento) {
+                    Log::info('Actualizando estado a Separacion para departamento (múltiple)', [
+                        'departamento_id' => $departamento->id,
+                        'estado_departamento_id' => $estadoSeparacion->id,
+                        'proforma_id' => $proforma->id
+                    ]);
+
+                    $departamento->update([
+                        'estado_departamento_id' => $estadoSeparacion->id,
+                    ]);
+
+                    Log::info('Departamento actualizado a estado Separacion (múltiple)', [
+                        'departamento_id' => $departamento->id,
+                        'estado_departamento_id' => $estadoSeparacion->id
                     ]);
                 }
             }
@@ -143,7 +162,7 @@ class SeparacionController extends Controller
             $totalCuotaInicial = array_sum(array_column($propiedades, 'monto_cuota_inicial'));
             $totalSaldoFinanciar = array_sum(array_column($propiedades, 'saldo_financiar'));
 
-            return response()->json([
+                    return response()->json([
                 'success' => true,
                 'message' => 'Separaciones creadas exitosamente para ' . count($propiedades) . ' propiedades',
                 'data' => [
@@ -154,10 +173,15 @@ class SeparacionController extends Controller
                         'monto_cuota_inicial' => $totalCuotaInicial,
                         'saldo_a_financiar' => $totalSaldoFinanciar
                     ],
-                    'separaciones' => collect($separacionesCreadas)->map(function($sep) {
+                    'separaciones' => collect($separacionesCreadas)->map(function($item) {
+                        $sep = $item['model'];
+                        // Usar exactamente el departamento_id del inmueble seleccionado
+                        $departamentoId = $item['departamento_id'];
+
                         return [
                             'id' => $sep->id,
                             'proforma_id' => $sep->proforma_id,
+                            'departamento_id' => $departamentoId,
                             'monto_separacion' => $sep->proforma->monto_separacion ?? 0,
                             'departamento' => $sep->proforma->departamento->num_departamento ?? 'N/A',
                             'proyecto' => $sep->proforma->departamento->proyecto->nombre ?? 'N/A'

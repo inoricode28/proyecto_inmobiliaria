@@ -79,10 +79,12 @@ class EditProforma extends EditRecord
         
         // Crear el inmueble principal
         if ($proforma->departamento_id) {
+            $departamento = \App\Models\Departamento::find($proforma->departamento_id);
             \App\Models\ProformaInmueble::create([
                 'proforma_id' => $proforma->id,
                 'departamento_id' => $proforma->departamento_id,
-                'precio_lista' => $proforma->precio_lista,
+                // Tomar el precio_lista actual desde el Departamento
+                'precio_lista' => $departamento ? $departamento->Precio_lista : ($proforma->precio_lista ?? 0),
                 'precio_venta' => $proforma->precio_venta,
                 'descuento' => $proforma->descuento,
                 'monto_separacion' => $proforma->monto_separacion,

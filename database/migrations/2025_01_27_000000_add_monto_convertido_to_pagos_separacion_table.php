@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('pagos_separacion', function (Blueprint $table) {
-            if (!Schema::hasColumn('pagos_separacion', 'monto_convertido')) {
-                $table->decimal('monto_convertido', 12, 2)->after('monto_pago')->nullable()->comment('Monto convertido con tipo de cambio aplicado');
-            }
-        });
+        if (Schema::hasTable('pagos_separacion')) {
+            Schema::table('pagos_separacion', function (Blueprint $table) {
+                if (!Schema::hasColumn('pagos_separacion', 'monto_convertido')) {
+                    $table->decimal('monto_convertido', 12, 2)->after('monto_pago')->nullable()->comment('Monto convertido con tipo de cambio aplicado');
+                }
+            });
+        }
     }
 
     /**
@@ -27,10 +29,12 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('pagos_separacion', function (Blueprint $table) {
-            if (Schema::hasColumn('pagos_separacion', 'monto_convertido')) {
-                $table->dropColumn('monto_convertido');
-            }
-        });
+        if (Schema::hasTable('pagos_separacion')) {
+            Schema::table('pagos_separacion', function (Blueprint $table) {
+                if (Schema::hasColumn('pagos_separacion', 'monto_convertido')) {
+                    $table->dropColumn('monto_convertido');
+                }
+            });
+        }
     }
 };

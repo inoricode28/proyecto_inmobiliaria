@@ -126,6 +126,14 @@ class Proforma extends Model
         return $this->hasMany(ProformaInmueble::class)->adicionales()->ordenado();
     }
 
+    /**
+     * Acceso directo a todos los registros en proforma_inmuebles
+     */
+    public function proformaInmuebles()
+    {
+        return $this->hasMany(ProformaInmueble::class)->ordenado();
+    }
+
     public function documentos()
     {
         return $this->hasMany(ProformaDocumento::class);

@@ -23,7 +23,8 @@ class CreateProforma extends CreateRecord
                 \App\Models\ProformaInmueble::create([
                     'proforma_id' => $proforma->id,
                     'departamento_id' => $proforma->departamento_id,
-                    'precio_lista' => $proforma->precio_lista,
+                    // Asegurar que el precio_lista provenga del Departamento
+                    'precio_lista' => $departamento->Precio_lista,
                     'precio_venta' => $proforma->precio_venta,
                     'descuento' => $proforma->descuento,
                     'monto_separacion' => $proforma->monto_separacion,

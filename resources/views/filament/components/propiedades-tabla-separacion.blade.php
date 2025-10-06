@@ -10,44 +10,33 @@
             'departamento.proyecto', 
             'departamento.tipoInmueble', 
             'departamento.separaciones.proforma',
-            'inmuebles.departamento.proyecto', 
-            'inmuebles.departamento.tipoInmueble',
-            'inmuebles.departamento.separaciones.proforma'
+            // Usar siempre la relación a proforma_inmuebles
+            'proformaInmuebles.departamento.proyecto', 
+            'proformaInmuebles.departamento.tipoInmueble',
+            'proformaInmuebles.departamento.separaciones.proforma'
         ])->find($proformaId);
         
         // Obtener todos los inmuebles disponibles de la proforma
         if ($proforma) {
-            // Si tiene inmuebles múltiples, usar esos
-            if ($proforma->inmuebles && $proforma->inmuebles->count() > 0) {
-                $inmueblesDisponibles = $proforma->inmuebles;
-            } 
-            // Si no, usar el inmueble principal
+            // Usar siempre los registros de proforma_inmuebles cuando existan
+            if ($proforma->proformaInmuebles && $proforma->proformaInmuebles->count() > 0) {
+                $inmueblesDisponibles = $proforma->proformaInmuebles;
+            }
+            // Si no existen registros (caso migraciones antiguas), intentar usar el principal
             elseif ($proforma->departamento) {
-                // Buscar el registro en proforma_inmuebles para obtener los datos correctos
-                $inmueblePrincipal = $proforma->inmuebles()->where('es_principal', true)->first();
-                
+                $inmueblePrincipal = $proforma->inmueblePrincipal;
                 if ($inmueblePrincipal) {
-                    // Usar datos de proforma_inmuebles
-                    $inmueblesDisponibles = collect([
-                        (object)[
-                            'id' => $proforma->departamento->id,
-                            'departamento' => $proforma->departamento,
-                            'descuento' => $inmueblePrincipal->descuento ?? 0,
-                            'monto_separacion' => $inmueblePrincipal->monto_separacion ?? 0,
-                            'monto_cuota_inicial' => $inmueblePrincipal->monto_cuota_inicial ?? 0,
-                            'precio_lista' => $inmueblePrincipal->precio_lista ?? $proforma->departamento->Precio_lista ?? 0
-                        ]
-                    ]);
+                    $inmueblesDisponibles = collect([$inmueblePrincipal]);
                 } else {
-                    // Fallback a datos de la proforma si no existe en proforma_inmuebles
+                    // Ultimo recurso: crear objeto minimal usando Departamento, con valores por defecto
                     $inmueblesDisponibles = collect([
-                        (object)[
+                        (object) [
                             'id' => $proforma->departamento->id,
                             'departamento' => $proforma->departamento,
-                            'descuento' => $proforma->descuento ?? 0,
-                            'monto_separacion' => $proforma->monto_separacion ?? 0,
-                            'monto_cuota_inicial' => $proforma->monto_cuota_inicial ?? 0,
-                            'precio_lista' => $proforma->departamento->Precio_lista ?? 0
+                            'descuento' => 0,
+                            'monto_separacion' => 0,
+                            'monto_cuota_inicial' => 0,
+                            'precio_lista' => $proforma->departamento->Precio_lista ?? 0,
                         ]
                     ]);
                 }
@@ -422,6 +411,7 @@ async function loadPropertiesFromAPI() {
                         // Agregar automáticamente a la tabla
                         const propertyData = {
                             id: propiedad.id,
+                            departamento_id: propiedad.id,
                             proyecto: propiedad.proyecto,
                             numero: propiedad.numero,
                             tipo: propiedad.tipo,
@@ -530,6 +520,7 @@ function populatePropertySelector(propiedades) {
         option.textContent = `${propiedad.proyecto} - ${propiedad.numero} (${propiedad.tipo} - ${propiedad.dormitorios} dorm.)${separacionText}`;
         
         // Agregar datos como atributos
+        option.dataset.departamentoId = propiedad.id;
         option.dataset.proyecto = propiedad.proyecto;
         option.dataset.numero = propiedad.numero;
         option.dataset.tipo = propiedad.tipo;
@@ -565,6 +556,7 @@ function addSelectedProperty() {
     // Obtener datos del inmueble
     const propertyData = {
         id: propertyId,
+        departamento_id: parseInt(selectedOption.dataset.departamentoId || selectedOption.value, 10),
         proyecto: selectedOption.dataset.proyecto,
         numero: selectedOption.dataset.numero,
         tipo: selectedOption.dataset.tipo,
@@ -624,6 +616,7 @@ function addPropertyToTable(propertyData) {
     row.className = baseClass + separacionClass;
     row.dataset.index = index;
     row.dataset.propertyId = propertyData.id;
+    row.dataset.departamentoId = propertyData.departamento_id;
     
     // Crear badge de estado
     const statusBadge = propertyData.tieneSeparacion ? 
@@ -1163,18 +1156,22 @@ async function createMultipleSeparaciones(multipleData) {
         // Transformar los datos al formato esperado por el backend
         const transformedData = {
             propiedades: multipleData.properties.map(property => ({
-                departamento_id: property.departamento_id || 1, // Necesitamos obtener este ID
-                precio_lista: property.precio_lista,
-                precio_venta: property.precio_venta,
-                monto_separacion: property.separacion,
-                monto_cuota_inicial: property.cuota_inicial,
-                saldo_financiar: property.saldo_financiar
-            })),
+                        departamento_id: property.departamento_id,
+                        precio_lista: property.precio_lista,
+                        precio_venta: property.precio_venta,
+                        monto_separacion: property.separacion,
+                        monto_cuota_inicial: property.cuota_inicial,
+                        saldo_financiar: property.saldo_financiar
+                    })),
             cliente_data: {
-                nombres: "Cliente Múltiple", // Temporal - necesitamos obtener datos reales del cliente
-                ape_paterno: "Apellido",
-                numero_documento: "12345678"
-            }
+                nombres: "{{ $proforma->nombres ?? '' }}",
+                ape_paterno: "{{ $proforma->ape_paterno ?? '' }}",
+                ape_materno: "{{ $proforma->ape_materno ?? '' }}",
+                numero_documento: "{{ $proforma->numero_documento ?? '' }}",
+                celular: "{{ $proforma->celular ?? '' }}",
+                email: "{{ $proforma->email ?? '' }}"
+            },
+            proforma_id: {{ $proformaId ?? 'null' }}
         };
         
         console.log('🔄 Datos transformados:', JSON.stringify(transformedData, null, 2));
@@ -1198,8 +1195,48 @@ async function createMultipleSeparaciones(multipleData) {
         
         const result = await response.json();
         console.log('✅ Separaciones creadas exitosamente:', result);
+
+        // Marcar filas como "Con Separación" usando respuesta del backend
+        const separaciones = (result && result.data && Array.isArray(result.data.separaciones))
+            ? result.data.separaciones
+            : (result && Array.isArray(result.separaciones) ? result.separaciones : []);
+        if (separaciones && separaciones.length) {
+            separaciones.forEach(sep => {
+                const row = document.querySelector(`#properties-tbody tr[data-departamento-id="${sep.departamento_id}"]`);
+                if (row) {
+                    // Actualizar estilos y badge
+                    row.classList.add('bg-green-50');
+                    const proyectoCell = row.querySelector('td:nth-child(2)');
+                    if (proyectoCell) {
+                        // Eliminar cualquier badge existente y agregar el de separación
+                        const existingBadges = proyectoCell.querySelectorAll('span.inline-flex');
+                        existingBadges.forEach(el => el.remove());
+                        const badge = document.createElement('span');
+                        badge.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2';
+                        badge.textContent = '✓ Con Separación';
+                        proyectoCell.appendChild(badge);
+                    }
+                    // Guardar separacion_id en dataset para otros modales
+                    row.dataset.separacionId = sep.id;
+                }
+
+                // Marcar la opción del selector como con separación y persistir el id
+                const selector = document.getElementById('property-selector');
+                if (selector) {
+                    const option = selector.querySelector(`option[data-departamento-id="${sep.departamento_id}"]`);
+                    if (option) {
+                        option.classList.add('bg-green-100', 'text-green-800');
+                        option.dataset.tieneSeparacion = 'true';
+                        option.dataset.separacionId = sep.id;
+                        if (!option.textContent.includes('✓ CON SEPARACIÓN')) {
+                            option.textContent = option.textContent + ' ✓ CON SEPARACIÓN';
+                        }
+                    }
+                }
+            });
+        }
+
         console.log('✅ === FIN createMultipleSeparaciones ===');
-        
         return result;
     } catch (error) {
         console.error('❌ Error en createMultipleSeparaciones:', error);
@@ -1251,8 +1288,10 @@ function getMultiplePropertiesData() {
         const inmuebleDetalle = inmuebleInfo ? (inmuebleInfo.querySelector('.text-sm')?.textContent || '').trim().replace(/\s+/g, ' ') : '';
         
         const proyecto = (row.querySelector('td:nth-child(2)')?.textContent || 'N/A').trim().replace(/\s+/g, ' ');
+        const departamentoId = row.dataset.departamentoId || row.dataset.propertyId || null;
         
         const propertyData = {
+            departamento_id: departamentoId ? parseInt(departamentoId, 10) : null,
             proyecto: proyecto,
             inmueble: inmuebleNumero,
             detalle: inmuebleDetalle,

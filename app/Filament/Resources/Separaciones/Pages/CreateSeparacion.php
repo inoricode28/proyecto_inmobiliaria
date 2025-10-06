@@ -112,16 +112,37 @@ class CreateSeparacion extends CreateRecord
     {
         $separacion = $this->record;
 
-        // Cambiar el estado del departamento a 'Separacion' solo si la proforma tiene prospecto
-        if ($separacion->proforma && 
-            $separacion->proforma->departamento && 
-            $separacion->proforma->prospecto_id) {
+        // Cambiar el estado de los departamentos seleccionados a 'Separacion' y marcar como no vendibles
+        if ($separacion->proforma) {
             $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
 
             if ($estadoSeparacion) {
-                $separacion->proforma->departamento->update([
-                    'estado_departamento_id' => $estadoSeparacion->id
+                // Manejar múltiples inmuebles asociados a la proforma
+                $inmuebles = [];
+                if (method_exists($separacion->proforma, 'proformaInmuebles') && $separacion->proforma->proformaInmuebles()->exists()) {
+                    $inmuebles = $separacion->proforma->proformaInmuebles()->with('departamento')->get()->pluck('departamento')->filter();
+                } elseif ($separacion->proforma->departamento) {
+                    $inmuebles = collect([$separacion->proforma->departamento]);
+                }
+
+                Log::info('Actualizando estado a Separacion para departamentos de proforma', [
+                    'proforma_id' => $separacion->proforma->id,
+                    'departamentos_count' => $inmuebles instanceof \Illuminate\Support\Collection ? $inmuebles->count() : (is_array($inmuebles) ? count($inmuebles) : 0)
                 ]);
+
+                foreach ($inmuebles as $departamento) {
+                    if ($departamento) {
+                        $departamento->update([
+                            'estado_departamento_id' => $estadoSeparacion->id,
+                        ]);
+
+                        Log::info('Departamento actualizado a estado Separacion', [
+                            'departamento_id' => $departamento->id ?? null,
+                            'estado_departamento_id' => $estadoSeparacion->id,
+                            'proforma_id' => $separacion->proforma->id,
+                        ]);
+                    }
+                }
             }
         }
 

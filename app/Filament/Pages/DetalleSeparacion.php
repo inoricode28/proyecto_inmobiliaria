@@ -11,21 +11,22 @@ use Illuminate\Http\Request;
 class DetalleSeparacion extends Page
 {
     protected static string $view = 'filament.pages.detalle-separacion';
-    
+
     protected static ?string $title = 'Detalle de Separación';
-    
+
     protected static bool $shouldRegisterNavigation = false;
-    
+
     public $proforma;
     public $separacion;
     public $departamento;
     public $tieneVenta;
     public $entregaExistente;
-    
+    public $inmuebles;
+
     public function mount(Request $request)
     {
         $proformaId = $request->route('proforma_id');
-        
+
         // Buscar la proforma con todas las relaciones necesarias
         $this->proforma = Proforma::with([
             'separacion',
@@ -34,6 +35,10 @@ class DetalleSeparacion extends Page
             'departamento.estadoDepartamento',
             'departamento.tipoFinanciamiento',
             'departamento.proyecto',
+            // Eager load de inmuebles de la proforma y sus relaciones
+            'proformaInmuebles',
+            'proformaInmuebles.departamento',
+            'proformaInmuebles.departamento.proyecto',
             'prospecto',
             'tipoDocumento',
             'genero',
@@ -43,7 +48,7 @@ class DetalleSeparacion extends Page
             'separacion.notariaKardex',
             'separacion.cartaFianza'
         ])->find($proformaId);
-        
+
         if (!$this->proforma) {
             abort(404, 'No se encontró la proforma especificada');
         }
@@ -51,16 +56,18 @@ class DetalleSeparacion extends Page
         // Permitir acceso sin importar si tiene separación o no
         $this->departamento = $this->proforma->departamento;
         $this->separacion = $this->proforma->separacion; // Puede ser null
-        
+        // Inmuebles vinculados a la proforma (principal y adicionales)
+        $this->inmuebles = $this->proforma->proformaInmuebles;
+
         // Verificar si la separación tiene una venta asociada
         $this->tieneVenta = $this->separacion && $this->separacion->venta !== null;
-        
+
         // Verificar si ya existe una entrega para esta venta
         if ($this->tieneVenta && $this->separacion->venta) {
             $this->entregaExistente = Entrega::where('venta_id', $this->separacion->venta->id)->first();
         }
     }
-    
+
     protected function getViewData(): array
     {
         return [
@@ -69,6 +76,7 @@ class DetalleSeparacion extends Page
             'departamento' => $this->departamento,
             'tieneVenta' => $this->tieneVenta,
             'entregaExistente' => $this->entregaExistente,
+            'inmuebles' => $this->inmuebles,
         ];
     }
 }
