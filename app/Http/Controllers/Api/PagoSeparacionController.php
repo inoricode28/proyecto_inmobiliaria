@@ -230,6 +230,12 @@ class PagoSeparacionController extends Controller
                 ->where('id', $proformaId)
                 ->value('monto_separacion');
 
+            // Si hay override de total (selección múltiple), usarlo para la validación
+            $montoTotalOverride = null;
+            if ($request->has('monto_total_override')) {
+                $montoTotalOverride = floatval($request->input('monto_total_override'));
+            }
+
             if (!$montoSeparacion) {
                 return response()->json([
                     'success' => false,
@@ -279,10 +285,12 @@ class PagoSeparacionController extends Controller
             //     'montos_individuales' => array_column($pagosData, 'monto_pago')
             // ]);
             
-            if ($totalTodosPagos > $montoSeparacion) {
+            // Determinar tope de validación: override si es válido (>0), caso contrario monto de separación
+            $topeValidacion = ($montoTotalOverride && $montoTotalOverride > 0) ? $montoTotalOverride : $montoSeparacion;
+            if ($totalTodosPagos > $topeValidacion) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'La suma total de pagos (S/ ' . number_format($totalTodosPagos, 2) . ') no puede exceder el monto de separación (S/ ' . number_format($montoSeparacion, 2) . '). Pagos existentes: S/ ' . number_format($pagosExistentes, 2) . ', Nuevos pagos: S/ ' . number_format($totalNuevosPagos, 2)
+                    'message' => 'La suma total de pagos (S/ ' . number_format($totalTodosPagos, 2) . ') no puede exceder el monto permitido (S/ ' . number_format($topeValidacion, 2) . '). Pagos existentes: S/ ' . number_format($pagosExistentes, 2) . ', Nuevos pagos: S/ ' . number_format($totalNuevosPagos, 2)
                 ], 422);
             }
 

@@ -202,6 +202,17 @@
 </div>
 
 <script>
+// Silenciar consola en este componente para evitar ruido en terminal
+(function() {
+    try {
+        var methods = ['log', 'warn', 'error', 'info', 'debug'];
+        for (var i = 0; i < methods.length; i++) {
+            if (typeof console !== 'undefined' && console[methods[i]]) {
+                console[methods[i]] = function() { /* silenciado */ };
+            }
+        }
+    } catch (e) { /* noop */ }
+})();
 document.addEventListener('DOMContentLoaded', function() {
     // Event listener para abrir el modal de cronograma SF con protección
     window.addEventListener('open-modal', function(event) {
