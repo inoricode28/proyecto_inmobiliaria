@@ -1059,19 +1059,51 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Normalizar tipos de datos para cumplir validaciones del backend
+        // proforma_id: intentar obtenerlo de variable global, atributo data o URL
+        const urlParamsForProforma = new URLSearchParams(window.location.search);
+        const proformaIdCandidate = (
+            window.currentProformaId ||
+            (document.querySelector('[data-proforma-id]') ? document.querySelector('[data-proforma-id]').getAttribute('data-proforma-id') : null) ||
+            urlParamsForProforma.get('proforma_id') ||
+            urlParamsForProforma.get('id')
+        );
+        const proformaId = proformaIdCandidate ? parseInt(proformaIdCandidate, 10) : null;
+        if (!proformaId || Number.isNaN(proformaId) || proformaId <= 0) {
+            alert('Error: No se pudo obtener un proforma_id válido.');
+            return;
+        }
+
+        const tipoComprobanteRaw = document.getElementById('sf-tipoComprobante').value;
+        const tipoComprobanteId = tipoComprobanteRaw === '' ? null : parseInt(tipoComprobanteRaw, 10);
+        const bancoId = parseInt(entidadFinanciera, 10);
+        const tipoFinanciamientoId = parseInt(tipoFinanciamiento, 10);
+
+        if (Number.isNaN(bancoId) || Number.isNaN(tipoFinanciamientoId)) {
+            alert('Error: Entidad Financiera y Tipo de Financiamiento deben ser válidos.');
+            return;
+        }
+        const tipoComprobanteNormalized = (tipoComprobanteId && !Number.isNaN(tipoComprobanteId)) ? tipoComprobanteId : null;
+
         const cronogramaSFData = {
-            proforma_id: window.currentProformaId,
+            proforma_id: proformaId,
             fecha_inicio: fechaInicio,
             monto_total: montoTotal,
             saldo_financiar: montoTotal, // Usar el mismo valor por ahora
             numero_cuotas: numeroCuotas,
-            banco_id: entidadFinanciera, // Corregido: era entidad_financiera_id
-            tipo_financiamiento_id: tipoFinanciamiento,
-            tipo_comprobante_id: document.getElementById('sf-tipoComprobante').value,
-            bono_mivivienda: document.getElementById('sf-bonoMiVivienda').checked, // Corregido: era bono_mi_vivienda
+            banco_id: bancoId,
+            tipo_financiamiento_id: tipoFinanciamientoId,
+            tipo_comprobante_id: tipoComprobanteNormalized, // Enviar null si no se selecciona
+            bono_mivivienda: document.getElementById('sf-bonoMiVivienda').checked,
             bono_verde: document.getElementById('sf-bonoVerde').checked,
             bono_integrador: document.getElementById('sf-bonoIntegrador').checked,
-            cuotas: cuotas
+            cuotas: cuotas.map(c => ({
+                numero_cuota: parseInt(c.numero_cuota, 10),
+                fecha_pago: c.fecha_pago,
+                monto: parseFloat(c.monto),
+                motivo: c.motivo,
+                estado: c.estado
+            }))
         };
 
         // Solo incluir separacion_id si existe (no es null)
