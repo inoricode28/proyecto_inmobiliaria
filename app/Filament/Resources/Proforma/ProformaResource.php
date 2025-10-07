@@ -408,7 +408,7 @@ class ProformaResource extends Resource
                                     TextInput::make('precio_lista')
                                         ->label('Precio Lista')
                                         ->disabled()
-                                        ->dehydrated(false),
+                                        ->dehydrated(),
 
                                     TextInput::make('precio_venta')
                                         ->label('Precio Venta')

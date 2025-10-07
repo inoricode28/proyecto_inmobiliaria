@@ -55,7 +55,10 @@ class TipoDocumentoSeeder extends Seeder
         ];
 
         foreach ($tiposDocumento as $tipo) {
-            DB::table('tipo_documento')->insert($tipo);
+            DB::table('tipo_documento')->updateOrInsert(
+                ['nombre' => $tipo['nombre']],
+                $tipo
+            );
         }
     }
 }

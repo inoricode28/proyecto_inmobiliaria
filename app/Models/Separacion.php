@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Separacion extends Model
 {
@@ -101,6 +103,30 @@ class Separacion extends Model
     public function tieneVenta()
     {
         return $this->venta()->exists();
+    }
+
+    /**
+     * Relación con SeparacionInmueble - todos los inmuebles
+     */
+    public function inmuebles(): HasMany
+    {
+        return $this->hasMany(SeparacionInmueble::class)->ordenado();
+    }
+
+    /**
+     * Relación con SeparacionInmueble - inmueble principal
+     */
+    public function inmueblePrincipal(): HasOne
+    {
+        return $this->hasOne(SeparacionInmueble::class)->principal();
+    }
+
+    /**
+     * Relación con SeparacionInmueble - inmuebles adicionales
+     */
+    public function inmueblesAdicionales(): HasMany
+    {
+        return $this->hasMany(SeparacionInmueble::class)->adicionales()->ordenado();
     }
 
 }

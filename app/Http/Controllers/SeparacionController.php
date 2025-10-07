@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Separacion;
+use App\Models\SeparacionInmueble;
 use App\Models\Proforma;
+use App\Models\ProformaInmueble;
 use App\Models\Departamento;
 use App\Models\EstadoDepartamento;
 use Exception;
@@ -32,123 +34,133 @@ class SeparacionController extends Controller
                 'cliente_data' => 'required|array',
                 'cliente_data.nombres' => 'required|string',
                 'cliente_data.ape_paterno' => 'required|string',
-                'cliente_data.numero_documento' => 'required|string',
+                'cliente_data.numero_documento' => 'nullable|string',
             ]);
 
             DB::beginTransaction();
 
             $propiedades = $request->propiedades;
             $clienteData = $request->cliente_data;
-            $separacionesCreadas = [];
-            $proformasCreadas = [];
 
             // Obtener el estado de separación para departamentos
             $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
 
-            foreach ($propiedades as $propiedad) {
-                // Obtener el departamento para asegurar actualización de estado en cualquier rama
+            // Crear una proforma principal con el primer inmueble
+            $primerPropiedad = $propiedades[0];
+            $departamentoPrincipal = Departamento::find($primerPropiedad['departamento_id']);
+            
+            if (!$departamentoPrincipal) {
+                throw new \Exception("Departamento principal no encontrado con ID: " . $primerPropiedad['departamento_id']);
+            }
+
+            // Obtener el proyecto_id desde el departamento principal
+            $proyectoId = $departamentoPrincipal->edificio->proyecto_id ?? null;
+            
+            if (!$proyectoId) {
+                throw new \Exception("No se pudo obtener el proyecto_id para el departamento ID: " . $primerPropiedad['departamento_id']);
+            }
+
+            // Calcular totales
+            $totalSeparacion = array_sum(array_column($propiedades, 'monto_separacion'));
+            $totalCuotaInicial = array_sum(array_column($propiedades, 'monto_cuota_inicial'));
+            $totalSaldoFinanciar = array_sum(array_column($propiedades, 'saldo_financiar'));
+            $totalPrecioVenta = array_sum(array_column($propiedades, 'precio_venta'));
+            $totalPrecioLista = array_sum(array_column($propiedades, 'precio_lista'));
+
+            // Crear la proforma principal
+            $proforma = Proforma::create([
+                'departamento_id' => $primerPropiedad['departamento_id'],
+                'proyecto_id' => $proyectoId,
+                'nombres' => $clienteData['nombres'],
+                'ape_paterno' => $clienteData['ape_paterno'],
+                'ape_materno' => $clienteData['ape_materno'] ?? '',
+                'numero_documento' => $clienteData['numero_documento'],
+                'email' => $clienteData['email'] ?? '',
+                'telefono' => $clienteData['telefono'] ?? '',
+                'precio_venta' => $totalPrecioVenta,
+                'monto_separacion' => $totalSeparacion,
+                'monto_cuota_inicial' => $totalCuotaInicial,
+                'descuento' => $totalPrecioLista - $totalPrecioVenta,
+                'created_by' => Auth::id() ?? 1,
+                'updated_by' => Auth::id() ?? 1,
+            ]);
+
+            // Crear registros en proforma_inmuebles para todos los inmuebles
+            foreach ($propiedades as $index => $propiedad) {
                 $departamento = Departamento::find($propiedad['departamento_id']);
+                
                 if (!$departamento) {
                     throw new \Exception("Departamento no encontrado con ID: " . $propiedad['departamento_id']);
                 }
 
-                // Verificar si ya existe una proforma para este departamento y cliente
-                $proformaExistente = Proforma::where('departamento_id', $propiedad['departamento_id'])
-                    ->where('numero_documento', $clienteData['numero_documento'])
-                    ->first();
-
-                if ($proformaExistente) {
-                    // Usar la proforma existente
-                    $proforma = $proformaExistente;
-                    
-                    // Actualizar los montos si es necesario
-                    $proforma->update([
-                        'precio_venta' => $propiedad['precio_venta'],
-                        'monto_separacion' => $propiedad['monto_separacion'],
-                        'monto_cuota_inicial' => $propiedad['monto_cuota_inicial'],
-                        'descuento' => $propiedad['precio_lista'] - $propiedad['precio_venta'],
-                    ]);
-                } else {
-                    // Crear nueva proforma para esta propiedad
-                    // Obtener el proyecto_id desde el departamento
-                    $proyectoId = $departamento->edificio->proyecto_id ?? null;
-                    
-                    if (!$proyectoId) {
-                        throw new \Exception("No se pudo obtener el proyecto_id para el departamento ID: " . $propiedad['departamento_id']);
-                    }
-                    
-                    $proforma = Proforma::create([
-                        'departamento_id' => $propiedad['departamento_id'],
-                        'proyecto_id' => $proyectoId,
-                        'nombres' => $clienteData['nombres'],
-                        'ape_paterno' => $clienteData['ape_paterno'],
-                        'ape_materno' => $clienteData['ape_materno'] ?? '',
-                        'numero_documento' => $clienteData['numero_documento'],
-                        'email' => $clienteData['email'] ?? '',
-                        'telefono' => $clienteData['telefono'] ?? '',
-                        'precio_venta' => $propiedad['precio_venta'],
-                        'monto_separacion' => $propiedad['monto_separacion'],
-                        'monto_cuota_inicial' => $propiedad['monto_cuota_inicial'],
-                        'descuento' => $propiedad['precio_lista'] - $propiedad['precio_venta'],
-                        'created_by' => Auth::id() ?? 1,
-                        'updated_by' => Auth::id() ?? 1,
-                    ]);
+                // Obtener precio_lista del departamento si no se proporciona
+                $precioLista = $propiedad['precio_lista'] ?? $departamento->Precio_lista ?? 0;
+                
+                // Calcular descuento como porcentaje
+                $descuentoPorcentaje = 0;
+                if ($precioLista > 0) {
+                    $descuentoPorcentaje = (($precioLista - $propiedad['precio_venta']) / $precioLista) * 100;
                 }
 
-                $proformasCreadas[] = $proforma;
+                ProformaInmueble::create([
+                    'proforma_id' => $proforma->id,
+                    'departamento_id' => $propiedad['departamento_id'],
+                    'precio_lista' => $precioLista,
+                    'precio_venta' => $propiedad['precio_venta'],
+                    'descuento' => $descuentoPorcentaje,
+                    'orden' => $index + 1,
+                    'created_by' => Auth::id() ?? 1,
+                    'updated_by' => Auth::id() ?? 1,
+                ]);
 
-                // Verificar si ya existe una separación para esta proforma
-                $separacionExistente = Separacion::where('proforma_id', $proforma->id)->first();
+                Log::info('ProformaInmueble creado', [
+                    'proforma_id' => $proforma->id,
+                    'departamento_id' => $propiedad['departamento_id'],
+                    'precio_lista' => $precioLista,
+                    'precio_venta' => $propiedad['precio_venta'],
+                    'orden' => $index + 1
+                ]);
+            }
 
-                if (!$separacionExistente) {
-                    // Crear nueva separación
-                    $separacion = Separacion::create([
-                        'proforma_id' => $proforma->id,
-                        'saldo_a_financiar' => $propiedad['saldo_financiar'],
-                        'fecha_vencimiento' => now()->addDays(30), // 30 días por defecto
-                        'created_by' => Auth::id() ?? 1,
-                        'updated_by' => Auth::id() ?? 1,
-                    ]);
+            // Crear la separación
+            $separacion = Separacion::create([
+                'proforma_id' => $proforma->id,
+                'saldo_a_financiar' => $totalSaldoFinanciar,
+                'fecha_vencimiento' => now()->addDays(30), // 30 días por defecto
+                'created_by' => Auth::id() ?? 1,
+                'updated_by' => Auth::id() ?? 1,
+            ]);
 
-                    // Registrar la separación junto con el departamento seleccionado
-                    $separacionesCreadas[] = [
-                        'model' => $separacion,
-                        'departamento_id' => $propiedad['departamento_id']
-                    ];
-
-                    Log::info('Separación creada para propiedad', [
-                        'separacion_id' => $separacion->id,
-                        'proforma_id' => $proforma->id,
-                        'departamento_id' => $propiedad['departamento_id'],
-                        'monto_separacion' => $propiedad['monto_separacion']
-                    ]);
-                } else {
-                    // Registrar la separación existente junto con el departamento seleccionado
-                    $separacionesCreadas[] = [
-                        'model' => $separacionExistente,
-                        'departamento_id' => $propiedad['departamento_id']
-                    ];
-                    
-                    Log::info('Separación existente encontrada para propiedad', [
-                        'separacion_id' => $separacionExistente->id,
-                        'proforma_id' => $proforma->id,
-                        'departamento_id' => $propiedad['departamento_id']
-                    ]);
-                }
+            // Crear registros en separacion_inmuebles para todos los inmuebles
+            foreach ($propiedades as $index => $propiedad) {
+                $departamento = Departamento::find($propiedad['departamento_id']);
+                
+                SeparacionInmueble::create([
+                    'separacion_id' => $separacion->id,
+                    'departamento_id' => $propiedad['departamento_id'],
+                    'precio_lista' => $propiedad['precio_lista'] ?? $departamento->Precio_lista ?? 0,
+                    'precio_venta' => $propiedad['precio_venta'],
+                    'monto_separacion' => $propiedad['monto_separacion'],
+                    'monto_cuota_inicial' => $propiedad['monto_cuota_inicial'],
+                    'saldo_financiar' => $propiedad['saldo_financiar'],
+                    'orden' => $index + 1,
+                    'created_by' => Auth::id() ?? 1,
+                    'updated_by' => Auth::id() ?? 1,
+                ]);
 
                 // Cambiar el estado del departamento a 'Separacion'
                 if ($estadoSeparacion && $departamento) {
-                    Log::info('Actualizando estado a Separacion para departamento (múltiple)', [
+                    Log::info('Actualizando estado a Separacion para departamento', [
                         'departamento_id' => $departamento->id,
                         'estado_departamento_id' => $estadoSeparacion->id,
-                        'proforma_id' => $proforma->id
+                        'separacion_id' => $separacion->id
                     ]);
 
                     $departamento->update([
                         'estado_departamento_id' => $estadoSeparacion->id,
                     ]);
 
-                    Log::info('Departamento actualizado a estado Separacion (múltiple)', [
+                    Log::info('Departamento actualizado a estado Separacion', [
                         'departamento_id' => $departamento->id,
                         'estado_departamento_id' => $estadoSeparacion->id
                     ]);
@@ -157,34 +169,39 @@ class SeparacionController extends Controller
 
             DB::commit();
 
-            // Calcular totales
-            $totalSeparacion = array_sum(array_column($propiedades, 'monto_separacion'));
-            $totalCuotaInicial = array_sum(array_column($propiedades, 'monto_cuota_inicial'));
-            $totalSaldoFinanciar = array_sum(array_column($propiedades, 'saldo_financiar'));
+            Log::info('Separación múltiple creada exitosamente', [
+                'separacion_id' => $separacion->id,
+                'proforma_id' => $proforma->id,
+                'cantidad_inmuebles' => count($propiedades),
+                'total_separacion' => $totalSeparacion,
+                'total_cuota_inicial' => $totalCuotaInicial,
+                'total_saldo_financiar' => $totalSaldoFinanciar
+            ]);
 
-                    return response()->json([
+            return response()->json([
                 'success' => true,
-                'message' => 'Separaciones creadas exitosamente para ' . count($propiedades) . ' propiedades',
+                'message' => 'Separación creada exitosamente para ' . count($propiedades) . ' propiedades',
                 'data' => [
-                    'separaciones_creadas' => count($separacionesCreadas),
-                    'proformas_procesadas' => count($proformasCreadas),
+                    'separacion_id' => $separacion->id,
+                    'proforma_id' => $proforma->id,
+                    'cantidad_inmuebles' => count($propiedades),
                     'totales' => [
                         'monto_separacion' => $totalSeparacion,
                         'monto_cuota_inicial' => $totalCuotaInicial,
-                        'saldo_a_financiar' => $totalSaldoFinanciar
+                        'saldo_a_financiar' => $totalSaldoFinanciar,
+                        'precio_venta_total' => $totalPrecioVenta,
+                        'precio_lista_total' => $totalPrecioLista
                     ],
-                    'separaciones' => collect($separacionesCreadas)->map(function($item) {
-                        $sep = $item['model'];
-                        // Usar exactamente el departamento_id del inmueble seleccionado
-                        $departamentoId = $item['departamento_id'];
-
+                    'inmuebles' => collect($propiedades)->map(function($propiedad, $index) use ($separacion) {
+                        $departamento = Departamento::find($propiedad['departamento_id']);
                         return [
-                            'id' => $sep->id,
-                            'proforma_id' => $sep->proforma_id,
-                            'departamento_id' => $departamentoId,
-                            'monto_separacion' => $sep->proforma->monto_separacion ?? 0,
-                            'departamento' => $sep->proforma->departamento->num_departamento ?? 'N/A',
-                            'proyecto' => $sep->proforma->departamento->proyecto->nombre ?? 'N/A'
+                            'departamento_id' => $propiedad['departamento_id'],
+                            'departamento' => $departamento->num_departamento ?? 'N/A',
+                            'proyecto' => $departamento->proyecto->nombre ?? 'N/A',
+                            'precio_lista' => $propiedad['precio_lista'],
+                            'precio_venta' => $propiedad['precio_venta'],
+                            'monto_separacion' => $propiedad['monto_separacion'],
+                            'orden' => $index + 1
                         ];
                     })
                 ]
@@ -193,7 +210,7 @@ class SeparacionController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             
-            Log::error('Error al crear separaciones múltiples', [
+            Log::error('Error al crear separación múltiple', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
@@ -201,99 +218,115 @@ class SeparacionController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear las separaciones: ' . $e->getMessage()
+                'message' => 'Error al crear la separación: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Obtener información consolidada de múltiples separaciones
+     * Obtener información de una separación con múltiples inmuebles
      */
-    public function getMultipleSeparacionesInfo(Request $request)
+    public function getSeparacionInfo($separacionId)
     {
         try {
-            $separacionIds = $request->input('separacion_ids', []);
-            
-            if (empty($separacionIds)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se proporcionaron IDs de separaciones'
-                ], 400);
-            }
-
-            $separaciones = DB::table('separaciones as s')
+            // Obtener información básica de la separación
+            $separacion = DB::table('separaciones as s')
                 ->leftJoin('proformas as p', 's.proforma_id', '=', 'p.id')
-                ->leftJoin('departamentos as d', 'p.departamento_id', '=', 'd.id')
-                ->leftJoin('proyectos as pr', 'd.proyecto_id', '=', 'pr.id')
                 ->select(
                     's.id as separacion_id',
                     's.proforma_id',
+                    's.saldo_a_financiar',
+                    's.fecha_vencimiento',
                     'p.monto_separacion',
                     'p.monto_cuota_inicial',
                     'p.nombres',
                     'p.ape_paterno',
                     'p.ape_materno',
                     'p.numero_documento',
-                    'd.num_departamento',
-                    'pr.nombre as proyecto_nombre',
-                    's.saldo_a_financiar'
+                    'p.email',
+                    'p.telefono',
+                    'p.precio_venta as precio_venta_total'
                 )
-                ->whereIn('s.id', $separacionIds)
-                ->get();
+                ->where('s.id', $separacionId)
+                ->first();
 
-            if ($separaciones->isEmpty()) {
+            if (!$separacion) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se encontraron separaciones'
+                    'message' => 'Separación no encontrada'
                 ], 404);
             }
 
-            // Calcular totales
-            $totalSeparacion = $separaciones->sum('monto_separacion');
-            $totalCuotaInicial = $separaciones->sum('monto_cuota_inicial');
-            $totalSaldoFinanciar = $separaciones->sum('saldo_a_financiar');
-
-            // Obtener datos del primer cliente (asumiendo que todas las separaciones son del mismo cliente)
-            $primerSeparacion = $separaciones->first();
+            // Obtener todos los inmuebles de la separación
+            $inmuebles = DB::table('separacion_inmuebles as si')
+                ->leftJoin('departamentos as d', 'si.departamento_id', '=', 'd.id')
+                ->leftJoin('proyectos as pr', 'd.proyecto_id', '=', 'pr.id')
+                ->select(
+                    'si.id as separacion_inmueble_id',
+                    'si.departamento_id',
+                    'si.precio_lista',
+                    'si.precio_venta',
+                    'si.monto_separacion',
+                    'si.monto_cuota_inicial',
+                    'si.saldo_financiar',
+                    'si.orden',
+                    'd.num_departamento',
+                    'pr.nombre as proyecto_nombre'
+                )
+                ->where('si.separacion_id', $separacionId)
+                ->orderBy('si.orden')
+                ->get();
 
             return response()->json([
                 'success' => true,
                 'data' => [
+                    'separacion' => [
+                        'id' => $separacion->separacion_id,
+                        'proforma_id' => $separacion->proforma_id,
+                        'saldo_a_financiar' => $separacion->saldo_a_financiar,
+                        'fecha_vencimiento' => $separacion->fecha_vencimiento
+                    ],
                     'cliente' => [
-                        'nombres' => $primerSeparacion->nombres,
-                        'apellidos' => trim($primerSeparacion->ape_paterno . ' ' . $primerSeparacion->ape_materno),
-                        'numero_documento' => $primerSeparacion->numero_documento
+                        'nombres' => $separacion->nombres,
+                        'apellidos' => trim($separacion->ape_paterno . ' ' . $separacion->ape_materno),
+                        'numero_documento' => $separacion->numero_documento,
+                        'email' => $separacion->email,
+                        'telefono' => $separacion->telefono
                     ],
                     'totales' => [
-                        'monto_separacion' => $totalSeparacion,
-                        'monto_cuota_inicial' => $totalCuotaInicial,
-                        'saldo_a_financiar' => $totalSaldoFinanciar,
-                        'cantidad_propiedades' => $separaciones->count()
+                        'monto_separacion' => $separacion->monto_separacion,
+                        'monto_cuota_inicial' => $separacion->monto_cuota_inicial,
+                        'saldo_a_financiar' => $separacion->saldo_a_financiar,
+                        'precio_venta_total' => $separacion->precio_venta_total,
+                        'cantidad_inmuebles' => $inmuebles->count()
                     ],
-                    'propiedades' => $separaciones->map(function($sep) {
+                    'inmuebles' => $inmuebles->map(function($inmueble) {
                         return [
-                            'separacion_id' => $sep->separacion_id,
-                            'proforma_id' => $sep->proforma_id,
-                            'proyecto' => $sep->proyecto_nombre,
-                            'departamento' => $sep->num_departamento,
-                            'monto_separacion' => $sep->monto_separacion,
-                            'monto_cuota_inicial' => $sep->monto_cuota_inicial,
-                            'saldo_a_financiar' => $sep->saldo_a_financiar
+                            'separacion_inmueble_id' => $inmueble->separacion_inmueble_id,
+                            'departamento_id' => $inmueble->departamento_id,
+                            'proyecto' => $inmueble->proyecto_nombre,
+                            'departamento' => $inmueble->num_departamento,
+                            'precio_lista' => $inmueble->precio_lista,
+                            'precio_venta' => $inmueble->precio_venta,
+                            'monto_separacion' => $inmueble->monto_separacion,
+                            'monto_cuota_inicial' => $inmueble->monto_cuota_inicial,
+                            'saldo_financiar' => $inmueble->saldo_financiar,
+                            'orden' => $inmueble->orden
                         ];
                     })
                 ],
-                'message' => 'Información de separaciones múltiples obtenida exitosamente'
+                'message' => 'Información de separación obtenida exitosamente'
             ]);
 
         } catch (Exception $e) {
-            Log::error('Error al obtener información de separaciones múltiples', [
+            Log::error('Error al obtener información de separación', [
                 'error' => $e->getMessage(),
-                'separacion_ids' => $request->input('separacion_ids', [])
+                'separacion_id' => $separacionId
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener información de separaciones: ' . $e->getMessage()
+                'message' => 'Error al obtener información de separación: ' . $e->getMessage()
             ], 500);
         }
     }

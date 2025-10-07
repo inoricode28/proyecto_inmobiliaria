@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Separaciones\Pages;
 
 use App\Models\Separacion;
+use App\Models\SeparacionInmueble;
 use App\Models\EstadoDepartamento;
 use App\Models\Prospecto;
 use App\Models\Proforma;
@@ -119,8 +120,11 @@ class CreateSeparacion extends CreateRecord
             if ($estadoSeparacion) {
                 // Manejar múltiples inmuebles asociados a la proforma
                 $inmuebles = [];
+                $proformaInmuebles = collect();
+                
                 if (method_exists($separacion->proforma, 'proformaInmuebles') && $separacion->proforma->proformaInmuebles()->exists()) {
-                    $inmuebles = $separacion->proforma->proformaInmuebles()->with('departamento')->get()->pluck('departamento')->filter();
+                    $proformaInmuebles = $separacion->proforma->proformaInmuebles()->with('departamento')->get();
+                    $inmuebles = $proformaInmuebles->pluck('departamento')->filter();
                 } elseif ($separacion->proforma->departamento) {
                     $inmuebles = collect([$separacion->proforma->departamento]);
                 }
@@ -130,16 +134,51 @@ class CreateSeparacion extends CreateRecord
                     'departamentos_count' => $inmuebles instanceof \Illuminate\Support\Collection ? $inmuebles->count() : (is_array($inmuebles) ? count($inmuebles) : 0)
                 ]);
 
-                foreach ($inmuebles as $departamento) {
+                // Crear registros en separacion_inmuebles para cada inmueble
+                foreach ($inmuebles as $index => $departamento) {
                     if ($departamento) {
+                        // Actualizar estado del departamento
                         $departamento->update([
                             'estado_departamento_id' => $estadoSeparacion->id,
                         ]);
 
-                        Log::info('Departamento actualizado a estado Separacion', [
+                        // Obtener datos del ProformaInmueble correspondiente si existe
+                        $proformaInmueble = $proformaInmuebles->where('departamento_id', $departamento->id)->first();
+                        
+                        // Calcular valores por inmueble
+                        $cantidadInmuebles = $inmuebles->count();
+                        $precioLista = $proformaInmueble ? $proformaInmueble->precio_lista : $departamento->Precio_lista ?? 0;
+                        $precioVenta = $proformaInmueble ? $proformaInmueble->precio_venta : ($separacion->proforma->precio_venta ?? $precioLista);
+                        $montoSeparacion = $proformaInmueble ? $proformaInmueble->monto_separacion : ($separacion->proforma->monto_separacion ?? 0);
+                        $montoCuotaInicial = $proformaInmueble ? $proformaInmueble->monto_cuota_inicial : ($separacion->proforma->monto_cuota_inicial ?? 0);
+                        $saldoFinanciar = $proformaInmueble ? $proformaInmueble->saldo_financiar : ($separacion->saldo_a_financiar ?? 0);
+                        
+                        // Si no hay ProformaInmuebles (caso de un solo departamento), dividir los montos
+                        if (!$proformaInmueble && $cantidadInmuebles > 1) {
+                            $montoSeparacion = $montoSeparacion / $cantidadInmuebles;
+                            $montoCuotaInicial = $montoCuotaInicial / $cantidadInmuebles;
+                            $saldoFinanciar = $saldoFinanciar / $cantidadInmuebles;
+                        }
+                        
+                        // Crear registro en separacion_inmuebles
+                        SeparacionInmueble::create([
+                            'separacion_id' => $separacion->id,
+                            'departamento_id' => $departamento->id,
+                            'precio_lista' => $precioLista,
+                            'precio_venta' => $precioVenta,
+                            'monto_separacion' => $montoSeparacion,
+                            'monto_cuota_inicial' => $montoCuotaInicial,
+                            'saldo_financiar' => $saldoFinanciar,
+                            'orden' => $index + 1,
+                            'created_by' => Auth::id() ?? 1,
+                            'updated_by' => Auth::id() ?? 1,
+                        ]);
+
+                        Log::info('Departamento actualizado a estado Separacion y registro creado en separacion_inmuebles', [
                             'departamento_id' => $departamento->id ?? null,
                             'estado_departamento_id' => $estadoSeparacion->id,
                             'proforma_id' => $separacion->proforma->id,
+                            'separacion_id' => $separacion->id,
                         ]);
                     }
                 }

@@ -14,8 +14,7 @@ class EstadosProyectoSeeder extends Seeder
      */
     public function run()
     {
-        // Insertar los estados de proyecto
-        DB::table('estados_proyecto')->insert([
+        $estados = [
             [
                 'nombre' => 'Planificado',
                 'descripcion' => 'El proyecto está en la fase de planificación, aún no se ha iniciado la construcción.',
@@ -28,6 +27,13 @@ class EstadosProyectoSeeder extends Seeder
                 'nombre' => 'Terminado',
                 'descripcion' => 'El proyecto ha sido completado y está finalizado.',
             ]
-        ]);
+        ];
+
+        foreach ($estados as $estado) {
+            DB::table('estados_proyecto')->updateOrInsert(
+                ['nombre' => $estado['nombre']],
+                $estado
+            );
+        }
     }
 }

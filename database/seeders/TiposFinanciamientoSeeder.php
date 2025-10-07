@@ -23,7 +23,10 @@ class TiposFinanciamientoSeeder extends Seeder
         ];
 
         foreach ($financiamientos as $financiamiento) {
-            DB::table('tipos_financiamiento')->insert($financiamiento);
+            DB::table('tipos_financiamiento')->updateOrInsert(
+                ['nombre' => $financiamiento['nombre']],
+                $financiamiento
+            );
         }
     }
 }

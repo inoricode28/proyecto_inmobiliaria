@@ -88,17 +88,112 @@
                 </div>
             </div>
 
-            <!-- Información adicional del departamento -->
+            <!-- Información de los Inmuebles -->
             <div class="mt-6 pt-6 border-t border-gray-200">
-                <h4 class="font-bold mb-3">Información del Departamento</h4>
-                <div class="grid grid-cols-3 gap-4">
-                    <div><strong>Proyecto:</strong> {{ $departamento->proyecto->nombre ?? 'N/A' }}</div>
-                    <div><strong>Número:</strong> {{ $departamento->num_departamento }}</div>
-                    <div><strong>Precio:</strong> S/ {{ number_format($departamento->precio, 2) }}</div>
-                    <div><strong>Área:</strong> {{ $departamento->construida }}m²</div>
-                    <div><strong>Dormitorios:</strong> {{ $departamento->num_dormitorios }}</div>
-                    <div><strong>Baños:</strong> {{ $departamento->num_bano }}</div>
-                </div>
+                <h4 class="font-bold mb-3">Información de los Inmuebles</h4>
+                
+                @if($inmuebles && $inmuebles->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse border border-gray-300">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Proyecto</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Inmueble</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-right">Precio Lista</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-right">Descuento</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-right">Precio Venta</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-right">Separación</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-right">Cuota Inicial</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-right">Saldo a Financiar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $totalPrecioLista = 0;
+                                    $totalDescuento = 0;
+                                    $totalPrecioVenta = 0;
+                                    $totalSeparacion = 0;
+                                    $totalCuotaInicial = 0;
+                                    $totalSaldoFinanciar = 0;
+                                @endphp
+                                
+                                @foreach($inmuebles as $inmueble)
+                                    @php
+                                        $dept = $inmueble->departamento ?? $inmueble;
+                                        $precioLista = $inmueble->precio_lista ?? $dept->Precio_lista ?? 0;
+                                        $descuento = $inmueble->descuento ?? 0;
+                                        $precioVenta = $inmueble->precio_venta ?? ($precioLista - $descuento);
+                                        $montoSeparacion = $inmueble->monto_separacion ?? 0;
+                                        $cuotaInicial = $inmueble->monto_cuota_inicial ?? 0;
+                                        $saldoFinanciar = $inmueble->saldo_financiar ?? ($precioVenta - $montoSeparacion - $cuotaInicial);
+                                        
+                                        $totalPrecioLista += $precioLista;
+                                        $totalDescuento += $descuento;
+                                        $totalPrecioVenta += $precioVenta;
+                                        $totalSeparacion += $montoSeparacion;
+                                        $totalCuotaInicial += $cuotaInicial;
+                                        $totalSaldoFinanciar += $saldoFinanciar;
+                                    @endphp
+                                    
+                                    <tr>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {{ $dept->proyecto->nombre ?? 'N/A' }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            <div class="font-medium">{{ $dept->num_departamento ?? 'N/A' }}</div>
+                                            <div class="text-sm text-gray-600">
+                                                {{ $dept->tipoInmueble->nombre ?? '' }} - 
+                                                {{ $dept->num_dormitorios ?? 0 }} dorm. - 
+                                                {{ $dept->construida ?? 0 }}m²
+                                            </div>
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 text-right">
+                                            S/ {{ number_format($precioLista, 2) }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 text-right">
+                                            S/ {{ number_format($descuento, 2) }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 text-right font-medium">
+                                            S/ {{ number_format($precioVenta, 2) }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 text-right">
+                                            S/ {{ number_format($montoSeparacion, 2) }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 text-right">
+                                            S/ {{ number_format($cuotaInicial, 2) }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 text-right">
+                                            S/ {{ number_format($saldoFinanciar, 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                
+                                <!-- Fila de totales -->
+                                @if($inmuebles->count() > 1)
+                                <tr class="bg-blue-50 font-bold">
+                                    <td class="border border-gray-300 px-4 py-2" colspan="2">TOTALES</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-right">S/ {{ number_format($totalPrecioLista, 2) }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-right">S/ {{ number_format($totalDescuento, 2) }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-right">S/ {{ number_format($totalPrecioVenta, 2) }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-right">S/ {{ number_format($totalSeparacion, 2) }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-right">S/ {{ number_format($totalCuotaInicial, 2) }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 text-right">S/ {{ number_format($totalSaldoFinanciar, 2) }}</td>
+                                </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <!-- Fallback para compatibilidad con datos antiguos -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div><strong>Proyecto:</strong> {{ $departamento->proyecto->nombre ?? 'N/A' }}</div>
+                        <div><strong>Número:</strong> {{ $departamento->num_departamento }}</div>
+                        <div><strong>Precio:</strong> S/ {{ number_format($departamento->precio ?? $departamento->Precio_lista ?? 0, 2) }}</div>
+                        <div><strong>Área:</strong> {{ $departamento->construida }}m²</div>
+                        <div><strong>Dormitorios:</strong> {{ $departamento->num_dormitorios }}</div>
+                        <div><strong>Baños:</strong> {{ $departamento->num_bano }}</div>
+                    </div>
+                @endif
             </div>
 
             <!-- Información del cliente -->

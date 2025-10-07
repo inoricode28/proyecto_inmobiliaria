@@ -172,7 +172,7 @@
             CRONOGRAMA C.I.
         </button>
         <button type="button" 
-                onclick="openCronogramaSFModal()"
+                onclick="openSFModalWithSeparaciones()"
                 class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
@@ -203,21 +203,123 @@
 let addedProperties = [];
 let propertyCounter = 0;
 
-// INTERCEPTOR DE MORPHDOM: Proteger filas dinámicas
+// SISTEMA DE PROTECCIÓN Y RESTAURACIÓN MEJORADO
 console.log('🔍 Verificando disponibilidad de morphdom:', typeof window.morphdom);
 console.log('🔍 Verificando disponibilidad de Livewire:', typeof window.Livewire);
 
+// Almacenamiento global para propiedades cargadas
+window.loadedProperties = window.loadedProperties || [];
+
+// Función para respaldar propiedades actuales
+function backupProperties() {
+    const tbody = document.getElementById('properties-tbody');
+    if (tbody) {
+        const dynamicRows = tbody.querySelectorAll('[data-dynamic-row]');
+        window.loadedProperties = Array.from(dynamicRows).map(row => ({
+            html: row.outerHTML,
+            propertyId: row.getAttribute('data-property-id')
+        }));
+        console.log('💾 Respaldadas', window.loadedProperties.length, 'propiedades');
+    }
+}
+
+// Variable para evitar múltiples restauraciones simultáneas
+window.restoringProperties = false;
+
+// Función para restaurar propiedades si desaparecen
+function restoreProperties() {
+    const tbody = document.getElementById('properties-tbody');
+    if (!tbody || window.restoringProperties) return;
+    
+    window.restoringProperties = true;
+    
+    // Verificar múltiples selectores para detectar filas dinámicas
+    const currentDynamicRows = tbody.querySelectorAll('[data-dynamic-row], [data-property-id], [data-index]');
+    const allRows = tbody.querySelectorAll('tr');
+    
+    console.log('🔍 Verificando estado de propiedades:', {
+        loadedProperties: window.loadedProperties?.length || 0,
+        currentDynamicRows: currentDynamicRows.length,
+        allRows: allRows.length
+    });
+    
+    // Solo restaurar si realmente no hay filas dinámicas Y tenemos propiedades respaldadas
+    // Y no hay filas con data-index (que es lo que usamos para las propiedades)
+    const hasDataIndexRows = tbody.querySelectorAll('[data-index]').length > 0;
+    
+    if (window.loadedProperties && window.loadedProperties.length > 0 && 
+        currentDynamicRows.length === 0 && 
+        !hasDataIndexRows &&
+        allRows.length <= 1) { // Solo la fila de "No hay inmuebles" o vacío
+        
+        console.log('🚨 ¡Propiedades realmente desaparecieron! Restaurando', window.loadedProperties.length, 'propiedades');
+        
+        // Remover fila por defecto si existe
+        const defaultRow = tbody.querySelector('tr:not([data-dynamic-row]):not([data-property-id]):not([data-index])');
+        if (defaultRow) {
+            console.log('🗑️ Removiendo fila por defecto');
+            defaultRow.remove();
+        }
+        
+        // Restaurar cada propiedad
+        window.loadedProperties.forEach((property, index) => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = property.html;
+            const restoredRow = tempDiv.firstElementChild;
+            
+            // Asegurar que los atributos de protección estén establecidos
+            restoredRow.setAttribute('data-dynamic-row', 'true');
+            restoredRow.setAttribute('data-livewire-ignore', 'true');
+            restoredRow.setAttribute('wire:ignore', 'true');
+            
+            tbody.appendChild(restoredRow);
+            console.log(`✅ Propiedad ${index + 1} restaurada`);
+        });
+        
+        console.log('✅ Propiedades restauradas exitosamente');
+    } else {
+        console.log('ℹ️ No es necesario restaurar propiedades - están presentes');
+    }
+    
+    // Reset de la variable de control
+    setTimeout(() => {
+        window.restoringProperties = false;
+    }, 2000);
+}
+
+// INTERCEPTOR DE MORPHDOM MEJORADO
 if (window.morphdom) {
     const originalMorphdom = window.morphdom;
     window.morphdom = function(fromNode, toNode, options = {}) {
+        // PROTECCIÓN: No interferir si el modal SF está activo
+        if (window.sfModalActive) {
+            console.log('🛡️ Modal SF activo - saltando morphdom');
+            return fromNode; // Retornar el nodo original sin cambios
+        }
+        
         console.log('🔄 MORPHDOM EJECUTÁNDOSE:', fromNode, toNode);
+        
+        // Respaldar propiedades antes de que morphdom ejecute
+        backupProperties();
+        
         const originalOnBeforeElUpdated = options.onBeforeElUpdated;
         
         options.onBeforeElUpdated = function(fromEl, toEl) {
-            // Si el elemento tiene atributos de protección, no permitir la actualización
-            if (fromEl.hasAttribute && fromEl.hasAttribute('data-dynamic-row')) {
+            // Proteger filas dinámicas con múltiples verificaciones
+            if (fromEl.hasAttribute && (
+                fromEl.hasAttribute('data-dynamic-row') ||
+                fromEl.hasAttribute('data-property-id') ||
+                fromEl.hasAttribute('data-livewire-ignore') ||
+                fromEl.hasAttribute('wire:ignore')
+            )) {
                 console.log('🛡️ MORPHDOM INTERCEPTADO: Protegiendo fila dinámica', fromEl);
                 return false; // Prevenir la actualización
+            }
+            
+            // Proteger el tbody completo de propiedades
+            if (fromEl.id === 'properties-tbody') {
+                console.log('🛡️ MORPHDOM INTERCEPTADO: Protegiendo tbody de propiedades');
+                return false;
             }
             
             // Si hay un callback original, ejecutarlo
@@ -228,24 +330,45 @@ if (window.morphdom) {
             return true;
         };
         
-        return originalMorphdom(fromNode, toNode, options);
+        const result = originalMorphdom(fromNode, toNode, options);
+        
+        // Verificar y restaurar propiedades después de que morphdom ejecute (timeout más largo)
+        setTimeout(restoreProperties, 500);
+        
+        return result;
     };
-    console.log('🛡️ Interceptor de morphdom instalado para proteger filas dinámicas');
+    console.log('🛡️ Interceptor de morphdom mejorado instalado con restauración automática');
 } else {
     console.log('⚠️ morphdom no está disponible aún, intentando instalar interceptor más tarde...');
     
     // Intentar instalar el interceptor cuando morphdom esté disponible
     const checkMorphdom = setInterval(() => {
         if (window.morphdom) {
-            console.log('✅ morphdom ahora disponible, instalando interceptor...');
+            console.log('✅ morphdom ahora disponible, instalando interceptor mejorado...');
             const originalMorphdom = window.morphdom;
             window.morphdom = function(fromNode, toNode, options = {}) {
                 console.log('🔄 MORPHDOM EJECUTÁNDOSE (instalado tardíamente):', fromNode, toNode);
+                
+                // Respaldar propiedades antes de que morphdom ejecute
+                backupProperties();
+                
                 const originalOnBeforeElUpdated = options.onBeforeElUpdated;
                 
                 options.onBeforeElUpdated = function(fromEl, toEl) {
-                    if (fromEl.hasAttribute && fromEl.hasAttribute('data-dynamic-row')) {
+                    // Proteger filas dinámicas con múltiples verificaciones
+                    if (fromEl.hasAttribute && (
+                        fromEl.hasAttribute('data-dynamic-row') ||
+                        fromEl.hasAttribute('data-property-id') ||
+                        fromEl.hasAttribute('data-livewire-ignore') ||
+                        fromEl.hasAttribute('wire:ignore')
+                    )) {
                         console.log('🛡️ MORPHDOM INTERCEPTADO (tardío): Protegiendo fila dinámica', fromEl);
+                        return false;
+                    }
+                    
+                    // Proteger el tbody completo de propiedades
+                    if (fromEl.id === 'properties-tbody') {
+                        console.log('🛡️ MORPHDOM INTERCEPTADO (tardío): Protegiendo tbody de propiedades');
                         return false;
                     }
                     
@@ -256,9 +379,14 @@ if (window.morphdom) {
                     return true;
                 };
                 
-                return originalMorphdom(fromNode, toNode, options);
+                const result = originalMorphdom(fromNode, toNode, options);
+                
+                // Verificar y restaurar propiedades después de que morphdom ejecute (timeout más largo)
+                setTimeout(restoreProperties, 500);
+                
+                return result;
             };
-            console.log('🛡️ Interceptor de morphdom instalado tardíamente');
+            console.log('🛡️ Interceptor de morphdom mejorado instalado tardíamente con restauración automática');
             clearInterval(checkMorphdom);
         }
     }, 100);
@@ -267,12 +395,47 @@ if (window.morphdom) {
     setTimeout(() => clearInterval(checkMorphdom), 10000);
 }
 
+// OBSERVADOR DE MUTACIONES para detectar cambios en el tbody
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('properties-tbody');
+    if (tbody) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    // Respaldar propiedades cuando se agregan
+                    if (mutation.addedNodes.length > 0) {
+                        setTimeout(backupProperties, 50);
+                    }
+                    
+                    // Verificar si las propiedades fueron removidas y restaurar si es necesario (timeout más largo)
+                    if (mutation.removedNodes.length > 0) {
+                        setTimeout(restoreProperties, 1000);
+                    }
+                }
+            });
+        });
+        
+        observer.observe(tbody, {
+            childList: true,
+            subtree: true
+        });
+        
+        console.log('👁️ Observador de mutaciones instalado para tbody de propiedades');
+    }
+});
+
 // INTERCEPTOR ALTERNATIVO PARA LIVEWIRE
 if (window.Livewire) {
     console.log('🔄 Instalando interceptor de Livewire...');
     
     // Interceptar eventos de Livewire que puedan causar re-renderizado
     window.Livewire.on('component.updated', (component) => {
+        // PROTECCIÓN: No interferir si el modal SF está activo
+        if (window.sfModalActive) {
+            console.log('🛡️ Modal SF activo - saltando actualización de Livewire');
+            return;
+        }
+        
         console.log('🔄 Componente Livewire actualizado:', component);
         
         // Restaurar filas dinámicas si fueron removidas
@@ -281,7 +444,7 @@ if (window.Livewire) {
             if (tbody) {
                 const dynamicRows = tbody.querySelectorAll('[data-dynamic-row="true"]');
                 console.log('🔍 Filas dinámicas encontradas después de actualización:', dynamicRows.length);
-                
+
                 if (dynamicRows.length === 0 && addedProperties.length > 0) {
                     console.log('⚠️ Filas dinámicas perdidas, intentando restaurar...');
                     // Aquí podríamos restaurar las filas si es necesario
@@ -290,7 +453,7 @@ if (window.Livewire) {
         }, 10);
     });
     
-    console.log('✅ Interceptor de Livewire instalado');
+    console.log('✅ Interceptor de Livewire instalado con protección SF');
 } else {
     console.log('⚠️ Livewire no está disponible aún...');
 }
@@ -317,32 +480,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 return originalInnerHTML.get.call(this);
             },
             set: function(value) {
-                console.log('🚨 ALERTA: Alguien está modificando el innerHTML del tbody!');
-                console.log('📋 Nuevo valor:', value);
-                console.trace('📍 Stack trace de la modificación:');
+                // Solo log en modo debug si es necesario
+                // console.log('🔄 innerHTML del tbody modificado');
                 return originalInnerHTML.set.call(this, value);
             }
         });
          
-         // Interceptor para detectar cuando se remueven elementos
+         // Interceptor para detectar cuando se remueven elementos (solo alertas críticas)
           const originalRemoveChild = tbody.removeChild;
           tbody.removeChild = function(child) {
-              console.log('🚨 ALERTA: Se está removiendo un elemento del tbody con removeChild!');
-              console.log('🗑️ Elemento removido:', child);
-              console.trace('📍 Stack trace de la remoción:');
+              // Solo alertar si es una fila de propiedad con datos importantes
+              if (child.dataset && child.dataset.propertyId && child.dataset.separacionId) {
+                  console.warn('⚠️ Removiendo fila con separación:', child.dataset.propertyId);
+              }
               return originalRemoveChild.call(this, child);
           };
           
-          // Interceptor para el método remove() en elementos hijos
+          // Interceptor para el método remove() en elementos hijos (solo alertas críticas)
           const observer = new MutationObserver(function(mutations) {
               mutations.forEach(function(mutation) {
                   if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
                       mutation.removedNodes.forEach(function(node) {
-                          if (node.nodeType === 1 && node.tagName === 'TR' && node.dataset && node.dataset.propertyId) {
-                              console.log('🚨 ALERTA: Fila de propiedad removida del DOM!');
-                              console.log('🗑️ Propiedad ID:', node.dataset.propertyId);
-                              console.log('📋 Index:', node.dataset.index);
-                              console.trace('📍 Stack trace de la remoción:');
+                          if (node.nodeType === 1 && node.tagName === 'TR' && node.dataset && node.dataset.propertyId && node.dataset.separacionId) {
+                              console.warn('⚠️ Fila con separación removida:', node.dataset.propertyId);
                           }
                       });
                   }
@@ -351,24 +511,56 @@ document.addEventListener('DOMContentLoaded', function() {
           
           observer.observe(tbody, { childList: true, subtree: true });
            
-           // Guardar el contenido inicial del tbody para comparar
+           // Guardar el contenido inicial del tbody para comparar (modo silencioso)
            let lastTbodyContent = tbody.innerHTML;
            
-           // Verificar cambios cada 50ms
+           // Verificar cambios cada 500ms (reducido para menos ruido)
            const contentChecker = setInterval(() => {
                const currentContent = tbody.innerHTML;
                if (currentContent !== lastTbodyContent) {
-                   console.log('🔄 CAMBIO DETECTADO en el contenido del tbody!');
-                   console.log('📋 Contenido anterior:', lastTbodyContent.substring(0, 200) + '...');
-                   console.log('📋 Contenido actual:', currentContent.substring(0, 200) + '...');
-                   console.trace('📍 Stack trace del cambio:');
+                   // Solo log en modo debug si es necesario
+                   // console.log('🔄 Contenido del tbody actualizado');
                    lastTbodyContent = currentContent;
                }
-           }, 50);
+           }, 500);
      }
      
-     // Cargar propiedades desde la API
+     // Cargar propiedades inmediatamente y configurar reintentos si es necesario
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    // Primera carga inmediata
     loadPropertiesFromAPI();
+    
+    // Verificar después de un momento si se cargaron correctamente
+    setTimeout(() => {
+        const tbody = document.getElementById('properties-tbody');
+        const currentRows = tbody ? tbody.querySelectorAll('tr:not(#default-row)').length : 0;
+        
+        if (currentRows === 0) {
+            console.log('🔄 Primera carga no exitosa, iniciando sistema de reintentos...');
+            
+            const retryInterval = setInterval(() => {
+                const tbody = document.getElementById('properties-tbody');
+                const currentRows = tbody ? tbody.querySelectorAll('tr:not(#default-row)').length : 0;
+                
+                if (currentRows === 0 && retryCount < maxRetries) {
+                    retryCount++;
+                    console.log(`🔄 Reintento ${retryCount}/${maxRetries} - Cargando propiedades...`);
+                    loadPropertiesFromAPI();
+                } else if (currentRows > 0 || retryCount >= maxRetries) {
+                    clearInterval(retryInterval);
+                    if (currentRows > 0) {
+                        console.log('✅ Propiedades cargadas exitosamente');
+                    } else {
+                        console.log('⚠️ No se pudieron cargar propiedades después de varios intentos');
+                    }
+                }
+            }, 2000);
+        } else {
+            console.log('✅ Propiedades cargadas exitosamente en el primer intento');
+        }
+    }, 1000);
 });
 
 // Función para cargar propiedades desde la API
@@ -400,6 +592,27 @@ async function loadPropertiesFromAPI() {
             
             if (propiedadesConSeparacion.length > 0) {
                 console.log('🔍 Cargando automáticamente propiedades con separaciones existentes...');
+                
+                // Limpiar completamente antes de cargar nuevas propiedades
+                addedProperties.length = 0;
+                
+                // Limpiar la tabla de propiedades existentes
+                const tbody = document.getElementById('properties-tbody');
+                if (tbody) {
+                    const existingRows = tbody.querySelectorAll('tr:not(#default-row):not(#totals-row)');
+                    existingRows.forEach(row => row.remove());
+                }
+                
+                // Rehabilitar todas las opciones del selector
+                const selector = document.getElementById('property-selector');
+                if (selector) {
+                    Array.from(selector.options).forEach(option => {
+                        if (option.value) {
+                            option.disabled = false;
+                            option.removeAttribute('data-auto-selected');
+                        }
+                    });
+                }
                 
                 propiedadesConSeparacion.forEach((propiedad, index) => {
                     // Buscar la opción en el selector
@@ -433,18 +646,36 @@ async function loadPropertiesFromAPI() {
                 
                 // Actualizar la interfaz después de cargar propiedades automáticamente
                 setTimeout(() => {
-                    document.getElementById('empty-message').style.display = 'none';
-                    document.getElementById('totals-row').style.display = '';
+                    updateCalculations();
+                    
+                    const emptyMessage = document.getElementById('empty-message');
+                    if (emptyMessage) {
+                        emptyMessage.style.display = 'none';
+                    }
+                    
+                    const totalsRow = document.getElementById('totals-row');
+                    if (totalsRow) {
+                        totalsRow.style.display = '';
+                    }
                     
                     const defaultRow = document.getElementById('default-row');
                     if (defaultRow) {
                         defaultRow.style.display = 'none';
                     }
                     
+                    // Verificar que las propiedades estén realmente visibles
+                    const tbody = document.getElementById('properties-tbody');
+                    const visibleRows = tbody ? tbody.querySelectorAll('tr:not(#default-row)').length : 0;
+                    console.log(`✅ Propiedades cargadas y visibles: ${visibleRows}`);
+                    
+                    if (visibleRows === 0 && propiedadesConSeparacion.length > 0) {
+                        console.log('⚠️ Las propiedades se cargaron pero no son visibles, forzando restauración...');
+                        setTimeout(restoreProperties, 100);
+                    }
+                    
                     updateCalculations();
                     
                     // Log detallado después de updateCalculations
-                    const tbody = document.getElementById('properties-tbody');
                     const rows = tbody ? tbody.querySelectorAll('tr:not(#default-row)') : [];
                     console.log('📊 Estado después de updateCalculations:');
                     console.log('  - Filas en tbody:', rows.length);
@@ -480,7 +711,14 @@ async function loadPropertiesFromAPI() {
                                 console.error('❌ El tbody ha sido eliminado del DOM');
                             } else {
                                 console.log('✅ El tbody existe, pero las filas han sido removidas');
-                                console.log('📋 Contenido actual del tbody:', tbody2.innerHTML);
+                                console.log('📋 🔍 Verificando estado de propiedades:', {
+                                    loadedProperties: window.loadedProperties?.length || 0,
+                                    currentDynamicRows: tbody2.querySelectorAll('[data-dynamic-row], [data-property-id], [data-index]').length,
+                                    allRows: tbody2.querySelectorAll('tr').length
+                                });
+                                
+                                // RESTAURAR INMEDIATAMENTE
+                                restoreProperties();
                             }
                         }
                     }, 200);
@@ -668,13 +906,14 @@ function addPropertyToTable(propertyData) {
     `;
     
     console.log('📝 HTML de la nueva fila generado correctamente');
-    tbody.appendChild(row);
     
-    // PROTECCIÓN CONTRA MORPHDOM: Marcar la fila recién agregada
+    // PROTECCIÓN CONTRA MORPHDOM: Marcar la fila ANTES de agregarla al DOM
     row.setAttribute('data-dynamic-row', 'true');
     row.setAttribute('data-livewire-ignore', 'true');
     row.setAttribute('wire:ignore', 'true');
     console.log('🛡️ Fila protegida contra morphdom con atributos especiales');
+    
+    tbody.appendChild(row);
     
     console.log('✅ Fila agregada al tbody. Número de filas después:', tbody.children.length);
     console.log('🔍 Verificando que la fila esté en el DOM:', document.querySelector(`[data-index="${index}"]`) ? 'SÍ' : 'NO');
@@ -818,6 +1057,36 @@ function updateCalculations() {
     }
 }
 
+// Función para obtener separaciones existentes sin crear nuevas
+function getExistingSeparaciones(multipleData) {
+    console.log('🔍 === OBTENIENDO SEPARACIONES EXISTENTES ===');
+    console.log('📊 Datos a verificar:', multipleData);
+    
+    const existingSeparaciones = [];
+    const needToCreate = [];
+    
+    for (const property of multipleData.properties) {
+        const row = document.querySelector(`#properties-tbody tr[data-departamento-id="${property.departamento_id}"]`);
+        if (row && row.dataset.separacionId) {
+            console.log(`✅ Separación existente para departamento ${property.departamento_id}: ${row.dataset.separacionId}`);
+            existingSeparaciones.push({
+                departamento_id: property.departamento_id,
+                id: row.dataset.separacionId,
+                property: property
+            });
+        } else {
+            console.log(`⚠️ Separación no existe para departamento ${property.departamento_id}`);
+            needToCreate.push(property);
+        }
+    }
+    
+    return {
+        existing: existingSeparaciones,
+        needToCreate: needToCreate,
+        allExist: needToCreate.length === 0
+    };
+}
+
 // Funciones para abrir los modales de cronograma
 window.openCronogramaModal = async function() {
     console.log('🔍 === INICIO openCronogramaModal ===');
@@ -832,13 +1101,17 @@ window.openCronogramaModal = async function() {
         // Verificar si las funciones existen antes de usarlas
         if (typeof getMultiplePropertiesData !== 'function') {
             console.error('❌ getMultiplePropertiesData no está disponible');
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: { id: 'cronograma-modal' } }));
+            // Abrir modal directamente sin disparar eventos
+            const modal = document.getElementById('cronograma-modal');
+            if (modal) modal.classList.remove('hidden');
             return;
         }
         
         if (typeof createMultipleSeparaciones !== 'function') {
             console.error('❌ createMultipleSeparaciones no está disponible');
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: { id: 'cronograma-modal' } }));
+            // Abrir modal directamente sin disparar eventos
+            const modal = document.getElementById('cronograma-modal');
+            if (modal) modal.classList.remove('hidden');
             return;
         }
         
@@ -851,7 +1124,9 @@ window.openCronogramaModal = async function() {
         if (!multipleData || !multipleData.properties || multipleData.properties.length === 0) {
             console.warn('⚠️ No hay datos de múltiples propiedades válidos:', multipleData);
             console.log('🔍 Abriendo modal sin datos múltiples...');
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: { id: 'cronograma-modal' } }));
+            // Abrir modal directamente sin disparar eventos
+            const modal = document.getElementById('cronograma-modal');
+            if (modal) modal.classList.remove('hidden');
             return;
         }
         
@@ -881,13 +1156,29 @@ window.openCronogramaModal = async function() {
         console.log('🔍 window.multiplePropertiesData:', window.multiplePropertiesData);
         console.log('🔍 window.globalMultipleData:', window.globalMultipleData);
         
-        // Intentar crear separaciones (sin bloquear el modal)
+        // Verificar separaciones existentes - SOLO usar las que ya existen, NO crear nuevas
         try {
-            console.log('🔄 Creando separaciones múltiples...');
-            await createMultipleSeparaciones(multipleData);
-            console.log('✅ Separaciones creadas exitosamente');
+            console.log('🔍 Verificando separaciones existentes...');
+            const separacionesStatus = getExistingSeparaciones(multipleData);
+            
+            if (separacionesStatus.allExist) {
+                console.log('✅ Todas las separaciones ya existen, usando IDs existentes');
+                // Asignar los IDs existentes a los datos
+                multipleData.separaciones = separacionesStatus.existing;
+            } else {
+                console.log(`⚠️ Faltan ${separacionesStatus.needToCreate.length} separaciones de ${multipleData.properties.length} total`);
+                console.log('📋 Para acceder al cronograma de cuota inicial, primero debe crear las separaciones desde los otros modales');
+                
+                // Solo asignar las separaciones que SÍ existen (si las hay)
+                if (separacionesStatus.existing.length > 0) {
+                    multipleData.separaciones = separacionesStatus.existing;
+                    console.log(`✅ Usando ${separacionesStatus.existing.length} separaciones existentes`);
+                } else {
+                    console.log('⚠️ No hay separaciones existentes para mostrar en el cronograma');
+                }
+            }
         } catch (separacionError) {
-            console.warn('⚠️ Error al crear separaciones, pero continuando con el modal:', separacionError);
+            console.warn('⚠️ Error al verificar separaciones, pero continuando con el modal:', separacionError);
         }
         
         // Cargar cuotas existentes para las propiedades
@@ -950,8 +1241,16 @@ window.openCronogramaModal = async function() {
             // Verificar una vez más antes de abrir
             verifyAndRestoreData();
             
-            console.log('🚀 Disparando evento para abrir modal del cronograma de cuota inicial');
-            window.dispatchEvent(new CustomEvent('open-modal', { detail: { id: 'cronograma-modal' } }));
+            console.log('🚀 Abriendo modal del cronograma de cuota inicial directamente');
+            // Abrir modal directamente sin disparar eventos
+            const modal = document.getElementById('cronograma-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                // Llamar a la función de mostrar modal si existe
+                if (typeof window.showCronogramaModal === 'function') {
+                    window.showCronogramaModal();
+                }
+            }
         }, 100); // Delay reducido a 100ms
         
     } catch (error) {
@@ -1117,17 +1416,77 @@ async function loadExistingCuotasForMultipleProperties(multipleData) {
     }
 }
 
-async function openCronogramaSFModal() {
+async function openSFModalWithSeparaciones() {
     try {
+        console.log('🚀 === INICIANDO openSFModalWithSeparaciones ===');
+        
         // Crear separaciones para las propiedades seleccionadas
         const multipleData = getMultiplePropertiesData();
+        console.log('📊 Datos múltiples obtenidos:', multipleData);
+        
         await createMultipleSeparaciones(multipleData);
+        console.log('✅ Separaciones creadas exitosamente');
         
         // Establecer los datos de múltiples propiedades para el cronograma SF
         window.multiplePropertiesData = multipleData;
-        window.dispatchEvent(new CustomEvent('open-modal', { detail: { id: 'cronograma-sf-modal' } }));
+        console.log('💾 window.multiplePropertiesData establecido:', window.multiplePropertiesData);
+        
+        // Verificar que los datos estén correctamente establecidos
+        if (window.multiplePropertiesData && window.multiplePropertiesData.properties) {
+            console.log('✅ Datos múltiples confirmados - propiedades:', window.multiplePropertiesData.properties.length);
+        } else {
+            console.error('❌ Error: window.multiplePropertiesData no está correctamente establecido');
+        }
+        
+        // Abrir el modal directamente para asegurar que los datos múltiples estén disponibles
+        console.log('🔄 Abriendo modal directamente para garantizar datos múltiples');
+        const modal = document.getElementById('cronograma-sf-modal');
+        if (modal) {
+            // Activar protección manualmente
+            window.sfModalActive = true;
+            console.log('🛡️ Modal SF activado - protección habilitada');
+            
+            modal.classList.remove('hidden');
+            
+            // Cargar datos del modal con un pequeño delay para asegurar que los datos estén establecidos
+            setTimeout(() => {
+                console.log('🔄 Iniciando carga de datos del modal SF...');
+                
+                // Verificar nuevamente que los datos múltiples estén disponibles
+                if (window.multiplePropertiesData && window.multiplePropertiesData.properties) {
+                    console.log('✅ Datos múltiples disponibles, cargando...');
+                    if (typeof loadMultipleSFData === 'function') {
+                        loadMultipleSFData();
+                    }
+                } else {
+                    console.log('⚠️ Datos múltiples no disponibles, cargando datos individuales');
+                    if (typeof loadProformaSFData === 'function') {
+                        loadProformaSFData();
+                    }
+                }
+                
+                // Cargar funciones adicionales
+                if (typeof loadExistingCuotasSF === 'function') {
+                    loadExistingCuotasSF();
+                }
+                if (typeof setDefaultSFDate === 'function') {
+                    setDefaultSFDate();
+                }
+                if (typeof loadBancos === 'function') {
+                    loadBancos();
+                }
+                if (typeof loadTiposFinanciamiento === 'function') {
+                    loadTiposFinanciamiento();
+                }
+                if (typeof loadTiposComprobante === 'function') {
+                    loadTiposComprobante();
+                }
+            }, 200);
+        }
+        
+        console.log('✅ === FIN openSFModalWithSeparaciones ===');
     } catch (error) {
-        console.error('Error al crear separaciones:', error);
+        console.error('❌ Error al crear separaciones:', error);
         alert('Error al procesar las separaciones. Por favor, intente nuevamente.');
     }
 }
@@ -1140,7 +1499,18 @@ async function openPagoSeparacionModal() {
         
         // Establecer los datos de múltiples propiedades para el registro de pagos
         window.multiplePropertiesData = multipleData;
-        window.dispatchEvent(new CustomEvent('open-modal', { detail: { id: 'pago-separacion-modal' } }));
+        
+        // Abrir el modal directamente sin disparar evento para evitar bucle infinito
+        const modal = document.getElementById('pago-separacion-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Cargar datos del modal si existe la función
+            if (typeof loadPagoSeparacionData === 'function') {
+                setTimeout(() => {
+                    loadPagoSeparacionData();
+                }, 200);
+            }
+        }
     } catch (error) {
         console.error('Error al crear separaciones:', error);
         alert('Error al procesar las separaciones. Por favor, intente nuevamente.');
@@ -1153,9 +1523,36 @@ async function createMultipleSeparaciones(multipleData) {
     console.log('📊 Datos a enviar:', JSON.stringify(multipleData, null, 2));
     
     try {
-        // Transformar los datos al formato esperado por el backend
+        // Verificar si las separaciones ya existen
+        console.log('🔍 Verificando separaciones existentes...');
+        const existingSeparaciones = [];
+        const needToCreate = [];
+        
+        for (const property of multipleData.properties) {
+            const row = document.querySelector(`#properties-tbody tr[data-departamento-id="${property.departamento_id}"]`);
+            if (row && row.dataset.separacionId) {
+                console.log(`✅ Separación ya existe para departamento ${property.departamento_id}: ${row.dataset.separacionId}`);
+                existingSeparaciones.push({
+                    departamento_id: property.departamento_id,
+                    id: row.dataset.separacionId
+                });
+            } else {
+                console.log(`⚠️ Separación no existe para departamento ${property.departamento_id}, necesita crearse`);
+                needToCreate.push(property);
+            }
+        }
+        
+        // Si todas las separaciones ya existen, no hacer nada
+        if (needToCreate.length === 0) {
+            console.log('✅ Todas las separaciones ya existen, no es necesario crear nuevas');
+            return { success: true, message: 'Separaciones ya existentes', data: { separaciones: existingSeparaciones } };
+        }
+        
+        console.log(`🔄 Necesario crear ${needToCreate.length} separaciones de ${multipleData.properties.length} total`);
+        
+        // Transformar los datos al formato esperado por el backend (solo las que necesitan crearse)
         const transformedData = {
-            propiedades: multipleData.properties.map(property => ({
+            propiedades: needToCreate.map(property => ({
                         departamento_id: property.departamento_id,
                         precio_lista: property.precio_lista,
                         precio_venta: property.precio_venta,
@@ -1196,44 +1593,25 @@ async function createMultipleSeparaciones(multipleData) {
         const result = await response.json();
         console.log('✅ Separaciones creadas exitosamente:', result);
 
-        // Marcar filas como "Con Separación" usando respuesta del backend
+        // PROTECCIÓN: No modificar directamente la tabla de propiedades para evitar interferencia
+        // Solo almacenar los datos de separaciones para uso posterior
         const separaciones = (result && result.data && Array.isArray(result.data.separaciones))
             ? result.data.separaciones
             : (result && Array.isArray(result.separaciones) ? result.separaciones : []);
+        
         if (separaciones && separaciones.length) {
+            // Almacenar los datos de separaciones sin modificar el DOM de la tabla
+            window.separacionesData = window.separacionesData || {};
             separaciones.forEach(sep => {
-                const row = document.querySelector(`#properties-tbody tr[data-departamento-id="${sep.departamento_id}"]`);
-                if (row) {
-                    // Actualizar estilos y badge
-                    row.classList.add('bg-green-50');
-                    const proyectoCell = row.querySelector('td:nth-child(2)');
-                    if (proyectoCell) {
-                        // Eliminar cualquier badge existente y agregar el de separación
-                        const existingBadges = proyectoCell.querySelectorAll('span.inline-flex');
-                        existingBadges.forEach(el => el.remove());
-                        const badge = document.createElement('span');
-                        badge.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2';
-                        badge.textContent = '✓ Con Separación';
-                        proyectoCell.appendChild(badge);
-                    }
-                    // Guardar separacion_id en dataset para otros modales
-                    row.dataset.separacionId = sep.id;
-                }
-
-                // Marcar la opción del selector como con separación y persistir el id
-                const selector = document.getElementById('property-selector');
-                if (selector) {
-                    const option = selector.querySelector(`option[data-departamento-id="${sep.departamento_id}"]`);
-                    if (option) {
-                        option.classList.add('bg-green-100', 'text-green-800');
-                        option.dataset.tieneSeparacion = 'true';
-                        option.dataset.separacionId = sep.id;
-                        if (!option.textContent.includes('✓ CON SEPARACIÓN')) {
-                            option.textContent = option.textContent + ' ✓ CON SEPARACIÓN';
-                        }
-                    }
-                }
+                window.separacionesData[sep.departamento_id] = {
+                    id: sep.id,
+                    departamento_id: sep.departamento_id,
+                    created: true
+                };
+                console.log(`💾 Separación almacenada para departamento ${sep.departamento_id}: ${sep.id}`);
             });
+            
+            console.log('💾 Datos de separaciones almacenados sin modificar tabla principal');
         }
 
         console.log('✅ === FIN createMultipleSeparaciones ===');
@@ -1248,15 +1626,88 @@ async function createMultipleSeparaciones(multipleData) {
 function getMultiplePropertiesData() {
     console.log('🔍 === INICIANDO getMultiplePropertiesData ===');
     
-    // Buscar filas en el tbody correcto con el selector correcto
-    const rows = document.querySelectorAll('#properties-tbody tr[data-index]');
-    console.log('📊 Filas encontradas:', rows.length);
-    console.log('🔍 Selector usado: #properties-tbody tr[data-index]');
+    // Verificar si existe el tbody
+    const tbody = document.getElementById('properties-tbody');
+    console.log('📋 Tbody encontrado:', tbody ? 'SÍ' : 'NO');
     
-    if (rows.length === 0) {
-        console.log('⚠️ No se encontraron filas con data-index');
+    if (tbody) {
+        console.log('📋 Contenido del tbody:', tbody.innerHTML.substring(0, 500) + '...');
+        console.log('📋 Número total de filas en tbody:', tbody.children.length);
+    }
+    
+    // Buscar filas con múltiples selectores en orden de prioridad
+    let rows = [];
+    
+    // 1. Intentar con data-index (selector original)
+    const dataIndexRows = document.querySelectorAll('#properties-tbody tr[data-index]');
+    console.log('📊 Filas encontradas con data-index:', dataIndexRows.length);
+    
+    // 2. Intentar con data-departamento-id (usado en las filas creadas)
+    const departamentoIdRows = document.querySelectorAll('#properties-tbody tr[data-departamento-id]');
+    console.log('📊 Filas encontradas con data-departamento-id:', departamentoIdRows.length);
+    
+    // 3. Intentar con data-property-id
+    const propertyIdRows = document.querySelectorAll('#properties-tbody tr[data-property-id]');
+    console.log('📊 Filas encontradas con data-property-id:', propertyIdRows.length);
+    
+    // 4. Intentar con data-dynamic-row (filas protegidas)
+    const dynamicRows = document.querySelectorAll('#properties-tbody tr[data-dynamic-row]');
+    console.log('📊 Filas encontradas con data-dynamic-row:', dynamicRows.length);
+    
+    // 5. Todas las filas excluyendo la por defecto
+    const allNonDefaultRows = document.querySelectorAll('#properties-tbody tr:not(#default-row)');
+    console.log('📊 Filas encontradas excluyendo default-row:', allNonDefaultRows.length);
+    
+    // Seleccionar el mejor conjunto de filas
+    if (dataIndexRows.length > 0) {
+        rows = dataIndexRows;
+        console.log('✅ Usando filas con data-index');
+    } else if (departamentoIdRows.length > 0) {
+        rows = departamentoIdRows;
+        console.log('✅ Usando filas con data-departamento-id');
+    } else if (propertyIdRows.length > 0) {
+        rows = propertyIdRows;
+        console.log('✅ Usando filas con data-property-id');
+    } else if (dynamicRows.length > 0) {
+        rows = dynamicRows;
+        console.log('✅ Usando filas con data-dynamic-row');
+    } else if (allNonDefaultRows.length > 0) {
+        rows = allNonDefaultRows;
+        console.log('✅ Usando todas las filas no-default');
+    } else {
+        console.log('❌ No se encontraron filas válidas');
+        
+        // Debug adicional: mostrar todas las filas del tbody
+        if (tbody) {
+            console.log('🔍 DEBUG: Todas las filas en tbody:');
+            Array.from(tbody.children).forEach((row, index) => {
+                console.log(`  Fila ${index}:`, {
+                    id: row.id,
+                    className: row.className,
+                    dataIndex: row.dataset.index,
+                    dataDepartamentoId: row.dataset.departamentoId,
+                    dataPropertyId: row.dataset.propertyId,
+                    dataDynamicRow: row.dataset.dynamicRow,
+                    innerHTML: row.innerHTML.substring(0, 100) + '...'
+                });
+            });
+        }
+        
         return null;
     }
+    
+    console.log(`🎯 Procesando ${rows.length} filas encontradas`);
+    
+    // Debug: mostrar información de cada fila encontrada
+    Array.from(rows).forEach((row, index) => {
+        console.log(`🔍 Fila ${index}:`, {
+            id: row.id,
+            dataIndex: row.dataset.index,
+            dataDepartamentoId: row.dataset.departamentoId,
+            dataPropertyId: row.dataset.propertyId,
+            dataDynamicRow: row.dataset.dynamicRow
+        });
+    });
     
     const properties = [];
     let totalPrecioLista = 0;
@@ -1288,7 +1739,9 @@ function getMultiplePropertiesData() {
         const inmuebleDetalle = inmuebleInfo ? (inmuebleInfo.querySelector('.text-sm')?.textContent || '').trim().replace(/\s+/g, ' ') : '';
         
         const proyecto = (row.querySelector('td:nth-child(2)')?.textContent || 'N/A').trim().replace(/\s+/g, ' ');
-        const departamentoId = row.dataset.departamentoId || row.dataset.propertyId || null;
+        const departamentoId = row.dataset.departamentoId || row.dataset.propertyId || row.dataset.index || null;
+        
+        console.log(`   - Departamento ID obtenido: ${departamentoId} (de ${row.dataset.departamentoId ? 'departamentoId' : row.dataset.propertyId ? 'propertyId' : row.dataset.index ? 'index' : 'ninguno'})`);
         
         const propertyData = {
             departamento_id: departamentoId ? parseInt(departamentoId, 10) : null,
@@ -1332,6 +1785,24 @@ function getMultiplePropertiesData() {
     };
     
     console.log('📋 Datos generados:', JSON.stringify(result, null, 2));
+    
+    // Establecer la variable global automáticamente
+    if (result && result.properties && result.properties.length > 0) {
+        window.multiplePropertiesData = result;
+        window.globalMultipleData = result; // Backup adicional
+        console.log('✅ window.multiplePropertiesData establecido automáticamente');
+        
+        // También guardar en sessionStorage como backup
+        try {
+            sessionStorage.setItem('multiplePropertiesData', JSON.stringify(result));
+            console.log('✅ Datos guardados en sessionStorage');
+        } catch (e) {
+            console.warn('⚠️ No se pudo guardar en sessionStorage:', e);
+        }
+    } else {
+        console.log('⚠️ No se estableció window.multiplePropertiesData porque no hay propiedades válidas');
+    }
+    
     console.log('✅ === FIN getMultiplePropertiesData ===');
     
     return result;

@@ -223,13 +223,13 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Event listener para abrir el modal
-    window.addEventListener('open-modal', function(event) {
-        if (event.detail && event.detail.id === 'pago-separacion-modal') {
-            const separacionId = event.detail.separacionId;
-            openPagoSeparacionModal(separacionId);
-        }
-    });
+    // Event listener para abrir el modal - COMENTADO para evitar bucle infinito
+    // window.addEventListener('open-modal', function(event) {
+    //     if (event.detail && event.detail.id === 'pago-separacion-modal') {
+    //         const separacionId = event.detail.separacionId;
+    //         openPagoSeparacionModal(separacionId);
+    //     }
+    // });
 
     // Función para abrir el modal
     window.openPagoSeparacionModal = function(separacionId) {

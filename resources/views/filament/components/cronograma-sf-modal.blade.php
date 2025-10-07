@@ -41,6 +41,8 @@
                         </div>
                     </div>
 
+                    {{-- Tabla de múltiples propiedades eliminada - solo se mantiene el cálculo interno --}}
+
                     {{-- Cuotas existentes --}}
                     <div id="sf-cuotasExistentesSection" class="hidden mb-6">
                         <h4 class="text-lg font-semibold text-gray-800 mb-3">📋 Cuotas de Saldo a Financiar Existentes</h4>
@@ -201,22 +203,65 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Event listener para abrir el modal de cronograma SF
+    // Event listener para abrir el modal de cronograma SF con protección
     window.addEventListener('open-modal', function(event) {
         if (event.detail && event.detail.id === 'cronograma-sf-modal') {
-            openCronogramaSFModal();
+            // Protección: Solo abrir si no está ya activo para evitar bucles
+            if (!window.sfModalActive) {
+                console.log('📨 Evento open-modal recibido para cronograma-sf-modal');
+                openCronogramaSFModal();
+            } else {
+                console.log('🛡️ Modal SF ya activo, ignorando evento para evitar bucle');
+            }
         }
     });
 
     // Función para abrir el modal y cargar datos
     window.openCronogramaSFModal = function() {
+        // PROTECCIÓN: Marcar que el modal SF está activo para evitar interferencias
+        window.sfModalActive = true;
+        console.log('🛡️ Modal SF activado - protección habilitada');
+        
         const modal = document.getElementById('cronograma-sf-modal');
         if (modal) {
             modal.classList.remove('hidden');
             
             // Cargar datos de la proforma
         setTimeout(() => {
-            loadProformaSFData();
+            // PRIMERO: Obtener datos de múltiples propiedades si están disponibles
+            console.log('🔍 === CARGANDO DATOS MÚLTIPLES PARA SF ===');
+            
+            // Verificar si getMultiplePropertiesData está disponible y llamarla
+            if (typeof getMultiplePropertiesData === 'function') {
+                console.log('✅ getMultiplePropertiesData disponible, obteniendo datos...');
+                const multipleData = getMultiplePropertiesData();
+                console.log('📊 window.multiplePropertiesData:', window.multiplePropertiesData);
+                
+                if (multipleData && multipleData.properties && multipleData.properties.length > 0) {
+                    console.log('✅ Datos múltiples obtenidos exitosamente');
+                    window.multiplePropertiesData = multipleData;
+                    window.globalMultipleData = multipleData;
+                } else {
+                    console.log('⚠️ getMultiplePropertiesData no devolvió datos válidos');
+                }
+            } else {
+                console.log('⚠️ getMultiplePropertiesData no está disponible');
+            }
+            
+            // Verificar estado final de los datos múltiples
+            if (window.multiplePropertiesData && window.multiplePropertiesData.properties && window.multiplePropertiesData.properties.length > 0) {
+                console.log('✅ Se encontraron datos múltiples para SF');
+                loadMultipleSFData();
+            } else {
+                console.log('❌ No se encontraron datos múltiples para SF');
+                console.log('🔍 === CARGANDO DATOS PROFORMA PARA SF ===');
+                
+                // Si no hay datos múltiples, proceder con carga individual
+                console.log('⚠️ No hay datos múltiples, procediendo con carga individual');
+                loadProformaSFData();
+            }
+            
+            // Cargar funciones adicionales
             loadExistingCuotasSF(); // Cargar cuotas existentes
             setDefaultSFDate();
             loadBancos();
@@ -228,6 +273,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para cerrar el modal
     window.closeCronogramaSFModal = function() {
+        // PROTECCIÓN: Desactivar protección del modal SF
+        window.sfModalActive = false;
+        console.log('🛡️ Modal SF desactivado - protección removida');
+        
         const modal = document.getElementById('cronograma-sf-modal');
         if (modal) {
             modal.classList.add('hidden');
@@ -374,109 +423,141 @@ document.addEventListener('DOMContentLoaded', function() {
         return null;
     }
 
-    // Función para cargar datos de la proforma para SF
-    function loadProformaSFData() {
-        // console.log('=== CARGANDO DATOS PROFORMA PARA SF ===');
+    // Función para cargar datos de múltiples propiedades para SF
+    function loadMultipleSFData() {
+        console.log('🔍 === CARGANDO DATOS MÚLTIPLES PARA SF ===');
+        console.log('📊 window.multiplePropertiesData:', window.multiplePropertiesData);
         
-        // Múltiples estrategias para obtener el proformaId (igual que el modal principal)
-        let proformaId = null;
-        
-        // Estrategia 1: Buscar en selects
-        const proformaSelect = document.querySelector('select[name="proforma_id"]');
-        if (proformaSelect && proformaSelect.value) {
-            proformaId = proformaSelect.value;
-            // console.log('✓ ProformaId SF encontrado en select proforma_id:', proformaId);
+        if (window.multiplePropertiesData && window.multiplePropertiesData.totals) {
+            const data = window.multiplePropertiesData;
+            console.log('✅ Datos múltiples encontrados:', data);
+            
+            // Mostrar información de proyectos
+            const proyectos = [...new Set(data.properties.map(p => p.proyecto))];
+            const proyectoText = proyectos.length === 1 ? proyectos[0] : `${proyectos.length} proyectos`;
+            document.getElementById('sf-proyecto-nombre').textContent = proyectoText;
+            
+            // Mostrar información de inmuebles
+            const inmuebles = data.properties.map(p => p.inmueble);
+            const inmuebleText = inmuebles.length <= 3 ? inmuebles.join(', ') : `${inmuebles.length} inmuebles`;
+            document.getElementById('sf-inmueble-numero').textContent = inmuebleText;
+            
+            // Calcular el saldo a financiar correctamente para múltiples propiedades
+            if (data.properties.length > 1) {
+                // Calcular el total del saldo a financiar sumando todas las propiedades
+                let totalSaldoFinanciar = 0;
+                
+                data.properties.forEach(property => {
+                    const precioVenta = parseFloat(property.precio_venta) || 0;
+                    const separacion = parseFloat(property.separacion) || 0;
+                    const inicial = parseFloat(property.cuota_inicial) || 0;
+                    // Usar la misma lógica que la tabla principal: precio_venta - separacion - cuota_inicial
+                    const saldoFinanciar = precioVenta - separacion - inicial;
+                    
+                    console.log(`💰 Propiedad ${property.inmueble}: Precio S/ ${precioVenta.toLocaleString('es-PE', {minimumFractionDigits: 2})} - Separación S/ ${separacion.toLocaleString('es-PE', {minimumFractionDigits: 2})} - Inicial S/ ${inicial.toLocaleString('es-PE', {minimumFractionDigits: 2})} = Saldo S/ ${saldoFinanciar.toLocaleString('es-PE', {minimumFractionDigits: 2})}`);
+                    
+                    totalSaldoFinanciar += saldoFinanciar;
+                });
+                
+                console.log('💰 Total saldo a financiar calculado:', totalSaldoFinanciar);
+                
+                // Actualizar el saldo a financiar en el modal
+                const sfSaldoFinanciarElement = document.getElementById('sf-saldo-financiar');
+                const sfMontoTotalElement = document.getElementById('sf-montoTotal');
+                
+                if (sfSaldoFinanciarElement) {
+                    const totalSaldoFinanciarText = 'S/ ' + totalSaldoFinanciar.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    sfSaldoFinanciarElement.textContent = totalSaldoFinanciarText;
+                    console.log('✅ sf-saldo-financiar actualizado a:', totalSaldoFinanciarText);
+                }
+                
+                if (sfMontoTotalElement) {
+                    sfMontoTotalElement.value = totalSaldoFinanciar;
+                    console.log('✅ sf-montoTotal actualizado a:', totalSaldoFinanciar);
+                }
+            } else {
+                // Para una sola propiedad, usar el cálculo original
+                const saldoFinanciar = parseFloat(data.totals.saldo_financiar) || 0;
+                console.log('💰 Saldo a financiar calculado (una propiedad):', saldoFinanciar);
+                
+                document.getElementById('sf-saldo-financiar').textContent = 'S/ ' + saldoFinanciar.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('sf-montoTotal').value = saldoFinanciar;
+            }
+            
+            // Obtener el valor final del saldo a financiar para el log
+            const finalSaldoFinanciar = document.getElementById('sf-saldo-financiar').textContent;
+            console.log('✅ Datos múltiples SF cargados exitosamente:', {
+                proyectos: proyectos.length,
+                inmuebles: inmuebles.length,
+                saldoFinanciarFinal: finalSaldoFinanciar,
+                propiedades: data.properties.length
+            });
+            
+            return true;
         }
         
-        // Estrategia 2: Buscar en inputs ocultos
+        console.log('❌ No se encontraron datos múltiples para SF');
+        return false;
+    }
+
+    // Función populateMultiplePropertiesTable eliminada - ya no se necesita
+
+    // Función para cargar datos de la proforma para SF
+    function loadProformaSFData() {
+        console.log('🔍 === CARGANDO DATOS PROFORMA PARA SF ===');
+        
+        // Primero verificar si hay datos de múltiples propiedades
+        if (loadMultipleSFData()) {
+            console.log('✅ Datos múltiples cargados para SF, saltando carga individual');
+            return;
+        }
+        
+        console.log('⚠️ No hay datos múltiples, procediendo con carga individual');
+        
+        // Si no hay datos múltiples, proceder con carga individual
+        // Usar estrategias más específicas para evitar interferir con la tabla principal
+        let proformaId = null;
+        
+        // Estrategia 1: Buscar en URL primero (más confiable)
+        const urlParams = new URLSearchParams(window.location.search);
+        proformaId = urlParams.get('proforma_id');
+        if (proformaId) {
+            // console.log('✓ ProformaId SF encontrado en URL:', proformaId);
+        }
+        
+        // Estrategia 2: Buscar en contexto específico del formulario principal (no en tabla)
         if (!proformaId) {
-            const proformaInput = document.querySelector('input[name="proforma_id"]');
-            if (proformaInput && proformaInput.value) {
-                proformaId = proformaInput.value;
-                // console.log('✓ ProformaId SF encontrado en input proforma_id:', proformaId);
+            const mainForm = document.querySelector('form[wire\\:submit]');
+            if (mainForm) {
+                const proformaField = mainForm.querySelector('select[name="proforma_id"], input[name="proforma_id"]');
+                if (proformaField && proformaField.value) {
+                    proformaId = proformaField.value;
+                    // console.log('✓ ProformaId SF encontrado en formulario principal:', proformaId);
+                }
             }
         }
         
-        // Estrategia 3: Buscar en selectores específicos de Filament
+        // Estrategia 3: Buscar en selectores específicos de Filament (evitando tabla)
         if (!proformaId) {
-            const filamentSelect = document.querySelector('[data-field-wrapper="proforma_id"] select');
+            const filamentSelect = document.querySelector('[data-field-wrapper="proforma_id"] select:not([data-table-select])');
             if (filamentSelect && filamentSelect.value) {
                 proformaId = filamentSelect.value;
                 // console.log('✓ ProformaId SF encontrado en selector Filament:', proformaId);
             }
         }
         
-        // Estrategia 4: Buscar en selectores genéricos
-        if (!proformaId) {
-            const genericSelects = document.querySelectorAll('select');
-            // console.log('SF: Buscando en', genericSelects.length, 'selectores genéricos...');
-            for (let select of genericSelects) {
-                if (select.name && select.name.includes('proforma') && select.value) {
-                    proformaId = select.value;
-                    // console.log('✓ ProformaId SF encontrado en selector genérico:', proformaId, 'name:', select.name);
-                    break;
-                }
-            }
+        // Estrategia 4: Buscar en variables globales (más seguro)
+        if (!proformaId && window.currentProformaId) {
+            proformaId = window.currentProformaId;
+            // console.log('✓ ProformaId SF encontrado en variable global:', proformaId);
         }
         
-        // Estrategia 5: Buscar en atributos data-*
+        // Estrategia 5: Buscar en atributos data-* específicos (evitando tabla)
         if (!proformaId) {
-            const dataElement = document.querySelector('[data-proforma-id]');
+            const dataElement = document.querySelector('[data-proforma-id]:not([data-table-row])');
             if (dataElement) {
                 proformaId = dataElement.getAttribute('data-proforma-id');
                 // console.log('✓ ProformaId SF encontrado en data-proforma-id:', proformaId);
-            }
-        }
-        
-        // Estrategia 6: Buscar en el contexto de Filament (más específico)
-        if (!proformaId) {
-            const filamentForm = document.querySelector('form[wire\\:submit]');
-            if (filamentForm) {
-                const proformaField = filamentForm.querySelector('select[name="proforma_id"], input[name="proforma_id"]');
-                if (proformaField && proformaField.value) {
-                    proformaId = proformaField.value;
-                    // console.log('✓ ProformaId SF encontrado en formulario Filament:', proformaId);
-                }
-            }
-        }
-        
-        // Estrategia 7: Buscar en todos los elementos con valor
-        if (!proformaId) {
-            // console.log('SF: Buscando en todos los elementos del DOM...');
-            const allElements = document.querySelectorAll('input, select');
-            let candidatos = [];
-            
-            for (let element of allElements) {
-                if (element.value && !isNaN(element.value) && element.value > 0) {
-                    const elementInfo = {
-                        tagName: element.tagName,
-                        name: element.name || 'sin-nombre',
-                        id: element.id || 'sin-id',
-                        className: element.className || 'sin-clase',
-                        value: element.value
-                    };
-                    candidatos.push(elementInfo);
-                    
-                    // Si el nombre o id contiene 'proforma', usar ese valor
-                    if ((element.name && element.name.toLowerCase().includes('proforma')) || 
-                        (element.id && element.id.toLowerCase().includes('proforma'))) {
-                        proformaId = element.value;
-                        // console.log('✓ ProformaId SF encontrado por coincidencia de nombre/id:', proformaId);
-                        break;
-                    }
-                }
-            }
-            
-            // console.log('SF: Candidatos encontrados:', candidatos);
-        }
-        
-        // Estrategia 8: Buscar en URL o parámetros
-        if (!proformaId) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlProformaId = urlParams.get('proforma_id') || urlParams.get('id');
-            if (urlProformaId) {
-                proformaId = urlProformaId;
-                // console.log('✓ ProformaId SF encontrado en URL:', proformaId);
             }
         }
         

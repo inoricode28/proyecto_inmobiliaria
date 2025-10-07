@@ -40,10 +40,14 @@ class CreateProforma extends CreateRecord
         if (isset($formData['inmuebles_adicionales']) && is_array($formData['inmuebles_adicionales'])) {
             foreach ($formData['inmuebles_adicionales'] as $index => $inmuebleData) {
                 if (isset($inmuebleData['departamento_id'])) {
+                    // Obtener el departamento para asegurar que tenemos el precio_lista correcto
+                    $departamento = \App\Models\Departamento::find($inmuebleData['departamento_id']);
+                    $precioLista = $inmuebleData['precio_lista'] ?? ($departamento ? $departamento->Precio_lista : 0);
+                    
                     \App\Models\ProformaInmueble::create([
                         'proforma_id' => $proforma->id,
                         'departamento_id' => $inmuebleData['departamento_id'],
-                        'precio_lista' => $inmuebleData['precio_lista'] ?? 0,
+                        'precio_lista' => $precioLista,
                         'precio_venta' => $inmuebleData['precio_venta'] ?? 0,
                         'descuento' => $inmuebleData['descuento'] ?? null,
                         'monto_separacion' => $inmuebleData['monto_separacion'] ?? null,

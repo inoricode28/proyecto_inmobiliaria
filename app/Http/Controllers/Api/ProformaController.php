@@ -101,12 +101,15 @@ class ProformaController extends Controller
                         continue;
                     }
 
-                    // Verificar si tiene separación existente ligada al mismo documento
-                    $separacionExistente = $departamento->separaciones()
-                        ->whereHas('proforma', function($query) use ($proforma) {
-                            $query->where('numero_documento', $proforma->numero_documento);
+                    // Verificar si tiene separación existente directamente en separacion_inmuebles
+                    $separacionExistente = \App\Models\SeparacionInmueble::where('departamento_id', $departamento->id)
+                        ->whereHas('separacion.proforma', function($query) use ($proforma) {
+                            $query->where('id', $proforma->id);
                         })
+                        ->with('separacion')
                         ->first();
+                    
+                    $separacionId = $separacionExistente ? $separacionExistente->separacion->id : null;
 
                     // Tomar precio lista del registro proforma_inmuebles; si es 0 o null, hacer fallback
                     $precioLista = 0;
@@ -134,7 +137,7 @@ class ProformaController extends Controller
                         'separacion' => $pi->monto_separacion ?? 0,
                         'cuota_inicial' => $pi->monto_cuota_inicial ?? 0,
                         'tiene_separacion' => $separacionExistente ? true : false,
-                        'separacion_id' => $separacionExistente ? $separacionExistente->id : null
+                        'separacion_id' => $separacionId
                     ];
                 }
             }
@@ -145,12 +148,15 @@ class ProformaController extends Controller
                 if ($inmueblePrincipal && $inmueblePrincipal->departamento) {
                     $departamento = $inmueblePrincipal->departamento;
 
-                    // Verificar si tiene separación existente
-                    $separacionExistente = $departamento->separaciones()
-                        ->whereHas('proforma', function($query) use ($proforma) {
-                            $query->where('numero_documento', $proforma->numero_documento);
+                    // Verificar si tiene separación existente directamente en separacion_inmuebles
+                    $separacionExistente = \App\Models\SeparacionInmueble::where('departamento_id', $departamento->id)
+                        ->whereHas('separacion.proforma', function($query) use ($proforma) {
+                            $query->where('id', $proforma->id);
                         })
+                        ->with('separacion')
                         ->first();
+                    
+                    $separacionId = $separacionExistente ? $separacionExistente->separacion->id : null;
 
                     // Usar el descuento directamente de la tabla proforma_inmuebles (ya es porcentaje)
                     // Para precio lista, aplicar el mismo esquema de fallback
@@ -176,19 +182,22 @@ class ProformaController extends Controller
                         'separacion' => $inmueblePrincipal->monto_separacion ?? 0,
                         'cuota_inicial' => $inmueblePrincipal->monto_cuota_inicial ?? 0,
                         'tiene_separacion' => $separacionExistente ? true : false,
-                        'separacion_id' => $separacionExistente ? $separacionExistente->id : null
+                        'separacion_id' => $separacionId
                     ];
                 }
                 // Fallback: usar el departamento directamente de la proforma (compatibilidad con datos antiguos)
                 elseif ($proforma->departamento) {
                     $departamento = $proforma->departamento;
 
-                    // Verificar si tiene separación existente
-                    $separacionExistente = $departamento->separaciones()
-                        ->whereHas('proforma', function($query) use ($proforma) {
-                            $query->where('numero_documento', $proforma->numero_documento);
+                    // Verificar si tiene separación existente directamente en separacion_inmuebles
+                    $separacionExistente = \App\Models\SeparacionInmueble::where('departamento_id', $departamento->id)
+                        ->whereHas('separacion.proforma', function($query) use ($proforma) {
+                            $query->where('id', $proforma->id);
                         })
+                        ->with('separacion')
                         ->first();
+                    
+                    $separacionId = $separacionExistente ? $separacionExistente->separacion->id : null;
 
                     // Calcular descuento como porcentaje del precio lista (fallback para datos antiguos)
                     $precioLista = $departamento->Precio_lista ?? 0;
@@ -207,7 +216,7 @@ class ProformaController extends Controller
                         'separacion' => $proforma->monto_separacion ?? 0,
                         'cuota_inicial' => $proforma->monto_cuota_inicial ?? 0,
                         'tiene_separacion' => $separacionExistente ? true : false,
-                        'separacion_id' => $separacionExistente ? $separacionExistente->id : null
+                        'separacion_id' => $separacionId
                     ];
                 }
             }

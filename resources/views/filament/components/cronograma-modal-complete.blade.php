@@ -110,39 +110,17 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Event listener para abrir el modal
-    window.addEventListener('open-modal', function(event) {
-        if (event.detail && event.detail.id === 'cronograma-modal') {
-            openCronogramaModal();
-        }
-    });
+    // Event listener para abrir el modal - COMENTADO para evitar bucle infinito
+    // window.addEventListener('open-modal', function(event) {
+    //     if (event.detail && event.detail.id === 'cronograma-modal') {
+    //         openCronogramaModal();
+    //     }
+    // });
 
-    // Función para abrir el modal y cargar datos
-    window.openCronogramaModal = async function() {
-        console.log('🎯 Abriendo modal del cronograma');
+    // Función para mostrar el modal (no sobrescribir la función principal)
+    window.showCronogramaModal = function() {
+        console.log('🎯 Mostrando modal del cronograma');
         console.log('🔍 Estado actual de window.multiplePropertiesData:', window.multiplePropertiesData);
-        
-        // Si no hay datos de múltiples propiedades, intentar obtenerlos
-        if (!window.multiplePropertiesData && typeof getMultiplePropertiesData === 'function') {
-            console.log('🔄 Intentando obtener datos de múltiples propiedades...');
-            try {
-                const multipleData = getMultiplePropertiesData();
-                console.log('📊 Datos obtenidos:', multipleData);
-                
-                if (multipleData && multipleData.properties && multipleData.properties.length > 0) {
-                    // Crear separaciones si es necesario
-                    if (typeof createMultipleSeparaciones === 'function') {
-                        console.log('🔄 Creando separaciones múltiples...');
-                        await createMultipleSeparaciones(multipleData);
-                    }
-                    
-                    window.multiplePropertiesData = multipleData;
-                    console.log('✅ window.multiplePropertiesData establecido:', window.multiplePropertiesData);
-                }
-            } catch (error) {
-                console.error('❌ Error al obtener datos múltiples:', error);
-            }
-        }
         
         const modal = document.getElementById('cronograma-modal');
         if (modal) {
@@ -156,6 +134,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 200); // Aumentar el delay para asegurar que window.multiplePropertiesData esté disponible
         }
     };
+
+    // Si no existe la función principal, crear una versión básica
+    if (typeof window.openCronogramaModal !== 'function') {
+        window.openCronogramaModal = async function() {
+            console.log('🎯 Abriendo modal del cronograma (función básica)');
+            console.log('🔍 Estado actual de window.multiplePropertiesData:', window.multiplePropertiesData);
+            
+            // Si no hay datos de múltiples propiedades, intentar obtenerlos
+            if (!window.multiplePropertiesData && typeof getMultiplePropertiesData === 'function') {
+                console.log('🔄 Intentando obtener datos de múltiples propiedades...');
+                try {
+                    const multipleData = getMultiplePropertiesData();
+                    console.log('📊 Datos obtenidos:', multipleData);
+                    
+                    if (multipleData && multipleData.properties && multipleData.properties.length > 0) {
+                        // Crear separaciones si es necesario
+                        if (typeof createMultipleSeparaciones === 'function') {
+                            console.log('🔄 Creando separaciones múltiples...');
+                            await createMultipleSeparaciones(multipleData);
+                        }
+                        
+                        window.multiplePropertiesData = multipleData;
+                        console.log('✅ window.multiplePropertiesData establecido:', window.multiplePropertiesData);
+                    }
+                } catch (error) {
+                    console.error('❌ Error al obtener datos múltiples:', error);
+                }
+            }
+            
+            // Llamar a la función de mostrar modal
+            window.showCronogramaModal();
+        };
+    }
 
     // Función para cerrar el modal
     window.closeCronogramaModal = function() {
