@@ -200,12 +200,23 @@
 </div>
 
 <script>
+// Silenciar consola en este componente para evitar ruido en terminal
+(function() {
+    try {
+        var methods = ['log', 'warn', 'error', 'info', 'debug'];
+        for (var i = 0; i < methods.length; i++) {
+            if (typeof console !== 'undefined' && console[methods[i]]) {
+                console[methods[i]] = function() { /* silenciado */ };
+            }
+        }
+    } catch (e) { /* noop */ }
+})();
 let addedProperties = [];
 let propertyCounter = 0;
 
 // SISTEMA DE PROTECCIÓN Y RESTAURACIÓN MEJORADO
-console.log('🔍 Verificando disponibilidad de morphdom:', typeof window.morphdom);
-console.log('🔍 Verificando disponibilidad de Livewire:', typeof window.Livewire);
+// console.log('🔍 Verificando disponibilidad de morphdom:', typeof window.morphdom);
+// console.log('🔍 Verificando disponibilidad de Livewire:', typeof window.Livewire);
 
 // Almacenamiento global para propiedades cargadas
 window.loadedProperties = window.loadedProperties || [];
