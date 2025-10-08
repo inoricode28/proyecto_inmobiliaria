@@ -487,9 +487,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('✅ sf-montoTotal actualizado a:', totalSaldoFinanciar);
                 }
             } else {
-                // Para una sola propiedad, usar el cálculo original
-                const saldoFinanciar = parseFloat(data.totals.saldo_financiar) || 0;
-                console.log('💰 Saldo a financiar calculado (una propiedad):', saldoFinanciar);
+                // Para una sola propiedad, calcular el saldo a financiar correctamente
+                let saldoFinanciar = 0;
+                
+                if (data.properties && data.properties.length === 1) {
+                    // Si hay una propiedad en el array, calcular usando la misma lógica que múltiples propiedades
+                    const property = data.properties[0];
+                    const precioVenta = parseFloat(property.precio_venta) || 0;
+                    const separacion = parseFloat(property.separacion) || 0;
+                    const inicial = parseFloat(property.cuota_inicial) || 0;
+                    saldoFinanciar = precioVenta - separacion - inicial;
+                    console.log('💰 Saldo a financiar calculado (una propiedad del array):', saldoFinanciar);
+                } else if (data.totals && data.totals.saldo_financiar) {
+                    // Fallback: usar totals si existe
+                    saldoFinanciar = parseFloat(data.totals.saldo_financiar) || 0;
+                    console.log('💰 Saldo a financiar calculado (totals):', saldoFinanciar);
+                } else {
+                    // Último fallback: calcular usando los totales disponibles
+                    const precioVenta = parseFloat(data.totals?.precio_venta) || 0;
+                    const separacion = parseFloat(data.totals?.separacion) || 0;
+                    const inicial = parseFloat(data.totals?.cuota_inicial) || 0;
+                    saldoFinanciar = precioVenta - separacion - inicial;
+                    console.log('💰 Saldo a financiar calculado (fallback):', saldoFinanciar);
+                }
                 
                 document.getElementById('sf-saldo-financiar').textContent = 'S/ ' + saldoFinanciar.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 document.getElementById('sf-montoTotal').value = saldoFinanciar;

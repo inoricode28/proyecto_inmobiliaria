@@ -1391,7 +1391,7 @@ async function loadExistingCuotasForMultipleProperties(multipleData) {
     
     try {
         // Intentar cargar cuotas existentes para la proforma
-        const response = await fetch(`/cronograma/proforma/${multipleData.proforma_id}`);
+        const response = await fetch(`/cronograma/definitivas/${multipleData.proforma_id}`);
         
         if (response.ok) {
             const data = await response.json();
