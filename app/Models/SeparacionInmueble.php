@@ -19,6 +19,7 @@ class SeparacionInmueble extends Model
         'descuento',
         'monto_separacion',
         'monto_cuota_inicial',
+        'saldo_financiar',
         'orden',
         'es_principal'
     ];
@@ -29,6 +30,7 @@ class SeparacionInmueble extends Model
         'descuento' => 'decimal:2',
         'monto_separacion' => 'decimal:2',
         'monto_cuota_inicial' => 'decimal:2',
+        'saldo_financiar' => 'decimal:2',
         'es_principal' => 'boolean'
     ];
 

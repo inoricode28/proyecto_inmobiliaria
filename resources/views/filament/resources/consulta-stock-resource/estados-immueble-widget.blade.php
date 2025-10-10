@@ -93,10 +93,18 @@
                         @click="
                             if ('{{ $departamento->estadoDepartamento->nombre }}' === 'Separacion' || '{{ $departamento->estadoDepartamento->nombre }}' === 'Minuta' || '{{ $departamento->estadoDepartamento->nombre }}' === 'Entregado') {
                                 @php
-                                    $proformaConSeparacion = $departamento->proformas()->whereHas('separacion')->latest()->first();
+                                    $proformaConSeparacion = \App\Models\Proforma::whereHas('separacion')
+                                        ->where(function($q) use ($departamento) {
+                                            $q->where('departamento_id', $departamento->id)
+                                              ->orWhereHas('proformaInmuebles', function($q2) use ($departamento) {
+                                                  $q2->where('departamento_id', $departamento->id);
+                                              });
+                                        })
+                                        ->orderByDesc('id')
+                                        ->first();
                                 @endphp
                                 @if($proformaConSeparacion)
-                                    window.location.href = '/Proforma/DetalleProforma/{{ $proformaConSeparacion->id }}';
+                                    window.location.href = '/Proforma/DetalleProforma/{{ $proformaConSeparacion->id }}?departamento_id={{ $departamento->id }}';
                                 @else
                                     alert('No se encontró una proforma con separación para este departamento.');
                                 @endif

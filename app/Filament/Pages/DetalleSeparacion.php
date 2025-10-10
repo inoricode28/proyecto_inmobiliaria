@@ -26,6 +26,7 @@ class DetalleSeparacion extends Page
     public function mount(Request $request)
     {
         $proformaId = $request->route('proforma_id');
+        $departamentoId = $request->query('departamento_id');
 
         // Buscar la proforma con todas las relaciones necesarias
         $this->proforma = Proforma::with([
@@ -54,10 +55,39 @@ class DetalleSeparacion extends Page
         }
 
         // Permitir acceso sin importar si tiene separación o no
-        $this->departamento = $this->proforma->departamento;
         $this->separacion = $this->proforma->separacion; // Puede ser null
         // Inmuebles vinculados a la proforma (principal y adicionales)
         $this->inmuebles = $this->proforma->proformaInmuebles;
+
+        // Selección de departamento:
+        // 1) Si llega departamento_id, priorizarlo buscando en proformaInmuebles o separacion_inmuebles
+        // 2) Si no, usar el principal de proforma o el departamento directamente
+        if ($departamentoId) {
+            $inmuebleSeleccionado = null;
+
+            // Buscar primero en proformaInmuebles
+            if ($this->proforma->proformaInmuebles && $this->proforma->proformaInmuebles->count() > 0) {
+                $inmuebleSeleccionado = $this->proforma->proformaInmuebles
+                    ->firstWhere('departamento_id', (int) $departamentoId);
+            }
+
+            // Si no se encuentra, intentar en separación_inmuebles
+            if (!$inmuebleSeleccionado && $this->separacion && $this->separacion->inmuebles) {
+                $inmuebleSeleccionado = $this->separacion->inmuebles
+                    ->firstWhere('departamento_id', (int) $departamentoId);
+            }
+
+            // Si existe, usar su departamento
+            if ($inmuebleSeleccionado && $inmuebleSeleccionado->departamento) {
+                $this->departamento = $inmuebleSeleccionado->departamento;
+            } else {
+                // Fallback a buscar directamente el departamento por ID
+                $this->departamento = \App\Models\Departamento::find($departamentoId) ?? $this->proforma->departamento;
+            }
+        } else {
+            // Sin parámetro, mantener el comportamiento actual
+            $this->departamento = $this->proforma->departamento;
+        }
 
         // Verificar si la separación tiene una venta asociada
         $this->tieneVenta = $this->separacion && $this->separacion->venta !== null;

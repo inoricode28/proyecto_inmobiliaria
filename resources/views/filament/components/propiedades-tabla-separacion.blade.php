@@ -837,12 +837,15 @@ function addSelectedProperty() {
     window.inmueblesSeleccionados.push(propertyData.departamento_id);
     
     // ACTUALIZAR EL CAMPO INMUEBLES_SELECCIONADOS DEL FORMULARIO FILAMENT
-    const successInmuebles = updateFilamentField('inmuebles_seleccionados', window.inmueblesSeleccionados);
+    // Serializar como JSON para garantizar compatibilidad con Livewire/Filament
+    const inmueblesJson = JSON.stringify(window.inmueblesSeleccionados);
+    const successInmuebles = updateFilamentField('inmuebles_seleccionados', inmueblesJson);
     
     if (!successInmuebles) {
         console.error('❌ No se pudo actualizar el campo inmuebles_seleccionados en el formulario');
         // Intentar crear un campo hidden si no existe
-        createHiddenFieldIfNotExists('inmuebles_seleccionados', window.inmueblesSeleccionados);
+    // Fallback: crear/actualizar campo oculto con JSON serializado
+    createHiddenFieldIfNotExists('inmuebles_seleccionados', inmueblesJson);
     }
     
     // TAMBIÉN ACTUALIZAR EL CAMPO DEPARTAMENTO_ID INDIVIDUAL (para compatibilidad)
@@ -1703,26 +1706,54 @@ function getMultiplePropertiesData() {
     
     if (!window.inmueblesSeleccionados || window.inmueblesSeleccionados.length === 0) {
         console.error('❌ NO HAY INMUEBLES SELECCIONADOS');
-        console.log('🔍 Verificando si hay checkboxes marcados...');
         
-        const checkedBoxes = document.querySelectorAll('#properties-tbody input[type="checkbox"]:checked');
-        console.log('📋 Checkboxes marcados encontrados:', checkedBoxes.length);
-        
-        if (checkedBoxes.length === 0) {
+        // 1) Intentar reconstruir desde las filas de la tabla
+        const tableRows = document.querySelectorAll('#properties-tbody tr[data-departamento-id]');
+        if (tableRows && tableRows.length > 0) {
+            window.inmueblesSeleccionados = Array.from(tableRows)
+                .map(row => parseInt(row.dataset.departamentoId, 10))
+                .filter(id => !isNaN(id));
+            console.log('✅ Reconstruido desde filas de tabla:', window.inmueblesSeleccionados);
+        }
+
+        // 2) Si sigue vacío, verificar checkboxes marcados (compatibilidad con versión anterior)
+        if (!window.inmueblesSeleccionados || window.inmueblesSeleccionados.length === 0) {
+            console.log('🔍 Verificando si hay checkboxes marcados (compatibilidad)...');
+            const checkedBoxes = document.querySelectorAll('#properties-tbody input[type="checkbox"]:checked');
+            console.log('📋 Checkboxes marcados encontrados:', checkedBoxes.length);
+            if (checkedBoxes.length > 0) {
+                window.inmueblesSeleccionados = [];
+                checkedBoxes.forEach(checkbox => {
+                    const row = checkbox.closest('tr');
+                    const departamentoId = row?.dataset?.departamentoId || row?.dataset?.propertyId || row?.dataset?.index;
+                    if (departamentoId) {
+                        window.inmueblesSeleccionados.push(parseInt(departamentoId, 10));
+                        console.log(`✅ Agregado a seleccionados (checkbox): ${departamentoId}`);
+                    }
+                });
+            }
+        }
+
+        // 3) Si aún vacío, intentar recuperar desde el <select id="property-selector">
+        if (!window.inmueblesSeleccionados || window.inmueblesSeleccionados.length === 0) {
+            console.log('🔍 Verificando selección desde <select id="property-selector">...');
+            const selector = document.getElementById('property-selector');
+            const selectedOptionValue = selector ? selector.value : null;
+            console.log('📋 Valor seleccionado en select:', selectedOptionValue);
+            if (selectedOptionValue) {
+                const row = document.querySelector(`#properties-tbody tr[data-departamento-id="${selectedOptionValue}"]`);
+                if (row) {
+                    window.inmueblesSeleccionados = [parseInt(selectedOptionValue, 10)];
+                    console.log(`✅ Selección tomada desde select: ${selectedOptionValue}`);
+                }
+            }
+        }
+
+        // 4) Si sigue sin seleccionados, mostrar alerta
+        if (!window.inmueblesSeleccionados || window.inmueblesSeleccionados.length === 0) {
             alert('Por favor, seleccione al menos un inmueble antes de crear la separación.');
             return null;
         }
-        
-        // Si hay checkboxes marcados pero no está en window.inmueblesSeleccionados, reconstruir
-        window.inmueblesSeleccionados = [];
-        checkedBoxes.forEach(checkbox => {
-            const row = checkbox.closest('tr');
-            const departamentoId = row.dataset.departamentoId || row.dataset.propertyId || row.dataset.index;
-            if (departamentoId) {
-                window.inmueblesSeleccionados.push(parseInt(departamentoId));
-                console.log(`✅ Agregado a seleccionados: ${departamentoId}`);
-            }
-        });
     }
     
     console.log('🎯 INMUEBLES SELECCIONADOS FINALES:', window.inmueblesSeleccionados);
@@ -1990,8 +2021,9 @@ function updateFilamentField(fieldName, value) {
         }
         
         if (field) {
-            // Actualizar el valor del campo
-            field.value = value;
+            // Convertir a string para inputs hidden/select
+            const valueToSet = typeof value === 'string' ? value : JSON.stringify(value);
+            field.value = valueToSet;
             
             // Disparar eventos para que Livewire/Filament detecte el cambio
             const inputEvent = new Event('input', { bubbles: true });
@@ -2019,7 +2051,8 @@ function updateFilamentField(fieldName, value) {
                 const wireModel = hiddenField.getAttribute('wire:model') || '';
                 
                 if (name.includes(fieldName) || wireModel.includes(fieldName)) {
-                    hiddenField.value = value;
+                    const valueToSetHidden = typeof value === 'string' ? value : JSON.stringify(value);
+                    hiddenField.value = valueToSetHidden;
                     hiddenField.dispatchEvent(new Event('input', { bubbles: true }));
                     hiddenField.dispatchEvent(new Event('change', { bubbles: true }));
                     console.log(`✅ Campo oculto ${fieldName} actualizado:`, value);

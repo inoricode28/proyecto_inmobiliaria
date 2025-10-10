@@ -352,7 +352,13 @@ class CreateSeparacion extends CreateRecord
         // Si es string (JSON), convertirlo a array
         if (is_string($inmuebles)) {
             $decoded = json_decode($inmuebles, true);
-            $inmuebles = is_array($decoded) ? $decoded : [];
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $inmuebles = $decoded;
+            } else {
+                // Intentar formato CSV: "1,2,3"
+                $csvParts = preg_split('/\s*,\s*/', trim($inmuebles));
+                $inmuebles = is_array($csvParts) ? $csvParts : [];
+            }
         }
 
         // Si está vacío, intentar con departamento_id individual (para compatibilidad)
@@ -370,7 +376,9 @@ class CreateSeparacion extends CreateRecord
         });
 
         // Convertir todos los valores a enteros
-        $inmuebles = array_map('intval', $inmuebles);
+        $inmuebles = array_map(function($item){
+            return (int) (is_array($item) ? ($item['departamento_id'] ?? $item[0] ?? $item) : $item);
+        }, $inmuebles);
 
         Log::info('Inmuebles seleccionados procesados', [
             'original' => $this->data['inmuebles_seleccionados'] ?? 'no existe',
@@ -545,11 +553,39 @@ class CreateSeparacion extends CreateRecord
 
         // Asegurar que inmuebles_seleccionados sea un array
         if (isset($data['inmuebles_seleccionados'])) {
-            if (is_string($data['inmuebles_seleccionados'])) {
-                $data['inmuebles_seleccionados'] = json_decode($data['inmuebles_seleccionados'], true) ?? [];
+            $raw = $data['inmuebles_seleccionados'];
+
+            if (is_string($raw)) {
+                // Intentar JSON primero
+                $decoded = json_decode($raw, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $data['inmuebles_seleccionados'] = $decoded;
+                } else {
+                    // Intentar CSV ("1,2,3")
+                    $csvParts = preg_split('/\s*,\s*/', trim($raw));
+                    $data['inmuebles_seleccionados'] = is_array($csvParts) ? $csvParts : [];
+                }
             }
 
-            // Si está vacío después de procesar, establecer como array vacío
+            // Normalizar a enteros independientemente de la forma del arreglo
+            if (is_array($data['inmuebles_seleccionados'])) {
+                $data['inmuebles_seleccionados'] = array_values(array_filter(array_map(function($item) {
+                    // Aceptar formas: 5, "5", [5], {departamento_id: 5}
+                    if (is_array($item)) {
+                        $val = $item['departamento_id'] ?? (isset($item[0]) ? $item[0] : null);
+                        return is_null($val) ? null : (int) $val;
+                    }
+                    if (is_object($item)) {
+                        $val = $item->departamento_id ?? null;
+                        return is_null($val) ? null : (int) $val;
+                    }
+                    return (int) $item;
+                }, $data['inmuebles_seleccionados']), function($v) {
+                    return !is_null($v);
+                }));
+            }
+
+            // Si queda vacío, asegurar arreglo vacío
             if (empty($data['inmuebles_seleccionados'])) {
                 $data['inmuebles_seleccionados'] = [];
             }
