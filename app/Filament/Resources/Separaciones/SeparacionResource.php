@@ -54,7 +54,7 @@ class SeparacionResource extends Resource
             // Campo oculto para detectar si viene desde separación definitiva
             Forms\Components\Hidden::make('from_separacion_definitiva')
                 ->default(false),
-                
+
             Tabs::make('Separación')
                 ->columnSpan('full')
             ->tabs([
@@ -173,7 +173,7 @@ class SeparacionResource extends Resource
                         ->label('Propiedades de la Proforma')
                         ->view('filament.components.propiedades-tabla-separacion')
                         ->columnSpan('full'),
-                        
+
                     // Campos ocultos para mantener los datos necesarios
                     Hidden::make('departamento_id'),
                     Hidden::make('proyecto_nombre'),
@@ -184,7 +184,10 @@ class SeparacionResource extends Resource
                     Hidden::make('monto_separacion'),
                     Hidden::make('cuota_inicial'),
                     Hidden::make('saldo_financiar'),
-                    
+
+                    Hidden::make('inmuebles_seleccionados')
+                    ->default([]),
+
                     /*
                     DatePicker::make('fecha_vencimiento')
                         ->label('Fecha de Vencimiento')
@@ -199,22 +202,22 @@ class SeparacionResource extends Resource
                         ->content(function (callable $get) {
                             $proformaId = $get('proforma_id');
                             $display = $proformaId ? 'inline-flex' : 'none';
-                            
+
                             return new \Illuminate\Support\HtmlString('
                                 <div class="flex gap-2">
-                                    <button type="button" 
-                                            onclick="console.log(\'🔥 Botón CRONOGRAMA C.I. clickeado\'); 
+                                    <button type="button"
+                                            onclick="console.log(\'🔥 Botón CRONOGRAMA C.I. clickeado\');
                                                      console.log(\'🔍 Verificando función:\', typeof window.openCronogramaModal);
-                                                     if(typeof window.openCronogramaModal === \'function\') { 
-                                                         console.log(\'✅ Función encontrada, ejecutando...\'); 
+                                                     if(typeof window.openCronogramaModal === \'function\') {
+                                                         console.log(\'✅ Función encontrada, ejecutando...\');
                                                          try {
-                                                             window.openCronogramaModal(); 
+                                                             window.openCronogramaModal();
                                                              console.log(\'✅ openCronogramaModal ejecutada sin errores\');
                                                          } catch(error) {
                                                              console.error(\'❌ Error al ejecutar openCronogramaModal:\', error);
                                                          }
-                                                     } else { 
-                                                         console.error(\'❌ Función openCronogramaModal no encontrada\'); 
+                                                     } else {
+                                                         console.error(\'❌ Función openCronogramaModal no encontrada\');
                                                      }"
                                             class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                             style="display: ' . $display . ';">
@@ -223,7 +226,7 @@ class SeparacionResource extends Resource
                                         </svg>
                                         Cronograma C.I.
                                     </button>
-                                    <button type="button" 
+                                    <button type="button"
                                             onclick="window.dispatchEvent(new CustomEvent(\'open-modal\', { detail: { id: \'cronograma-sf-modal\' } }))"
                                             class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                             style="display: ' . $display . ';">
@@ -232,7 +235,7 @@ class SeparacionResource extends Resource
                                         </svg>
                                         Cronograma S.F.
                                     </button>
-                                    <button type="button" 
+                                    <button type="button"
                                             onclick="window.dispatchEvent(new CustomEvent(\'open-modal\', { detail: { id: \'pago-separacion-modal\' } }))"
                                             class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                             style="display: ' . $display . ';">

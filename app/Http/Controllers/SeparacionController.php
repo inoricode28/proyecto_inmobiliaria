@@ -42,6 +42,14 @@ class SeparacionController extends Controller
             $propiedades = $request->propiedades;
             $clienteData = $request->cliente_data;
 
+            // LOG ESPECÍFICO: Ver qué datos está recibiendo el controlador
+            Log::info('=== DATOS RECIBIDOS EN CONTROLADOR ===', [
+                'total_propiedades' => count($propiedades),
+                'propiedades_ids' => array_column($propiedades, 'departamento_id'),
+                'propiedades_completas' => $propiedades,
+                'cliente_data' => $clienteData
+            ]);
+
             // Obtener el estado de separación para departamentos
             $estadoSeparacion = EstadoDepartamento::where('nombre', 'Separacion')->first();
 
@@ -132,10 +140,23 @@ class SeparacionController extends Controller
             ]);
 
             // Crear registros en separacion_inmuebles para todos los inmuebles
+            Log::info('=== INICIANDO CREACIÓN DE SEPARACION_INMUEBLES ===', [
+                'separacion_id' => $separacion->id,
+                'total_propiedades_a_procesar' => count($propiedades)
+            ]);
+
             foreach ($propiedades as $index => $propiedad) {
                 $departamento = Departamento::find($propiedad['departamento_id']);
                 
-                SeparacionInmueble::create([
+                Log::info('=== PROCESANDO DEPARTAMENTO ===', [
+                    'index' => $index,
+                    'departamento_id' => $propiedad['departamento_id'],
+                    'departamento_encontrado' => $departamento ? true : false,
+                    'num_departamento' => $departamento ? $departamento->num_departamento : 'N/A',
+                    'separacion_id' => $separacion->id
+                ]);
+                
+                $separacionInmueble = SeparacionInmueble::create([
                     'separacion_id' => $separacion->id,
                     'departamento_id' => $propiedad['departamento_id'],
                     'precio_lista' => $propiedad['precio_lista'] ?? $departamento->Precio_lista ?? 0,
@@ -146,6 +167,14 @@ class SeparacionController extends Controller
                     'orden' => $index + 1,
                     'created_by' => Auth::id() ?? 1,
                     'updated_by' => Auth::id() ?? 1,
+                ]);
+
+                Log::info('=== SEPARACION_INMUEBLE CREADO ===', [
+                    'separacion_inmueble_id' => $separacionInmueble->id,
+                    'separacion_id' => $separacion->id,
+                    'departamento_id' => $propiedad['departamento_id'],
+                    'num_departamento' => $departamento ? $departamento->num_departamento : 'N/A',
+                    'orden' => $index + 1
                 ]);
 
                 // Cambiar el estado del departamento a 'Separacion'
