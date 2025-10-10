@@ -17,47 +17,33 @@ class SeguimientoExportController extends Controller
     public function exportExcel(Request $request)
     {
         $query = $this->buildTableQuery($request);
-        
-        return Excel::download(new SeguimientosExport($query->get()), 'seguimientos.xlsx');
+        // Pasar el query builder directamente para evitar llamar with() sobre una Collection
+        return Excel::download(new SeguimientosExport($query), 'seguimientos.xlsx');
     }
 
     public function exportPdf(Request $request)
     {
         $query = $this->buildTableQuery($request);
-        
-        $seguimientos = $query->get()->map(function ($tarea) {
-            return [
-                'id' => $tarea->prospecto->id,
-                'nombres' => $this->formatNombres($tarea->prospecto),
-                'telefono' => $tarea->prospecto->celular,
-                'documento' => $tarea->prospecto->numero_documento,
-                'proyecto' => $tarea->prospecto->proyecto->nombre ?? '',
-                'fuente_referencia' => $tarea->prospecto->comoSeEntero->nombre ?? '',
-                'fecha_registro' => $tarea->prospecto->fecha_registro ? Carbon::parse($tarea->prospecto->fecha_registro)->format('d/m/Y') : '',
-                'fecha_ultimo_contacto' => $this->getFechaUltimoContacto($tarea->prospecto_id),
-                'fecha_tarea' => $tarea->fecha_realizar ? Carbon::parse($tarea->fecha_realizar)->format('d/m/Y') : '',
-                'responsable' => $tarea->usuarioAsignado->name ?? '',
-            ];
-        });
-
-        $pdf = PDF::loadView('pdf.seguimientos', compact('seguimientos'));
-        return $pdf->download('seguimientos.pdf');
+        // Usar la clase de exportación para asegurar el mismo agrupamiento y filtrado que Excel
+        return (new SeguimientosPdfExport($query))->export();
     }
 
     private function buildTableQuery(Request $request)
     {
         // Replicar exactamente la lógica de ListPanelSeguimientos::getTableQuery()
         $filtros = [
-            'proyecto_id' => $request->get('proyecto_id'),
+            // Aceptar nombres alternos desde el Widget (proyecto, comoSeEntero, fechaInicio, etc.)
+            'proyecto_id' => $request->get('proyecto_id') ?? $request->get('proyecto'),
             'usuario_id' => $request->get('usuario_id'),
-            'como_se_entero_id' => $request->get('como_se_entero_id'),
+            'como_se_entero_id' => $request->get('como_se_entero_id') ?? $request->get('comoSeEntero'),
             'tipo_gestion_id' => $request->get('tipo_gestion_id'),
-            'fecha_inicio' => $request->get('fecha_inicio'),
-            'fecha_fin' => $request->get('fecha_fin'),
-            'nivel_interes_id' => $request->get('nivel_interes_id'),
-            'rango_acciones' => $request->get('rango_acciones'),
+            'fecha_inicio' => $request->get('fecha_inicio') ?? $request->get('fechaInicio'),
+            'fecha_fin' => $request->get('fecha_fin') ?? $request->get('fechaFin'),
+            'nivel_interes_id' => $request->get('nivel_interes_id') ?? $request->get('NivelInteres'),
+            'rango_acciones' => $request->get('rango_acciones') ?? $request->get('rangoAcciones'),
             'vencimiento' => $request->get('vencimiento'),
-            'filtro_tipo_gestion_aplicado' => true // Por defecto aplicamos filtros
+            // Bandera igual que en ListPanel: solo true cuando se selecciona tipo gestión
+            'filtro_tipo_gestion_aplicado' => !empty($request->get('tipo_gestion_id'))
         ];
 
         $latestTareas = DB::table('tareas as t1')
@@ -133,6 +119,11 @@ class SeguimientoExportController extends Controller
                         break;
                 }
             });
+
+        // Si en el listado no aplica tipo de gestión, no muestra nada
+        if (!$filtros['filtro_tipo_gestion_aplicado']) {
+            return $query->whereRaw('1 = 0');
+        }
 
         return $query;
     }

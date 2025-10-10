@@ -16,7 +16,10 @@ class SeguimientosPdfExport
 
     public function export()
     {
-        $query = $this->query ?: Tarea::query();
+        // Si se pasó un Builder, úsalo; si se pasó una Collection, conviértelo a Builder mínimo.
+        $query = $this->query instanceof \Illuminate\Database\Eloquent\Builder
+            ? $this->query
+            : (is_null($this->query) ? Tarea::query() : Tarea::query()->whereIn('id', collect($this->query)->pluck('id')));
 
         // Obtener las tareas con sus relaciones
         $tareas = $query->with(['prospecto.proyecto', 'prospecto.comoSeEntero', 'usuarioAsignado'])
@@ -54,7 +57,6 @@ class SeguimientosPdfExport
         }
 
         $pdf = Pdf::loadView('pdf.seguimientos', compact('seguimientos'));
-
         return $pdf->download('seguimientos_' . date('Y-m-d_H-i-s') . '.pdf');
     }
 }

@@ -35,17 +35,62 @@
 </x-filament::card>
 
 <script>
+// Obtiene los filtros actuales directamente desde los inputs del formulario (estado Livewire)
+function getCurrentFilters() {
+    const getVal = (name) => document.querySelector(`[name="data.${name}"]`)?.value;
+    const toInt = (v) => {
+        if (v === undefined || v === null || v === '' ) return null;
+        const n = Number(v);
+        return Number.isNaN(n) ? v : n;
+    };
+
+    return {
+        proyecto: toInt(getVal('proyecto')),
+        usuario_id: toInt(getVal('usuario_id')) ?? 0,
+        comoSeEntero: toInt(getVal('comoSeEntero')) ?? 0,
+        tipo_gestion_id: toInt(getVal('tipo_gestion_id')),
+        fechaInicio: getVal('fechaInicio') || null,
+        fechaFin: getVal('fechaFin') || null,
+        NivelInteres: toInt(getVal('NivelInteres')) ?? 0,
+        rangoAcciones: getVal('rangoAcciones') || 0,
+        vencimiento: getVal('vencimiento') || 0,
+    };
+}
+
+function buildQueryParams(filters) {
+    const params = new URLSearchParams();
+    const map = {
+        proyecto: filters.proyecto,
+        usuario_id: filters.usuario_id,
+        comoSeEntero: filters.comoSeEntero,
+        tipo_gestion_id: filters.tipo_gestion_id,
+        fechaInicio: filters.fechaInicio,
+        fechaFin: filters.fechaFin,
+        NivelInteres: filters.NivelInteres,
+        rangoAcciones: filters.rangoAcciones,
+        vencimiento: filters.vencimiento,
+    };
+    Object.entries(map).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '' && value !== 0) {
+            params.append(key, value);
+        }
+    });
+    return params.toString();
+}
+
 function exportToExcel() {
-    // Exportación simple sin parámetros complejos
-    const url = '{{ route("seguimientos.export.excel") }}';
-    console.log('Exportando Excel:', url);
+    const baseUrl = '{{ route("seguimientos.export.excel") }}';
+    const filters = getCurrentFilters();
+    const qs = buildQueryParams(filters);
+    const url = qs ? `${baseUrl}?${qs}` : baseUrl;
     window.open(url, '_blank');
 }
 
 function exportToPdf() {
-    // Exportación simple sin parámetros complejos
-    const url = '{{ route("seguimientos.export.pdf") }}';
-    console.log('Exportando PDF:', url);
+    const baseUrl = '{{ route("seguimientos.export.pdf") }}';
+    const filters = getCurrentFilters();
+    const qs = buildQueryParams(filters);
+    const url = qs ? `${baseUrl}?${qs}` : baseUrl;
     window.open(url, '_blank');
 }
 </script>
